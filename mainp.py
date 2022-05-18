@@ -13,9 +13,11 @@ import time, threading
 from tkinter import *
 from tkinter import messagebox
 from functools import partial
+from tkinter import ttk
 import pyautogui
 import serial
-
+import sys
+import glob
 #---------------------------------
 
 
@@ -39,15 +41,44 @@ def My_Documents(location):
 	temp_docs = buf.value
 	return temp_docs
 
-def line_selector(num):
-	#if buttonClicked == False:
-	#	address = "10.65.96." + str(num)
-	#	select_route(address)
-	#else:
-		#identify camera based on the IP last two numbers.
-	#	cam_num = num
-	#	select_camera(cam_num)
+def line_selector(num,port):
 	print("hi")
+
+
+
+#def comPort_sel(self,num):
+#		if num == 45:
+#			for i in self.comList.curselection():
+#				print(self.comList.get(i))
+
+
+def serial_ports():
+    """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+    """
+    if sys.platform.startswith('win'):
+        ports = ['COM%s' % (i + 1) for i in range(256)]
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this excludes your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException):
+            pass
+    return result
 
 #---------------------------------End of Auxiliary Functions-------------------------#
 
@@ -58,7 +89,7 @@ def line_selector(num):
 #This CSV is for button data. You can add a button if you modify this adequately.
 import os
 import csv
-file = open(resource_path("data/btn_data.csv"))
+file = open(resource_path("images/btn_data.csv"))
 type(file)
 csvreader = csv.reader(file)
 header = []
@@ -98,8 +129,7 @@ class Interface:
 		label1 = Label(self.mainWindow, image = self.background_image)
 		label1.place(x = 0,y = 0)
 		self.l = Label(self.mainWindow)
-		self.l.pack()
-		
+		self.l.pack()	
 		h_offset = 2
 		w_offset = 4
 		fg_offset = "white"
@@ -110,19 +140,26 @@ class Interface:
 		#process the first button
 			a_temp = rows[i-1][1]
 			globals()[a_temp] = Button(self.mainWindow, width = w_offset, height = h_offset)
+			globals()[a_temp].configure(width = int(rows[i-1][6]))
+			globals()[a_temp].configure(height = int(rows[i-1][7]))
 			globals()[a_temp].place(x =int(rows[i-1][2]),y=int(rows[i-1][3]))
 			globals()[a_temp].configure(bg = bg_offset)
 			globals()[a_temp].configure(fg = fg_offset)
 			globals()[a_temp].configure(font=("Helvetica", 10, "bold"))
 			globals()[a_temp].configure(text = rows[i-1][4])
 			globals()[a_temp].configure(command=partial(line_selector, int(rows[i-1][5])))
-		#button to select between camera or panel
-		
-    #def run(self): 
+			#COM port Listbox
+			comList = Listbox(self.mainWindow, width=12, height=8)
+			comList.place(x =418,y=620)
+			portList = serial_ports()
+			for seriales in portList:
+				comList.insert(0,seriales)
 
 	def start(self): #Start
 		self.mainWindow.mainloop()
 
+
+	
 
     #The Interface class contains methods that use attributes from itself and attributes from Process class.
 	def method1(self): 
@@ -165,9 +202,15 @@ class Process(threading.Thread):
         while not finish:
             #print("Proceso infinito")
 			#do not start serial until com info is selected.
-            GUI.method1()
+            #GUI.method1()
             time.sleep(3)
 
+class FrameWithButton(ttk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.btn = tk.Button(root, text="Button")
+        self.btn.pack()
 
 #########################finished classes
 

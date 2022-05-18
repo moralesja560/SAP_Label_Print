@@ -39,6 +39,16 @@ def My_Documents(location):
 	temp_docs = buf.value
 	return temp_docs
 
+def line_selector(num):
+	#if buttonClicked == False:
+	#	address = "10.65.96." + str(num)
+	#	select_route(address)
+	#else:
+		#identify camera based on the IP last two numbers.
+	#	cam_num = num
+	#	select_camera(cam_num)
+	print("hi")
+
 #---------------------------------End of Auxiliary Functions-------------------------#
 
 
@@ -107,9 +117,6 @@ class Interface:
 			globals()[a_temp].configure(text = rows[i-1][4])
 			globals()[a_temp].configure(command=partial(line_selector, int(rows[i-1][5])))
 		#button to select between camera or panel
-		self.btn_text.set("Switch to Cameras")
-		cam_switch = Button(self.mainWindow,textvariable= self.btn_text,fg=fg_offset, width=v_offset*5, font=("Helvetica", 10, "bold"), bg=bg_offset, height=h_offset,
-			command = selection).place(x =350,y=40)
 		
     #def run(self): 
 

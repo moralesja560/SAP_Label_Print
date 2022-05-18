@@ -204,14 +204,6 @@ class Process(threading.Thread):
 			#do not start serial until com info is selected.
             #GUI.method1()
             time.sleep(3)
-
-class FrameWithButton(ttk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        self.btn = tk.Button(root, text="Button")
-        self.btn.pack()
-
 #########################finished classes
 
 

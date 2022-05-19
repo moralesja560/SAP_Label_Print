@@ -120,19 +120,19 @@ class Passwordchecker(tk.Frame):
 		self.parent = parent
 		self.initialize_user_interface()
 
+	#first function inside the class: GUI initializing
+	#this is where GUI initial configuration takes place.
 	def initialize_user_interface(self):
-
-		#self.parent.geometry("200x200")
+		#define the GUI size in px (depends on end-user screen size)
 		self.parent.geometry("1024x768")
+		#protocol to correctly close GUI
 		self.parent.protocol("WM_DELETE_WINDOW", self.quit)
 		self.parent.title("Mubea de Mexico - Interfaz para impresión de etiquetas.")
-		self.entry=tk.Entry(self.parent)
-		self.entry.pack()
+		# a label that contains the background image
 		self.background_image = PhotoImage(file = resource_path("images/UI.png"))
 		label1 = Label(self.parent, image = self.background_image)
 		label1.place(x = 0,y = 0)
-		self.l = Label(self.parent)
-		self.l.pack()	
+		#general parameters for the buttons.
 		h_offset = 2
 		w_offset = 4
 		fg_offset = "white"
@@ -149,13 +149,19 @@ class Passwordchecker(tk.Frame):
 			globals()[a_temp].configure(fg = fg_offset)
 			globals()[a_temp].configure(font=("Helvetica", 10, "bold"))
 			globals()[a_temp].configure(text = rows[i-1][4])
+			#self.selector is the function inside the main class
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
+		
+		#declare a Listbox with ".self" at the beginning of the variable.
+		#self.parent is the location of the tkinter core.
 		self.comList = Listbox(self.parent, width=12, height=8)
+		#place it
 		self.comList.place(x =418,y=620)
+		#call the port selector function and retrieve all available COM ports.
 		portList = serial_ports()
 		for seriales in portList:
 			self.comList.insert(0,seriales)
-
+	#Selector is the 
 	def Selector(self,num):
 		print(num)
 		global ComPort

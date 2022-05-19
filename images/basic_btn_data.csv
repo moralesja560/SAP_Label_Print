@@ -1,2 +1,3 @@
 Nombre,buttn_name,x_pos,y_pos,text,command,Width,2
 Inlet_1,Button9,500,620,Abrir Puerto,45,10,2
+Load_Test_1,Button1,100,10,1,5,2,2

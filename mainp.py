@@ -71,11 +71,12 @@ def serial_ports():
     return result
 
 def label_print(ShopOrder,BoxType,StandardPack):
-	pyautogui.hotkey('win','r')
-	pyautogui.write('chrome.exe')
-	pyautogui.press('enter')
-	time.sleep(5)
-	pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
+	if len(str(ShopOrder))>0:
+		pyautogui.hotkey('win','r')
+		pyautogui.write('chrome.exe')
+		pyautogui.press('enter')
+		time.sleep(5)
+		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
@@ -87,7 +88,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 #This CSV is for button data. You can add a button if you modify this adequately.
 import os
 import csv
-file = open(resource_path("images/btn_data.csv"))
+file = open(resource_path("images/basic_btn_data.csv"))
 type(file)
 csvreader = csv.reader(file)
 header = []
@@ -146,8 +147,6 @@ class Passwordchecker(tk.Frame):
 			self.comList.insert(0,seriales)
 
 	def Selector(self,num):
-		global selected_serialPort
-		selected_SerialPort = ""
 		print(num)
 		if num == 45:
 			for i in self.comList.curselection():
@@ -178,14 +177,17 @@ class Passwordchecker(tk.Frame):
 				if finish == True:
 					break
 			label_data = str(s)[2:-3]
-			if finish == False:
-				print(label_data)
+			if finish == False and len(label_data)>0:
+				print(len(label_data))
 				print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
 				ShopOrder = label_data[0:6]
 				BoxType = label_data[6:9]
 				StandardPack =label_data[9:12]
 				label_print(ShopOrder,BoxType,StandardPack)
 				s = ""
+			else:
+				print("port closed or error")
+				break
 
 
 class Process(threading.Thread):

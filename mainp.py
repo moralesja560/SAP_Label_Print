@@ -13,7 +13,9 @@ import time, threading
 from tkinter import *
 from tkinter import messagebox
 from functools import partial
-from tkinter import ttk
+import tkinter as tk
+from turtle import update
+from typing_extensions import Self
 import pyautogui
 import serial
 import sys
@@ -41,8 +43,6 @@ def My_Documents(location):
 	temp_docs = buf.value
 	return temp_docs
 
-def line_selector(num,port):
-	print("hi")
 
 
 
@@ -80,6 +80,8 @@ def serial_ports():
             pass
     return result
 
+
+
 #---------------------------------End of Auxiliary Functions-------------------------#
 
 
@@ -109,12 +111,18 @@ file.close()
 
 #-----------------------------Start of tkinter classes-----------------------------#
 
+class FrameWithButton(tk.Frame):
+	def __init__(self, master):
+		super().__init__(master)
+		self.btn = tk.Button(self, text="Button")
+		self.btn.pack()
+
 class Interface:
 	def __init__(self):
 		#threading.Thread.__init__(self)
 		self.attrib1 = "Attrib from Interface class"
 		#Main Window
-		self.mainWindow = Tk()
+		self.mainWindow = tk.Tk()
 		self.btn_text = StringVar()
 		self.mainWindow.geometry("1024x768")
 
@@ -134,6 +142,11 @@ class Interface:
 		w_offset = 4
 		fg_offset = "white"
 		bg_offset = '#3d85c5'
+		an_instance = FrameWithButton(self.mainWindow)
+		an_instance.place(x=100,y=100)
+		def update_button():
+			global an_instance
+			an_instance.btn['text'] = "Button Text Updated!"
 
 ######Button declaration area
 		for i in range(len(rows)):
@@ -147,19 +160,21 @@ class Interface:
 			globals()[a_temp].configure(fg = fg_offset)
 			globals()[a_temp].configure(font=("Helvetica", 10, "bold"))
 			globals()[a_temp].configure(text = rows[i-1][4])
-			globals()[a_temp].configure(command=partial(line_selector, int(rows[i-1][5])))
+			globals()[a_temp].configure(command=partial(update_button, int(rows[i-1][5])))
 			#COM port Listbox
-			comList = Listbox(self.mainWindow, width=12, height=8)
-			comList.place(x =418,y=620)
-			portList = serial_ports()
-			for seriales in portList:
-				comList.insert(0,seriales)
+		an_instance = FrameWithButton(self.mainWindow)
+		an_instance.pack
+
+
+			#comList = Listbox(self.mainWindow, width=12, height=8)
+			#comList.place(x =418,y=620)
+			#portList = serial_ports()
+			#for seriales in portList:
+			#	comList.insert(0,seriales)
 
 	def start(self): #Start
 		self.mainWindow.mainloop()
 
-
-	
 
     #The Interface class contains methods that use attributes from itself and attributes from Process class.
 	def method1(self): 
@@ -187,6 +202,9 @@ class Interface:
 			self.mainWindow.destroy()
 			self.mainWindow.quit()
 
+
+
+
 class Process(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -204,6 +222,8 @@ class Process(threading.Thread):
 			#do not start serial until com info is selected.
             #GUI.method1()
             time.sleep(3)
+
+
 #########################finished classes
 
 

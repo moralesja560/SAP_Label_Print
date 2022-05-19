@@ -148,9 +148,20 @@ class Passwordchecker(tk.Frame):
 
 	def Selector(self,num):
 		print(num)
+		global ComPort
 		if num == 45:
 			for i in self.comList.curselection():
 				print(self.comList.get(i))
+				ComPort = self.comList.get(i)
+				print((ComPort))
+			if "COM" in ComPort:
+				SecondThread.start()
+				for i in range(0,1):
+			#process the first button
+					a_temp = 'Button9'
+					globals()[a_temp].configure(state = "disabled")
+					globals()[a_temp].configure(fg = "gray")
+
 
 	def quit(self):
 		if messagebox.askyesno('App','Are you sure you want to quit?'):
@@ -158,12 +169,10 @@ class Passwordchecker(tk.Frame):
 			self.parent.destroy()
 			self.parent.quit()
 
-	def method1(self): 
-		#print(self.attrib1)
-		#print(SecondThread.attrib2)
+	def method1(self,ComPort): 
 		#here you can put something to run as second background, do not forget to uncomment #GUI.method1()
 		ser = serial.Serial(
-				port='COM9',\
+				port=ComPort,\
 				baudrate=9600,\
 				parity=serial.PARITY_NONE,\
 				stopbits=serial.STOPBITS_ONE,\
@@ -186,7 +195,7 @@ class Passwordchecker(tk.Frame):
 				label_print(ShopOrder,BoxType,StandardPack)
 				s = ""
 			else:
-				print("port closed or error")
+				print(f"port closed or error {ComPort}")
 				break
 
 
@@ -205,7 +214,7 @@ class Process(threading.Thread):
         while not finish:
             print("Proceso infinito")
 			#do not start serial until com info is selected.
-            run1.method1()
+            run1.method1(ComPort)
             time.sleep(3)
 
 
@@ -214,7 +223,7 @@ if __name__ == '__main__':
 	root = tk.Tk()
 	SecondThread = Process()
 	run1 = Passwordchecker(root)
-	root.after(50, SecondThread.start)
+	#root.after(50, SecondThread.start)
 	root.mainloop() #GUI.start()
 	print("Exiting....")
 	finish = True

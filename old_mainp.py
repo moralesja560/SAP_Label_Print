@@ -1,4 +1,12 @@
+#Developed by Jorge Alberto Morales.
+	#Mechatronics Engineering
+	#Master in Business Management and Corporate Finance
+	#Python Dev
+	#JorgeAlberto.Morales@mubea.com
+
+
 #----------------------import area
+
 import os
 import sys
 import time, threading
@@ -6,19 +14,13 @@ from tkinter import *
 from tkinter import messagebox
 from functools import partial
 import tkinter as tk
+from turtle import update
+from typing_extensions import Self
 import pyautogui
 import serial
 import sys
 import glob
 #---------------------------------
-
-
-#progress check
-#hay que buscar una forma de que se arranque el serial con el botón para setear el puerto COM
-#tambien hay que buscar una forma de sacar los prints a una consola en la GUI
-#viiglar que todo cierre bien y empezar a compilar
-#empezar a probar en producción para ajustar el pyautogui
-
 
 
 #---------------------------------------Auxiliary Functions-------------------------#
@@ -40,6 +42,14 @@ def My_Documents(location):
 	#add the text filename at the end of the path
 	temp_docs = buf.value
 	return temp_docs
+
+
+
+
+#def comPort_sel(self,num):
+#		if num == 45:
+#			for i in self.comList.curselection():
+#				print(self.comList.get(i))
 
 
 def serial_ports():
@@ -70,12 +80,6 @@ def serial_ports():
             pass
     return result
 
-def label_print(ShopOrder,BoxType,StandardPack):
-	pyautogui.hotkey('win','r')
-	pyautogui.write('chrome.exe')
-	pyautogui.press('enter')
-	time.sleep(5)
-	pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
@@ -100,37 +104,54 @@ for row in csvreader:
 file.close()
 
 
+
+
 #/////-----------------------End of Reading and Writing Files--------------------------#
 
+
 #-----------------------------Start of tkinter classes-----------------------------#
-class Passwordchecker(tk.Frame):
-	def __init__(self, parent):
-		tk.Frame.__init__(self, parent)
-		self.parent = parent
-		self.initialize_user_interface()
 
-	def initialize_user_interface(self):
+class FrameWithButton(tk.Frame):
+	def __init__(self, master):
+		super().__init__(master)
+		self.btn = tk.Button(self, text="Button")
+		self.btn.pack()
 
-		#self.parent.geometry("200x200")
-		self.parent.geometry("1024x768")
-		self.parent.protocol("WM_DELETE_WINDOW", self.quit)
-		self.parent.title("Mubea de Mexico - Interfaz para impresión de etiquetas.")
-		self.entry=tk.Entry(self.parent)
-		self.entry.pack()
+class Interface:
+	def __init__(self):
+		#threading.Thread.__init__(self)
+		self.attrib1 = "Attrib from Interface class"
+		#Main Window
+		self.mainWindow = tk.Tk()
+		self.mainWindow.geometry("1024x768")
+
+		#self.mainWindow.title("My GUI Title")
+		self.mainWindow.title("Mubea de Mexico - Interfaz para impresión de etiquetas.")
+
+		#self.mainWindow.protocol("WM_DELETE_WINDOW", self.quit)
+		self.mainWindow.protocol("WM_DELETE_WINDOW", self.quit)
+		
+		#in case a background is needed
 		self.background_image = PhotoImage(file = resource_path("images/UI.png"))
-		label1 = Label(self.parent, image = self.background_image)
+		label1 = Label(self.mainWindow, image = self.background_image)
 		label1.place(x = 0,y = 0)
-		self.l = Label(self.parent)
+		self.l = Label(self.mainWindow)
 		self.l.pack()	
 		h_offset = 2
 		w_offset = 4
 		fg_offset = "white"
 		bg_offset = '#3d85c5'
+		an_instance = FrameWithButton(self.mainWindow)
+		an_instance.place(x=100,y=100)
+		def update_button():
+			global an_instance
+			an_instance.btn['text'] = "Button Text Updated!"
+
 ######Button declaration area
 		for i in range(len(rows)):
 		#process the first button
 			a_temp = rows[i-1][1]
-			globals()[a_temp] = Button(self.parent, width = w_offset, height = h_offset)
+			globals()[a_temp] = Button(self.mainWindow, width = w_offset, height = h_offset)
 			globals()[a_temp].configure(width = int(rows[i-1][6]))
 			globals()[a_temp].configure(height = int(rows[i-1][7]))
 			globals()[a_temp].place(x =int(rows[i-1][2]),y=int(rows[i-1][3]))
@@ -138,54 +159,49 @@ class Passwordchecker(tk.Frame):
 			globals()[a_temp].configure(fg = fg_offset)
 			globals()[a_temp].configure(font=("Helvetica", 10, "bold"))
 			globals()[a_temp].configure(text = rows[i-1][4])
-			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
-		self.comList = Listbox(self.parent, width=12, height=8)
-		self.comList.place(x =418,y=620)
-		portList = serial_ports()
-		for seriales in portList:
-			self.comList.insert(0,seriales)
+			globals()[a_temp].configure(command=partial(update_button, int(rows[i-1][5])))
+			#COM port Listbox
+		an_instance = FrameWithButton(self.mainWindow)
+		an_instance.pack
 
-	def Selector(self,num):
-		global selected_serialPort
-		selected_SerialPort = ""
-		print(num)
-		if num == 45:
-			for i in self.comList.curselection():
-				print(self.comList.get(i))
 
-	def quit(self):
-		if messagebox.askyesno('App','Are you sure you want to quit?'):
-            #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
-			self.parent.destroy()
-			self.parent.quit()
+			#comList = Listbox(self.mainWindow, width=12, height=8)
+			#comList.place(x =418,y=620)
+			#portList = serial_ports()
+			#for seriales in portList:
+			#	comList.insert(0,seriales)
 
+	def start(self): #Start
+		self.mainWindow.mainloop()
+
+
+    #The Interface class contains methods that use attributes from itself and attributes from Process class.
 	def method1(self): 
 		#print(self.attrib1)
 		#print(SecondThread.attrib2)
 		#here you can put something to run as second background, do not forget to uncomment #GUI.method1()
+		print("hola")
 		ser = serial.Serial(
-				port='COM9',\
+				port='COM3',\
 				baudrate=9600,\
 				parity=serial.PARITY_NONE,\
 				stopbits=serial.STOPBITS_ONE,\
 				bytesize=serial.EIGHTBITS,\
 				timeout=1)
 		print("connected to: " + ser.portstr)
-		s = ""
-		while finish is not True:
-			while '/n' not in str(s):
-				s = ser.read(40)
-				if finish == True:
-					break
+		while finish is False:
+			s = ser.read(20)
 			label_data = str(s)[2:-3]
-			if finish == False:
-				print(label_data)
-				print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
-				ShopOrder = label_data[0:6]
-				BoxType = label_data[6:9]
-				StandardPack =label_data[9:12]
-				label_print(ShopOrder,BoxType,StandardPack)
-				s = ""
+			print(label_data)
+			print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
+
+	def quit(self):
+		if messagebox.askyesno('App','Are you sure you want to quit?'):
+            #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
+			self.mainWindow.destroy()
+			self.mainWindow.quit()
+
+
 
 
 class Process(threading.Thread):
@@ -201,18 +217,23 @@ class Process(threading.Thread):
     def run(self):
         global finish
         while not finish:
-            print("Proceso infinito")
+            #print("Proceso infinito")
 			#do not start serial until com info is selected.
-            run1.method1()
+            #GUI.method1()
             time.sleep(3)
 
 
-if __name__ == '__main__':
-	finish = False
-	root = tk.Tk()
-	SecondThread = Process()
-	run1 = Passwordchecker(root)
-	root.after(50, SecondThread.start)
-	root.mainloop() #GUI.start()
-	print("Exiting....")
-	finish = True
+#########################finished classes
+
+
+finish = False
+GUI = Interface()
+#Starts the infinity process
+SecondThread = Process()
+GUI.mainWindow.after(50, SecondThread.start)   
+#Waits until GUI is closed
+GUI.start()
+#GUI.join()
+print("When GUI is closed this message appears")
+#When GUI is closed we set finish to True, so SecondThread will be closed.
+finish = True

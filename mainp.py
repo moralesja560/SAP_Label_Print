@@ -14,7 +14,8 @@ import glob
 
 
 #progress check
-#hay que buscar una forma de que se arranque el serial con el botón para setear el puerto COM
+#boton para cerrar el comando serial y volverlo a arrancar pudiendo seleccionar otro puerto.
+# comentarios en otod lados..
 #tambien hay que buscar una forma de sacar los prints a una consola en la GUI
 #viiglar que todo cierre bien y empezar a compilar
 #empezar a probar en producción para ajustar el pyautogui
@@ -32,6 +33,7 @@ def resource_path(relative_path):
 def My_Documents(location):
 	import ctypes.wintypes
 		#####-----This section discovers My Documents default path --------
+		#### loop the "location" variable to find many paths, including AppData and ProgramFiles
 	CSIDL_PERSONAL = location       # My Documents
 	SHGFP_TYPE_CURRENT = 0   # Get current, not default value
 	buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
@@ -41,7 +43,7 @@ def My_Documents(location):
 	temp_docs = buf.value
 	return temp_docs
 
-
+#This functions returns a list of available serial ports.
 def serial_ports():
     """ Lists serial port names
 
@@ -70,7 +72,9 @@ def serial_ports():
             pass
     return result
 
+#This is the function that actually prints the labels.
 def label_print(ShopOrder,BoxType,StandardPack):
+	#a protection to avoid printing empty labels
 	if len(str(ShopOrder))>0:
 		pyautogui.hotkey('win','r')
 		pyautogui.write('chrome.exe')
@@ -104,8 +108,14 @@ file.close()
 #/////-----------------------End of Reading and Writing Files--------------------------#
 
 #-----------------------------Start of tkinter classes-----------------------------#
+
+#This stuff is actually difficult to understand.
+
+#This class PasswordChecker stores the necessary data to run a tkinter gui.
 class Passwordchecker(tk.Frame):
+	#needs info
 	def __init__(self, parent):
+	#tk.frame starts and calls the initialize user interface
 		tk.Frame.__init__(self, parent)
 		self.parent = parent
 		self.initialize_user_interface()

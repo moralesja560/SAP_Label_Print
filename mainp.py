@@ -17,7 +17,7 @@ import glob
 
 ############progress check
 ######-------TASKS
-####----create tkinter stuff to select COM-port stuff such as baudrate
+####----create tkinter stuff to select COM-port stuff such as baudrate. Follow done example
 ####----finish comments
 ####----console to GUI
 ####-----check for correct program exit

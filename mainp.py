@@ -1,4 +1,5 @@
 #----------------------import area
+from ast import Compare
 import os
 import sys
 import time, threading
@@ -170,9 +171,24 @@ class Passwordchecker(tk.Frame):
 		portList = serial_ports()
 		for seriales in portList:
 			self.comList.insert(0,seriales)
-	#Selector is the function that commands buttons actions
+		#area to deploy ComPort options.
+		options = [9600,19200,38400,57600,115200]
+		self.baudRate1 = StringVar()
+		self.baudRate1.set(9600)
+		self.rateList = OptionMenu(self.parent,self.baudRate1,*options)
+		self.rateList.place(x=500,y=620)
+	
+
+
+
+
+
+
+##########Selector is the function that commands buttons actions
 	def Selector(self,num):
 		global ComPort
+		global baud_Rate
+		baud_Rate = self.baudRate1.get()
 		#button to Open COM
 		if num == 10:
 			#clean the var
@@ -212,6 +228,10 @@ class Passwordchecker(tk.Frame):
 					messagebox.showinfo('Puerto no abierto','Aún no se ha abierto el puerto')
 			except:
 				messagebox.showinfo('Puerto no abierto','Puerto no existe o no abierto.')
+				a_temp = 'Button1'
+				globals()[a_temp].configure(state = "active")
+				globals()[a_temp].configure(bg = self.bg_offset)
+				globals()[a_temp].configure(fg = self.fg_offset)
 
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
@@ -219,12 +239,12 @@ class Passwordchecker(tk.Frame):
 			self.parent.destroy()
 			self.parent.quit()
 
-	def method1(self,ComPort): 
+	def method1(self,ComPort,baudRate): 
 		#This is the area where the second thread lives.
-		#
+		print(ComPort,baudRate)
 		self.ser = serial.Serial(
 				port=ComPort,\
-				baudrate=9600,\
+				baudrate=baudRate,\
 				parity=serial.PARITY_NONE,\
 				stopbits=serial.STOPBITS_ONE,\
 				bytesize=serial.EIGHTBITS,\
@@ -267,6 +287,7 @@ class Passwordchecker(tk.Frame):
 				break
 
 
+#################Threading area 
 class Process(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -282,14 +303,14 @@ class Process(threading.Thread):
 		global finish
 		#while not finish:
 			#do not start serial until com info is selected.
-		run1.method1(ComPort)
+		run1.method1(ComPort,baud_Rate)
 		time.sleep(3)
 	
 	def stop(self):
 		self._stop_event.set()
 		print("Thread Stopped")
 
-
+#stuff that 
 if __name__ == '__main__':
 	finish = False
 	root = tk.Tk()

@@ -12,7 +12,7 @@ import pyautogui
 import serial
 import sys
 import glob
-#---------------------------------
+#---------------------------------...
 
 
 ############progress check

@@ -181,15 +181,17 @@ class Passwordchecker(tk.Frame):
 			for i in self.comList.curselection():
 				ComPort = self.comList.get(i)
 			#when this for loop ends, a "COM9" text must be stored,
-			#this if checks if the text "COM" exists
+			#this if checks if the text "COM" exists in the variable "ComPort"
 			if "COM" in ComPort:
 				try:
+					#Try to start the Serial Process Thread
 					SecondThread.start()
 				except:
+					#It is well known that a finished process cannot be restarted, so a new process is started
 					SecondThread = Process()
 					SecondThread.start()
 				finally:
-				#process the first button
+				#disable button 
 					a_temp = 'Button1'
 					globals()[a_temp].configure(state = "disabled")
 			else:
@@ -198,7 +200,8 @@ class Passwordchecker(tk.Frame):
 		#button to close COM
 		if num == 20:
 			# When button "Close Port" is clicked but the thread is not alive, an error occurs.
-			try:	
+			try:
+				# if the serial port is open, close it and reenable the process.
 				if self.ser.is_open:
 					self.ser.close()
 					a_temp = 'Button1'
@@ -226,9 +229,14 @@ class Passwordchecker(tk.Frame):
 				stopbits=serial.STOPBITS_ONE,\
 				bytesize=serial.EIGHTBITS,\
 				timeout=1)
+		#A notice that the COM has been opened
 		print("connected to: " + self.ser.portstr)
+		#serial buffer cleaning
 		s = ""
+
 		while finish is not True and self.ser.is_open == True:
+			#monitor the buffer s to look for /n
+			# the TRY catcher is to find if the port has been closed and react accordingly
 			while '/n' not in str(s):
 				try:
 					s = self.ser.read(40)
@@ -240,13 +248,18 @@ class Passwordchecker(tk.Frame):
 					pass
 				if finish == True:
 					break
+			
+##############----------------This is the data processing area
+			#remove the firt two characters 'b and the last characters /n
 			label_data = str(s)[2:-3]
+			#prevent data process if label_data is 0 characters long.
 			if finish == False and len(label_data)>0:
 				print(len(label_data))
 				print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
 				ShopOrder = label_data[0:6]
 				BoxType = label_data[6:9]
 				StandardPack =label_data[9:12]
+				#Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
 				s = ""
 			else:

@@ -14,12 +14,20 @@ import glob
 #---------------------------------
 
 
-#progress check
-#boton para cerrar el comando serial y volverlo a arrancar pudiendo seleccionar otro puerto.
-# comentarios en otod lados..
-#tambien hay que buscar una forma de sacar los prints a una consola en la GUI
-#viiglar que todo cierre bien y empezar a compilar
-#empezar a probar en producción para ajustar el pyautogui
+############progress check
+######-------TASKS
+####----create tkinter stuff to select COM-port stuff such as baudrate
+####----finish comments
+####----console to GUI
+####-----check for correct program exit
+####-----production run to test pyautogui.
+####----put in PLC some characters to better recognize parameters sent over serial
+
+#####--------RECOMMENDATIONS
+#Utiliza mejor los prints para señalar info importante.
+# comentarios en todos lados..
+#optimización de procesos.
+#mensajes de informacion y error en todos lados
 
 
 
@@ -136,8 +144,8 @@ class Passwordchecker(tk.Frame):
 		#general parameters for the buttons.
 		h_offset = 2
 		w_offset = 4
-		fg_offset = "white"
-		bg_offset = '#3d85c5'
+		self.fg_offset = "white"
+		self.bg_offset = '#3d85c5'
 ######Button declaration area
 		for i in range(len(rows)):
 		#process the first button
@@ -146,14 +154,14 @@ class Passwordchecker(tk.Frame):
 			globals()[a_temp].configure(width = int(rows[i-1][6]))
 			globals()[a_temp].configure(height = int(rows[i-1][7]))
 			globals()[a_temp].place(x =int(rows[i-1][2]),y=int(rows[i-1][3]))
-			globals()[a_temp].configure(bg = bg_offset)
-			globals()[a_temp].configure(fg = fg_offset)
+			globals()[a_temp].configure(bg = self.bg_offset)
+			globals()[a_temp].configure(fg = self.fg_offset)
 			globals()[a_temp].configure(font=("Helvetica", 10, "bold"))
 			globals()[a_temp].configure(text = rows[i-1][4])
 			#self.selector is the function inside the main class
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
-		
-		#declare a Listbox with ".self" at the beginning of the variable.
+##### tkinter stuff that is unique, such as only one Listbox, needs to be declared like this
+		#declare a Listbox with ".self" at the beginning of the variable. It helps the variable to be reachable outside here.
 		#self.parent is the location of the tkinter core.
 		self.comList = Listbox(self.parent, width=12, height=8)
 		#place it
@@ -162,44 +170,55 @@ class Passwordchecker(tk.Frame):
 		portList = serial_ports()
 		for seriales in portList:
 			self.comList.insert(0,seriales)
-	#Selector is the function that command buttons actions
+	#Selector is the function that commands buttons actions
 	def Selector(self,num):
-		print(num)
 		global ComPort
 		#button to Open COM
 		if num == 10:
+			#clean the var
+			ComPort = ""
+			#this loops the listbox to find which port is selected.
 			for i in self.comList.curselection():
 				ComPort = self.comList.get(i)
+			#when this for loop ends, a "COM9" text must be stored,
+			#this if checks if the text "COM" exists
 			if "COM" in ComPort:
 				try:
 					SecondThread.start()
 				except:
 					SecondThread = Process()
 					SecondThread.start()
-			else:
+				finally:
 				#process the first button
-				a_temp = 'Button1'
-				globals()[a_temp].configure(state = "disabled")
-				globals()[a_temp].configure(fg = "gray")
+					a_temp = 'Button1'
+					globals()[a_temp].configure(state = "disabled")
+			else:
+				# A warning that no port is selected.
+				messagebox.showinfo('Puerto no seleccionado','Click en la lista para seleccionar un puerto COM')
 		#button to close COM
 		if num == 20:
-			if self.ser.is_open:
-				self.ser.close()
-				a_temp = 'Button1'
-				globals()[a_temp].configure(state = "active")
-				globals()[a_temp].configure(fg = "white")			
-			else:
-				messagebox.showinfo('Puerto no abierto','Aún no se ha abierto el puerto')	
-
+			# When button "Close Port" is clicked but the thread is not alive, an error occurs.
+			try:	
+				if self.ser.is_open:
+					self.ser.close()
+					a_temp = 'Button1'
+					globals()[a_temp].configure(state = "active")
+					globals()[a_temp].configure(bg = self.bg_offset)
+					globals()[a_temp].configure(fg = self.fg_offset)
+				else:
+					messagebox.showinfo('Puerto no abierto','Aún no se ha abierto el puerto')
+			except:
+				messagebox.showinfo('Puerto no abierto','Puerto no existe o no abierto.')
 
 	def quit(self):
-		if messagebox.askyesno('App','Are you sure you want to quit?'):
+		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
 			self.parent.destroy()
 			self.parent.quit()
 
 	def method1(self,ComPort): 
-		#here you can put something to run as second background, do not forget to uncomment #GUI.method1()
+		#This is the area where the second thread lives.
+		#
 		self.ser = serial.Serial(
 				port=ComPort,\
 				baudrate=9600,\
@@ -214,9 +233,10 @@ class Passwordchecker(tk.Frame):
 				try:
 					s = self.ser.read(40)
 				except:
-					messagebox.showinfo('Puerto no abierto','Ha ocurrido un error en puerto.')
+					messagebox.showinfo('Puerto no abierto','Se ha cerrado el puerto exitosamente.')
 					break
-				else:
+				#changed else for finally:
+				finally:
 					pass
 				if finish == True:
 					break

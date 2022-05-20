@@ -6,6 +6,7 @@ from tkinter import *
 from tkinter import messagebox
 from functools import partial
 import tkinter as tk
+from unittest import expectedFailure
 import pyautogui
 import serial
 import sys
@@ -161,22 +162,34 @@ class Passwordchecker(tk.Frame):
 		portList = serial_ports()
 		for seriales in portList:
 			self.comList.insert(0,seriales)
-	#Selector is the 
+	#Selector is the function that command buttons actions
 	def Selector(self,num):
 		print(num)
 		global ComPort
-		if num == 45:
+		#button to Open COM
+		if num == 10:
 			for i in self.comList.curselection():
-				print(self.comList.get(i))
 				ComPort = self.comList.get(i)
-				print((ComPort))
 			if "COM" in ComPort:
-				SecondThread.start()
-				for i in range(0,1):
-			#process the first button
-					a_temp = 'Button9'
-					globals()[a_temp].configure(state = "disabled")
-					globals()[a_temp].configure(fg = "gray")
+				try:
+					SecondThread.start()
+				except:
+					SecondThread = Process()
+					SecondThread.start()
+			else:
+				#process the first button
+				a_temp = 'Button1'
+				globals()[a_temp].configure(state = "disabled")
+				globals()[a_temp].configure(fg = "gray")
+		#button to close COM
+		if num == 20:
+			if self.ser.is_open:
+				self.ser.close()
+				a_temp = 'Button1'
+				globals()[a_temp].configure(state = "active")
+				globals()[a_temp].configure(fg = "white")			
+			else:
+				messagebox.showinfo('Puerto no abierto','Aún no se ha abierto el puerto')	
 
 
 	def quit(self):
@@ -187,18 +200,24 @@ class Passwordchecker(tk.Frame):
 
 	def method1(self,ComPort): 
 		#here you can put something to run as second background, do not forget to uncomment #GUI.method1()
-		ser = serial.Serial(
+		self.ser = serial.Serial(
 				port=ComPort,\
 				baudrate=9600,\
 				parity=serial.PARITY_NONE,\
 				stopbits=serial.STOPBITS_ONE,\
 				bytesize=serial.EIGHTBITS,\
 				timeout=1)
-		print("connected to: " + ser.portstr)
+		print("connected to: " + self.ser.portstr)
 		s = ""
-		while finish is not True:
+		while finish is not True and self.ser.is_open == True:
 			while '/n' not in str(s):
-				s = ser.read(40)
+				try:
+					s = self.ser.read(40)
+				except:
+					messagebox.showinfo('Puerto no abierto','Ha ocurrido un error en puerto.')
+					break
+				else:
+					pass
 				if finish == True:
 					break
 			label_data = str(s)[2:-3]
@@ -221,17 +240,21 @@ class Process(threading.Thread):
 		self.attrib2 = "Attrib from Process1 class"
 
 class Process(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self.attrib2 = "Attrib from Process2 class"
+	def __init__(self):
+		threading.Thread.__init__(self)
+		self.attrib2 = "Attrib from Process2 class"
+		self._stop_event = threading.Event()
 
-    def run(self):
-        global finish
-        while not finish:
-            print("Proceso infinito")
+	def run(self):
+		global finish
+		#while not finish:
 			#do not start serial until com info is selected.
-            run1.method1(ComPort)
-            time.sleep(3)
+		run1.method1(ComPort)
+		time.sleep(3)
+	
+	def stop(self):
+		self._stop_event.set()
+		print("Thread Stopped")
 
 
 if __name__ == '__main__':

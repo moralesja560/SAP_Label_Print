@@ -330,8 +330,6 @@ class Passwordchecker(tk.Frame):
 
 
 
-
-
 			#remove the firt two characters 'b and the last characters /n
 			label_data = str(s)[2:-3]
 			self.console.configure(text = "Datos Recibidos:" + label_data)

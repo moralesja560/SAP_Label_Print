@@ -100,7 +100,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 
 #This CSV is for button data. You can add a button if you modify this adequately.
-import os
 import csv
 file = open(resource_path("images/basic_btn_data.csv"))
 type(file)
@@ -111,6 +110,18 @@ header
 rows = []
 for row in csvreader:
 	rows.append(row)
+
+file.close()
+
+file = open(resource_path("images/entry_btn_data.csv"))
+type(file)
+csvreader = csv.reader(file)
+header = []
+header = next(csvreader)
+header
+rows2 = []
+for row in csvreader:
+	rows2.append(row)
 
 file.close()
 
@@ -164,38 +175,44 @@ class Passwordchecker(tk.Frame):
 ##### tkinter stuff that is unique, such as only one Listbox, needs to be declared like this
 		#declare a Listbox with ".self" at the beginning of the variable. It helps the variable to be reachable outside here.
 		#self.parent is the location of the tkinter core.
-		self.comList = Listbox(self.parent, width=12, height=8)
+		#self.comList = Listbox(self.parent, width=12, height=8)
 		#place it
-		self.comList.place(x =418,y=620)
+		#self.comList.place(x =418,y=620)
 		#call the port selector function and retrieve all available COM ports.
 		portList = serial_ports()
-		for seriales in portList:
-			self.comList.insert(0,seriales)
+		#for seriales in portList:
+		#	self.comList.insert(0,seriales)
+
+		#ComPort.
+		
+		self.ComList = StringVar()
+		self.ComList.set("Choose Port")
+		dropdown1 = OptionMenu(self.parent,self.ComList,portList)
+		dropdown1.place(x=418,y=620)
+		dropdown1.configure(width=10)
+
 		#area to deploy ComPort options.
-		options = [9600,19200,38400,57600,115200]
+		speeds = [9600,19200,38400,57600,115200]
 		self.baudRate1 = StringVar()
-		self.baudRate1.set(9600)
-		self.rateList = OptionMenu(self.parent,self.baudRate1,*options)
-		self.rateList.place(x=500,y=620)
-	
-
-
-
-
+		self.baudRate1.set("Choose Speed")
+		dropdown2 = OptionMenu(self.parent,self.baudRate1,*speeds)
+		dropdown2.place(x=418,y=650)
+		dropdown2.configure(width=10)
 
 
 ##########Selector is the function that commands buttons actions
 	def Selector(self,num):
 		global ComPort
 		global baud_Rate
+		ComPort = self.ComList.get()
 		baud_Rate = self.baudRate1.get()
 		#button to Open COM
 		if num == 10:
 			#clean the var
-			ComPort = ""
+			#ComPort = ""
 			#this loops the listbox to find which port is selected.
-			for i in self.comList.curselection():
-				ComPort = self.comList.get(i)
+			#for i in self.comList.curselection():
+			#	ComPort = self.comList.get(i)
 			#when this for loop ends, a "COM9" text must be stored,
 			#this if checks if the text "COM" exists in the variable "ComPort"
 			if "COM" in ComPort:

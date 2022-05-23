@@ -1,0 +1,2 @@
+Nombre,buttn_name,x_pos,y_pos,Width,Height,options
+dropdown1,self.ComList,418,620,10,2,PortList

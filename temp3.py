@@ -1,6 +1,5 @@
 #----------------------import area
 from ast import Compare
-from cProfile import label
 import os
 import sys
 import time, threading
@@ -110,6 +109,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		pyautogui.press('tab')
 		time.sleep(3)
 		pyautogui.press('enter')
+		
+		#run1 es la puerta de acceso a todos los widgets en el GUI
+		#bring
+		
+		
+		
+		
 		run1.console.configure(text = "Impresión Terminada")
 		
 
@@ -194,8 +200,8 @@ class Passwordchecker(tk.Frame):
 			#self.selector is the function inside the main class
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
 
-			self.console = Label(self.parent,width = w_offset*9, height = h_offset)
-			self.console.place(x=700,y=590)
+			self.console = Label(self.parent,width = w_offset*8, height = h_offset)
+			self.console.place(x=750,y=590)
 			self.console.configure(text = "")
 			self.console.configure(fg="white", bg="black", font=("Console",10))
 
@@ -206,7 +212,7 @@ class Passwordchecker(tk.Frame):
 ######### Create Dropdown menus for COM options 
 		#ComPort.
 		self.ComList = StringVar()
-		self.ComList.set("COM9")
+		self.ComList.set("Elige Puerto")
 		dropdown1 = OptionMenu(self.parent,self.ComList,*portList)
 		dropdown1.place(x=418,y=590)
 		dropdown1.configure(width=14)
@@ -214,7 +220,7 @@ class Passwordchecker(tk.Frame):
 		#Speed.
 		speeds = [9600,19200,38400,57600,115200]
 		self.baudRate1 = StringVar()
-		self.baudRate1.set("9600")
+		self.baudRate1.set("Elige Baudios")
 		dropdown2 = OptionMenu(self.parent,self.baudRate1,*speeds)
 		dropdown2.place(x=418,y=620)
 		dropdown2.configure(width=14)
@@ -222,7 +228,7 @@ class Passwordchecker(tk.Frame):
 		#Parity
 		parity = [serial.PARITY_EVEN,serial.PARITY_NONE,serial.PARITY_ODD]
 		self.Parity1 = StringVar()
-		self.Parity1.set("N")
+		self.Parity1.set("Elige Paridad")
 		dropdown3 = OptionMenu(self.parent,self.Parity1,*parity)
 		dropdown3.place(x=418,y=650)
 		dropdown3.configure(width=14)
@@ -230,7 +236,7 @@ class Passwordchecker(tk.Frame):
 		#stop_bits
 		sbits = [serial.STOPBITS_ONE,serial.STOPBITS_ONE_POINT_FIVE,serial.STOPBITS_TWO]
 		self.stopBits1 = IntVar()
-		self.stopBits1.set("1")
+		self.stopBits1.set("Elige Stop Bits")
 		dropdown4 = OptionMenu(self.parent,self.stopBits1,*sbits)
 		dropdown4.place(x=418,y=680)
 		dropdown4.configure(width=14)
@@ -238,7 +244,7 @@ class Passwordchecker(tk.Frame):
 		#byte_size
 		byte_s = [serial.EIGHTBITS,serial.FIVEBITS,serial.SIXBITS,serial.SEVENBITS]
 		self.byteSize1 = IntVar()
-		self.byteSize1.set("8")
+		self.byteSize1.set("Elige Bytsize")
 		dropdown5 = OptionMenu(self.parent,self.byteSize1,*byte_s)
 		dropdown5.place(x=418,y=710)
 		dropdown5.configure(width=14)
@@ -349,28 +355,17 @@ class Passwordchecker(tk.Frame):
 
 			#remove the firt two characters 'b and the last characters /n
 			label_data = str(s)[2:-3]
-			self.console.configure(text = "Datos Recibidos: " + label_data)
+			self.console.configure(text = "Datos Recibidos:" + label_data)
 			#prevent data process if label_data is 0 characters long.
 			if finish == False and len(label_data)>0:
-				#find the X in box.
-				if label_data.find('X') == -1:
-					#what if the string does not have X
-					self.console.configure(text = "Datos No Válidos: " + label_data)
-				else:
-					x_pos=label_data.find('X')
-					#print(x_pos)
-					#print(f"Shop Order is {label_data[0:x_pos-2]}")
-					#print(f"BOX is {label_data[x_pos-2:x_pos+1]}")
-					#print(f"StandardPack is {label_data[x_pos+1:len(label_data)]}")
-					ShopOrder = label_data[0:x_pos-2]
-					BoxType = label_data[x_pos-2:x_pos+1]
-					StandardPack =label_data[x_pos+1:len(label_data)]
+				#print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
+				
+				ShopOrder = label_data[0:7]
+				BoxType = label_data[7:10]
+				StandardPack =label_data[10:12]
 				#Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
-				ShopOrder = ""
-				BoxType = ""
-				StandardPack = ""
-				label_data = ""
+				#self.console.configure(text = "Impresión Terminada")
 				s = ""
 			else:
 				self.console.configure(text = f"Puerto Cerrado o Error en {ComPort}")

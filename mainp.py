@@ -110,6 +110,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		pyautogui.press('tab')
 		time.sleep(3)
 		pyautogui.press('enter')
+		#look for 3 scenarios
+		time.sleep(10)		
+		
+		error_btn = pyautogui.locateOnScreen(resource_path(r"images/error1.png"),grayscale=False, confidence=.9)
+		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.9)
+		if error_btn == None:
+			print("no error")
 		run1.console.configure(text = "Impresión Terminada")
 		
 

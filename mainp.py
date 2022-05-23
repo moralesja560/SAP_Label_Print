@@ -92,7 +92,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#time.sleep(5)
 		#pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
 		#run1 es la puerta de acceso a todos los widgets en el GUI
-		
+		#bring
 		
 		
 		

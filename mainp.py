@@ -213,7 +213,7 @@ class Passwordchecker(tk.Frame):
 		#stop_bits
 		sbits = [serial.STOPBITS_ONE,serial.STOPBITS_ONE_POINT_FIVE,serial.STOPBITS_TWO]
 		self.stopBits1 = IntVar()
-		self.stopBits1.set("Elige Bits")
+		self.stopBits1.set("Elige Stop Bits")
 		dropdown4 = OptionMenu(self.parent,self.stopBits1,*sbits)
 		dropdown4.place(x=418,y=680)
 		dropdown4.configure(width=14)
@@ -221,7 +221,7 @@ class Passwordchecker(tk.Frame):
 		#byte_size
 		byte_s = [serial.EIGHTBITS,serial.FIVEBITS,serial.SIXBITS,serial.SEVENBITS]
 		self.byteSize1 = IntVar()
-		self.byteSize1.set("Tamaño Bits")
+		self.byteSize1.set("Elige Bytsize")
 		dropdown5 = OptionMenu(self.parent,self.byteSize1,*byte_s)
 		dropdown5.place(x=418,y=710)
 		dropdown5.configure(width=14)
@@ -233,33 +233,42 @@ class Passwordchecker(tk.Frame):
 		global Parity_data
 		global stop_bits
 		global byte_size
-		#Variable declaration starts here
-		ComPort = self.ComList.get()
-		baud_Rate = self.baudRate1.get()
-		Parity_data = self.Parity1.get()
-		stop_bits = self.stopBits1.get()
-		byte_size = self.byteSize1.get()
-		#go to def run() in thread 2 config to pass these variables to the method1 second thread.
+
+		#go to def run() in thread 2 and config it to pass these variables to the method1 second thread.
 		
 		#### area to check if the info coming from the optionmenu is valid and all the option menus were opened and selected.
-		
+			
 		#button to Open COM
 		if num == 10:
-			if "COM" in ComPort:
-				try:
-					#Try to start the Serial Process Thread
-					SecondThread.start()
-				except:
-					#It is well known that a finished process cannot be restarted, so a new process is started
-					SecondThread = Process()
-					SecondThread.start()
-				finally:
-				#disable button 
-					a_temp = 'Button1'
-					globals()[a_temp].configure(state = "disabled")
-			else:
+			#Variable declaration starts here
+			try:
+				ComPort = self.ComList.get()
+				baud_Rate = self.baudRate1.get()
+				Parity_data = self.Parity1.get()
+				stop_bits = self.stopBits1.get()
+				byte_size = self.byteSize1.get()
+			except:
+				messagebox.showinfo('Error en Parámetros','Revise los parámetros del puerto')
+			else:			
+			#### area to check if the info coming from the optionmenu is valid and all the option menus were opened and selected.
+				if len(ComPort)>5:
+					messagebox.showinfo('Error en Parámetros','Revise los parámetros del puerto')
+				else:
+				#if "COM" in ComPort:
+					try:
+						#Try to start the Serial Process Thread
+						SecondThread.start()
+					except:
+						#It is well known that a finished process cannot be restarted, so a new process is started
+						SecondThread = Process()
+						SecondThread.start()
+					finally:
+					#disable button 
+						a_temp = 'Button1'
+						globals()[a_temp].configure(state = "disabled")
+			#else:
 				# A warning that no port is selected.
-				messagebox.showinfo('Puerto no seleccionado','Click en la lista para seleccionar un puerto COM')
+			#	messagebox.showinfo('Puerto no seleccionado','Click en la lista para seleccionar un puerto COM')
 		#button to close COM
 		if num == 20:
 			# When button "Close Port" is clicked but the thread is not alive, an error occurs.
@@ -328,7 +337,7 @@ class Passwordchecker(tk.Frame):
 			self.console.configure(text = "Datos Recibidos:" + label_data)
 			#prevent data process if label_data is 0 characters long.
 			if finish == False and len(label_data)>0:
-				print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
+				#print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
 				ShopOrder = label_data[0:6]
 				BoxType = label_data[6:9]
 				StandardPack =label_data[9:12]
@@ -372,5 +381,5 @@ if __name__ == '__main__':
 	run1 = Passwordchecker(root)
 	#root.after(50, SecondThread.start)
 	root.mainloop() #GUI.start()
-	print("Exiting....")
+	#print("Exiting....")
 	finish = True

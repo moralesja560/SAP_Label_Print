@@ -92,6 +92,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		pyautogui.press('enter')
 		time.sleep(5)
 		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
+		#run1 es la puerta de acceso a todos los widgets en el GUI
+		run1.console.configure(text = "Impresión Terminada")
 		
 
 
@@ -332,7 +334,7 @@ class Passwordchecker(tk.Frame):
 				StandardPack =label_data[9:12]
 				#Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
-				self.console.configure(text = "Impresión Terminada")
+				#self.console.configure(text = "Impresión Terminada")
 				s = ""
 			else:
 				self.console.configure(text = f"Puerto Cerrado o Error en {ComPort}")

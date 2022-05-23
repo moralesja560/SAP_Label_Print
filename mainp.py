@@ -20,7 +20,8 @@ import glob
 ############progress check
 ######-------TASKS
 ####-----production run to test pyautogui.
-####----put in PLC some characters to better recognize parameters sent over serial
+####----carga las imagenes de error y crea el escenario para regresar a seguir imprimiendo.
+# quiza se pueda una forma de registrar esas etiquetas que no se imprimieron para que luego se impriman manual.
 ### sistema de registro en un TXT
 
 
@@ -112,15 +113,23 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		pyautogui.press('enter')
 		#look for 3 scenarios
 		time.sleep(10)		
-		
-		error_btn = pyautogui.locateOnScreen(resource_path(r"images/error1.png"),grayscale=False, confidence=.9)
-		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.9)
+		print(pyautogui.position())
+		error_btn = pyautogui.locateOnScreen(resource_path(r"images/error1.png"),grayscale=False, confidence=.7)
+		#error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.9)
 		if error_btn == None:
-			print("no error")
+			print("error en deteccion")
+		else:
+			pyautogui.press('tab')
+			time.sleep(1)
+			pyautogui.press('enter')	
 		run1.console.configure(text = "Impresión Terminada")
-		
-
-
+		#435,142
+		#notification.notify(
+		#	title = 'testing',
+		#	message ='message',
+		#	app_icon = None,
+		#	timeout = 5,
+		#)
 #---------------------------------End of Auxiliary Functions-------------------------#
 
 

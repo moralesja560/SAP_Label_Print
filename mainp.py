@@ -8,6 +8,7 @@ from tkinter import messagebox
 from functools import partial
 import tkinter as tk
 from unittest import expectedFailure
+from matplotlib.pyplot import text
 import pyautogui
 import serial
 import sys
@@ -91,6 +92,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		pyautogui.press('enter')
 		time.sleep(5)
 		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
+		
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
@@ -172,6 +174,12 @@ class Passwordchecker(tk.Frame):
 			globals()[a_temp].configure(text = rows[i-1][4])
 			#self.selector is the function inside the main class
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
+
+			self.console = Label(self.parent,width = w_offset*8, height = h_offset)
+			self.console.place(x=750,y=590)
+			self.console.configure(text = "")
+			self.console.configure(fg="white", bg="black", font=("Console",10))
+
 
 		#call the port selector function and retrieve all available COM ports.
 		portList = serial_ports()
@@ -286,7 +294,8 @@ class Passwordchecker(tk.Frame):
 				bytesize=byte_size,\
 				timeout=1)
 		#A notice that the COM has been opened
-		print("connected to: " + self.ser.portstr)
+		#print("connected to: " + self.ser.portstr)
+		self.console.configure(text = "Conectado a: " + self.ser.portstr)
 		#serial buffer cleaning
 		s = ""
 
@@ -297,7 +306,8 @@ class Passwordchecker(tk.Frame):
 				try:
 					s = self.ser.read(40)
 				except:
-					messagebox.showinfo('Puerto no abierto','Se ha cerrado el puerto exitosamente.')
+					#messagebox.showinfo('Puerto no abierto','Se ha cerrado el puerto exitosamente.')
+					self.console.configure(text = 'Se ha cerrado el puerto exitosamente.')
 					break
 				#changed else for finally:
 				finally:
@@ -306,8 +316,14 @@ class Passwordchecker(tk.Frame):
 					break
 			
 ##############----------------This is the data processing area
+
+
+
+
+
 			#remove the firt two characters 'b and the last characters /n
 			label_data = str(s)[2:-3]
+			self.console.configure(text = "Datos Recibidos:" + label_data)
 			#prevent data process if label_data is 0 characters long.
 			if finish == False and len(label_data)>0:
 				print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
@@ -316,9 +332,10 @@ class Passwordchecker(tk.Frame):
 				StandardPack =label_data[9:12]
 				#Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
+				self.console.configure(text = "Impresión Terminada")
 				s = ""
 			else:
-				print(f"port closed or error {ComPort}")
+				self.console.configure(text = f"Puerto Cerrado o Error en {ComPort}")
 				break
 
 

@@ -8,6 +8,7 @@ from tkinter import messagebox
 from functools import partial
 import tkinter as tk
 from unittest import expectedFailure
+from matplotlib.pyplot import text
 import pyautogui
 import serial
 import sys
@@ -91,6 +92,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		pyautogui.press('enter')
 		time.sleep(5)
 		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
+		#run1 es la puerta de acceso a todos los widgets en el GUI
+		run1.console.configure(text = "Impresión Terminada")
+		
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
@@ -100,7 +104,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 
 #This CSV is for button data. You can add a button if you modify this adequately.
-import os
 import csv
 file = open(resource_path("images/basic_btn_data.csv"))
 type(file)
@@ -111,6 +114,18 @@ header
 rows = []
 for row in csvreader:
 	rows.append(row)
+
+file.close()
+
+file = open(resource_path("images/entry_btn_data.csv"))
+type(file)
+csvreader = csv.reader(file)
+header = []
+header = next(csvreader)
+header
+rows2 = []
+for row in csvreader:
+	rows2.append(row)
 
 file.close()
 
@@ -161,43 +176,75 @@ class Passwordchecker(tk.Frame):
 			globals()[a_temp].configure(text = rows[i-1][4])
 			#self.selector is the function inside the main class
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
-##### tkinter stuff that is unique, such as only one Listbox, needs to be declared like this
-		#declare a Listbox with ".self" at the beginning of the variable. It helps the variable to be reachable outside here.
-		#self.parent is the location of the tkinter core.
-		self.comList = Listbox(self.parent, width=12, height=8)
-		#place it
-		self.comList.place(x =418,y=620)
+
+			self.console = Label(self.parent,width = w_offset*8, height = h_offset)
+			self.console.place(x=750,y=590)
+			self.console.configure(text = "")
+			self.console.configure(fg="white", bg="black", font=("Console",10))
+
+
 		#call the port selector function and retrieve all available COM ports.
 		portList = serial_ports()
-		for seriales in portList:
-			self.comList.insert(0,seriales)
-		#area to deploy ComPort options.
-		options = [9600,19200,38400,57600,115200]
+
+######### Create Dropdown menus for COM options 
+		#ComPort.
+		self.ComList = StringVar()
+		self.ComList.set("Elige Puerto")
+		dropdown1 = OptionMenu(self.parent,self.ComList,*portList)
+		dropdown1.place(x=418,y=590)
+		dropdown1.configure(width=14)
+
+		#Speed.
+		speeds = [9600,19200,38400,57600,115200]
 		self.baudRate1 = StringVar()
-		self.baudRate1.set(9600)
-		self.rateList = OptionMenu(self.parent,self.baudRate1,*options)
-		self.rateList.place(x=500,y=620)
-	
+		self.baudRate1.set("Elige Baudios")
+		dropdown2 = OptionMenu(self.parent,self.baudRate1,*speeds)
+		dropdown2.place(x=418,y=620)
+		dropdown2.configure(width=14)
 
+		#Parity
+		parity = [serial.PARITY_EVEN,serial.PARITY_NONE,serial.PARITY_ODD]
+		self.Parity1 = StringVar()
+		self.Parity1.set("Elige Paridad")
+		dropdown3 = OptionMenu(self.parent,self.Parity1,*parity)
+		dropdown3.place(x=418,y=650)
+		dropdown3.configure(width=14)
 
+		#stop_bits
+		sbits = [serial.STOPBITS_ONE,serial.STOPBITS_ONE_POINT_FIVE,serial.STOPBITS_TWO]
+		self.stopBits1 = IntVar()
+		self.stopBits1.set("Elige Bits")
+		dropdown4 = OptionMenu(self.parent,self.stopBits1,*sbits)
+		dropdown4.place(x=418,y=680)
+		dropdown4.configure(width=14)
 
-
-
+		#byte_size
+		byte_s = [serial.EIGHTBITS,serial.FIVEBITS,serial.SIXBITS,serial.SEVENBITS]
+		self.byteSize1 = IntVar()
+		self.byteSize1.set("Tamaño Bits")
+		dropdown5 = OptionMenu(self.parent,self.byteSize1,*byte_s)
+		dropdown5.place(x=418,y=710)
+		dropdown5.configure(width=14)
 
 ##########Selector is the function that commands buttons actions
 	def Selector(self,num):
 		global ComPort
 		global baud_Rate
+		global Parity_data
+		global stop_bits
+		global byte_size
+		#Variable declaration starts here
+		ComPort = self.ComList.get()
 		baud_Rate = self.baudRate1.get()
+		Parity_data = self.Parity1.get()
+		stop_bits = self.stopBits1.get()
+		byte_size = self.byteSize1.get()
+		#go to def run() in thread 2 config to pass these variables to the method1 second thread.
+		
+		#### area to check if the info coming from the optionmenu is valid and all the option menus were opened and selected.
+		
 		#button to Open COM
 		if num == 10:
-			#clean the var
-			ComPort = ""
-			#this loops the listbox to find which port is selected.
-			for i in self.comList.curselection():
-				ComPort = self.comList.get(i)
-			#when this for loop ends, a "COM9" text must be stored,
-			#this if checks if the text "COM" exists in the variable "ComPort"
 			if "COM" in ComPort:
 				try:
 					#Try to start the Serial Process Thread
@@ -239,18 +286,18 @@ class Passwordchecker(tk.Frame):
 			self.parent.destroy()
 			self.parent.quit()
 
-	def method1(self,ComPort,baudRate): 
+	def method1(self,ComPort,baudRate,Parity_data,stop_bits,byte_size): 
 		#This is the area where the second thread lives.
-		print(ComPort,baudRate)
 		self.ser = serial.Serial(
 				port=ComPort,\
 				baudrate=baudRate,\
-				parity=serial.PARITY_NONE,\
-				stopbits=serial.STOPBITS_ONE,\
-				bytesize=serial.EIGHTBITS,\
+				parity=Parity_data,\
+				stopbits=stop_bits,\
+				bytesize=byte_size,\
 				timeout=1)
 		#A notice that the COM has been opened
-		print("connected to: " + self.ser.portstr)
+		#print("connected to: " + self.ser.portstr)
+		self.console.configure(text = "Conectado a: " + self.ser.portstr)
 		#serial buffer cleaning
 		s = ""
 
@@ -261,7 +308,8 @@ class Passwordchecker(tk.Frame):
 				try:
 					s = self.ser.read(40)
 				except:
-					messagebox.showinfo('Puerto no abierto','Se ha cerrado el puerto exitosamente.')
+					#messagebox.showinfo('Puerto no abierto','Se ha cerrado el puerto exitosamente.')
+					self.console.configure(text = 'Se ha cerrado el puerto exitosamente.')
 					break
 				#changed else for finally:
 				finally:
@@ -270,20 +318,26 @@ class Passwordchecker(tk.Frame):
 					break
 			
 ##############----------------This is the data processing area
+
+
+
+
+
 			#remove the firt two characters 'b and the last characters /n
 			label_data = str(s)[2:-3]
+			self.console.configure(text = "Datos Recibidos:" + label_data)
 			#prevent data process if label_data is 0 characters long.
 			if finish == False and len(label_data)>0:
-				print(len(label_data))
 				print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
 				ShopOrder = label_data[0:6]
 				BoxType = label_data[6:9]
 				StandardPack =label_data[9:12]
 				#Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
+				#self.console.configure(text = "Impresión Terminada")
 				s = ""
 			else:
-				print(f"port closed or error {ComPort}")
+				self.console.configure(text = f"Puerto Cerrado o Error en {ComPort}")
 				break
 
 
@@ -303,7 +357,7 @@ class Process(threading.Thread):
 		global finish
 		#while not finish:
 			#do not start serial until com info is selected.
-		run1.method1(ComPort,baud_Rate)
+		run1.method1(ComPort,baud_Rate,Parity_data,stop_bits,byte_size)
 		time.sleep(3)
 	
 	def stop(self):

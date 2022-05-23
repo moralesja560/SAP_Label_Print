@@ -172,49 +172,69 @@ class Passwordchecker(tk.Frame):
 			globals()[a_temp].configure(text = rows[i-1][4])
 			#self.selector is the function inside the main class
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
-##### tkinter stuff that is unique, such as only one Listbox, needs to be declared like this
-		#declare a Listbox with ".self" at the beginning of the variable. It helps the variable to be reachable outside here.
-		#self.parent is the location of the tkinter core.
-		#self.comList = Listbox(self.parent, width=12, height=8)
-		#place it
-		#self.comList.place(x =418,y=620)
+
 		#call the port selector function and retrieve all available COM ports.
 		portList = serial_ports()
-		#for seriales in portList:
-		#	self.comList.insert(0,seriales)
 
+######### Create Dropdown menus for COM options 
 		#ComPort.
-		
 		self.ComList = StringVar()
-		self.ComList.set("Choose Port")
-		dropdown1 = OptionMenu(self.parent,self.ComList,portList)
-		dropdown1.place(x=418,y=620)
-		dropdown1.configure(width=10)
+		self.ComList.set("Elige Puerto")
+		dropdown1 = OptionMenu(self.parent,self.ComList,*portList)
+		dropdown1.place(x=418,y=590)
+		dropdown1.configure(width=14)
 
-		#area to deploy ComPort options.
+		#Speed.
 		speeds = [9600,19200,38400,57600,115200]
 		self.baudRate1 = StringVar()
-		self.baudRate1.set("Choose Speed")
+		self.baudRate1.set("Elige Baudios")
 		dropdown2 = OptionMenu(self.parent,self.baudRate1,*speeds)
-		dropdown2.place(x=418,y=650)
-		dropdown2.configure(width=10)
+		dropdown2.place(x=418,y=620)
+		dropdown2.configure(width=14)
 
+		#Parity
+		parity = [serial.PARITY_EVEN,serial.PARITY_NONE,serial.PARITY_ODD]
+		self.Parity1 = StringVar()
+		self.Parity1.set("Elige Paridad")
+		dropdown3 = OptionMenu(self.parent,self.Parity1,*parity)
+		dropdown3.place(x=418,y=650)
+		dropdown3.configure(width=14)
+
+		#stop_bits
+		sbits = [serial.STOPBITS_ONE,serial.STOPBITS_ONE_POINT_FIVE,serial.STOPBITS_TWO]
+		self.stopBits1 = IntVar()
+		self.stopBits1.set("Elige Bits")
+		dropdown4 = OptionMenu(self.parent,self.stopBits1,*sbits)
+		dropdown4.place(x=418,y=680)
+		dropdown4.configure(width=14)
+
+		#byte_size
+		byte_s = [serial.EIGHTBITS,serial.FIVEBITS,serial.SIXBITS,serial.SEVENBITS]
+		self.byteSize1 = IntVar()
+		self.byteSize1.set("Tamaño Bits")
+		dropdown5 = OptionMenu(self.parent,self.byteSize1,*byte_s)
+		dropdown5.place(x=418,y=710)
+		dropdown5.configure(width=14)
 
 ##########Selector is the function that commands buttons actions
 	def Selector(self,num):
 		global ComPort
 		global baud_Rate
+		global Parity_data
+		global stop_bits
+		global byte_size
+		#Variable declaration starts here
 		ComPort = self.ComList.get()
 		baud_Rate = self.baudRate1.get()
+		Parity_data = self.Parity1.get()
+		stop_bits = self.stopBits1.get()
+		byte_size = self.byteSize1.get()
+		#go to def run() in thread 2 config to pass these variables to the method1 second thread.
+		
+		#### area to check if the info coming from the optionmenu is valid and all the option menus were opened and selected.
+		
 		#button to Open COM
 		if num == 10:
-			#clean the var
-			#ComPort = ""
-			#this loops the listbox to find which port is selected.
-			#for i in self.comList.curselection():
-			#	ComPort = self.comList.get(i)
-			#when this for loop ends, a "COM9" text must be stored,
-			#this if checks if the text "COM" exists in the variable "ComPort"
 			if "COM" in ComPort:
 				try:
 					#Try to start the Serial Process Thread
@@ -256,15 +276,14 @@ class Passwordchecker(tk.Frame):
 			self.parent.destroy()
 			self.parent.quit()
 
-	def method1(self,ComPort,baudRate): 
+	def method1(self,ComPort,baudRate,Parity_data,stop_bits,byte_size): 
 		#This is the area where the second thread lives.
-		print(ComPort,baudRate)
 		self.ser = serial.Serial(
 				port=ComPort,\
 				baudrate=baudRate,\
-				parity=serial.PARITY_NONE,\
-				stopbits=serial.STOPBITS_ONE,\
-				bytesize=serial.EIGHTBITS,\
+				parity=Parity_data,\
+				stopbits=stop_bits,\
+				bytesize=byte_size,\
 				timeout=1)
 		#A notice that the COM has been opened
 		print("connected to: " + self.ser.portstr)
@@ -291,7 +310,6 @@ class Passwordchecker(tk.Frame):
 			label_data = str(s)[2:-3]
 			#prevent data process if label_data is 0 characters long.
 			if finish == False and len(label_data)>0:
-				print(len(label_data))
 				print(f"Shop Order is {label_data[0:6]} and type {label_data[6:9]} and standard pack {label_data[9:12]}  ")
 				ShopOrder = label_data[0:6]
 				BoxType = label_data[6:9]
@@ -320,7 +338,7 @@ class Process(threading.Thread):
 		global finish
 		#while not finish:
 			#do not start serial until com info is selected.
-		run1.method1(ComPort,baud_Rate)
+		run1.method1(ComPort,baud_Rate,Parity_data,stop_bits,byte_size)
 		time.sleep(3)
 	
 	def stop(self):

@@ -18,12 +18,10 @@ import glob
 
 ############progress check
 ######-------TASKS
-####----create tkinter stuff to select COM-port stuff such as baudrate. Follow done example
-####----finish comments
-####----console to GUI
-####-----check for correct program exit
 ####-----production run to test pyautogui.
 ####----put in PLC some characters to better recognize parameters sent over serial
+### sistema de registro en un TXT
+
 
 #####--------RECOMMENDATIONS
 #Utiliza mejor los prints para señalar info importante.
@@ -83,16 +81,22 @@ def serial_ports():
             pass
     return result
 
-#This is the function that actually prints the labels.
+###################################This is the function that actually prints the labels.
+
 def label_print(ShopOrder,BoxType,StandardPack):
 	#a protection to avoid printing empty labels
 	if len(str(ShopOrder))>0:
-		pyautogui.hotkey('win','r')
-		pyautogui.write('chrome.exe')
-		pyautogui.press('enter')
-		time.sleep(5)
-		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
+		#pyautogui.hotkey('win','r')
+		#pyautogui.write('chrome.exe')
+		#pyautogui.press('enter')
+		#time.sleep(5)
+		#pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
 		#run1 es la puerta de acceso a todos los widgets en el GUI
+		
+		
+		
+		
+		
 		run1.console.configure(text = "Impresión Terminada")
 		
 

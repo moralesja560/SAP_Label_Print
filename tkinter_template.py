@@ -1,12 +1,18 @@
-from importlib.metadata import entry_points
+
+from ast import Compare
 import os
 import sys
 import time, threading
 from tkinter import *
 from tkinter import messagebox
-import tkinter as tk
-import sys
 from functools import partial
+import tkinter as tk
+from unittest import expectedFailure
+from matplotlib.pyplot import text
+import pyautogui
+import serial
+import sys
+import glob
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -22,10 +28,6 @@ class Passwordchecker(tk.Frame):
 		self.parent = parent
 		self.initialize_user_interface()
 
-	def Selector1(self):
-		self.c_temp = PhotoImage(file = resource_path("images/SAP2.png"))
-		self.label1.configure(image = self.c_temp)
-		pass
 	#first function inside the class: GUI initializing
 	#this is where GUI initial configuration takes place.
 	def initialize_user_interface(self):
@@ -36,29 +38,25 @@ class Passwordchecker(tk.Frame):
 		self.parent.title("Membrain PAS")
 		# a label that contains the background image
 		self.background_image = PhotoImage(file = resource_path("images/SAP1.png"))
-		self.label1 = Label(self.parent, image = self.background_image)
-		self.label1.place(x = 0,y = 0)
+		label1 = Label(self.parent, image = self.background_image)
+		label1.place(x = 0,y = 0)
 		#general parameters for the buttons.
 		h_offset = 2
 		w_offset = 4
 		self.fg_offset = "white"
 		self.bg_offset = '#3d85c5'
-		self.caja = Entry(self.parent,width = w_offset)
-		self.caja.bind('<Return>',self.Selector1)
-		self.caja.place(x =int(377),y=int(128))
+
 
 ##########Selector is the function that commands buttons actions
-
-
-
-
+	def Selector(self,num):
+		pass
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
 			self.parent.destroy()
 			self.parent.quit()
 
-	def method1(self): 
+	def method1(self,ComPort,baudRate,Parity_data,stop_bits,byte_size): 
 		#This is the area where the second thread lives.
 		print("hi")
 		

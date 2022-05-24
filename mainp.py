@@ -101,7 +101,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		pyautogui.press('tab')
 		pyautogui.press('space')
 		time.sleep(3)
-		print(StandardPack)
+		#print(StandardPack)
 		pyautogui.write(f"{StandardPack}")
 		pyautogui.press('tab')
 		pyautogui.write("20010380")
@@ -123,27 +123,48 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#yes no
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
 		
-		if error1_btn == None:
-			print("error en deteccion1")
+#		if error1_btn == None:
+#			print("error en deteccion1")
 			#log the label to take further action
+#			warning_log("error1_btn")
+#		else:
+#			pyautogui.press('enter')
+
+#		if error2_btn == None:
+#			print("error en deteccion2")
+			#log the label to take further action
+#			warning_log("error2_btn")
+#		else:
+#			time.sleep(1)
+#			pyautogui.press('enter')
+#			pyautogui.click(435,142)
+
+#		if error3_btn == None:
+#			print("error en deteccion3")
+#			#log the label to take further action
+#			warning_log("error3_btn")
+#		else:
+#			pyautogui.press('tab')
+#			time.sleep(1)
+#			pyautogui.press('enter')
+
+		if error1_btn == None:
+			if error2_btn == None:
+				if error3_btn == None:
+					#no se detectó nada
+					warning_log("error1,2,3_btn")
+				else:
+					pyautogui.press('tab')
+					time.sleep(1)
+					pyautogui.press('enter')
+					pyautogui.click(435,142)
+			else:
+				time.sleep(1)
+				pyautogui.press('enter')
+				pyautogui.click(435,142)
 		else:
 			pyautogui.press('enter')
 
-		if error2_btn == None:
-			print("error en deteccion2")
-			#log the label to take further action
-		else:
-			time.sleep(1)
-			pyautogui.press('enter')
-			pyautogui.click(435,142)
-		
-		if error3_btn == None:
-			print("error en deteccion3")
-			#log the label to take further action
-		else:
-			pyautogui.press('tab')
-			time.sleep(1)
-			pyautogui.press('enter')
 
 		run1.console.configure(text = "Impresión Terminada")
 		#435,142
@@ -199,7 +220,7 @@ file.close()
 def write_log(ShopOrder,BoxType,StandardPack):
 	now = datetime.now()
 	dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-	print("date and time =", dt_string)	
+	#print("date and time =", dt_string)	
 	mis_docs = My_Documents(5)
 	ruta = str(mis_docs)+ r"\registro_etiquetas.txt"
 	file_exists = os.path.exists(ruta)
@@ -224,6 +245,35 @@ def write_log(ShopOrder,BoxType,StandardPack):
 		f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
 		# Close the file
 		f.close()
+
+def warning_log(texto):
+	now = datetime.now()
+	dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+	#print("date and time =", dt_string)	
+	mis_docs = My_Documents(5)
+	ruta = str(mis_docs)+ r"\registro_etiquetas.txt"
+	file_exists = os.path.exists(ruta)
+	if file_exists == True:
+		with open(ruta, "a+") as file_object:
+			# Move read cursor to the start of file.
+			file_object.seek(0)
+			# If file is not empty then append '\n'
+			data = file_object.read(100)
+			if len(data) > 0 :
+				file_object.write("\n")
+				# Append text at the end of file	
+				file_object.write(f" No se pudo detectar {texto}")
+		# Open a file with access mode 'a'
+		#file_object = open(ruta, 'a')
+		# Append 'hello' at the end of file
+		#file_object.append(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+		# Close the file
+		#file_object.close()
+	else:
+		f= open(ruta,"w+")
+		f.write(f" No se pudo detectar {texto}")
+		# Close the file
+		f.close()		
 
 
 #/////-----------------------End of Reading and Writing Files--------------------------#

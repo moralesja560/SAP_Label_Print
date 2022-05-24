@@ -345,7 +345,7 @@ class Passwordchecker(tk.Frame):
 					globals()[a_temp].configure(bg = self.bg_offset)
 					globals()[a_temp].configure(fg = self.fg_offset)
 				else:
-					messagebox.showinfo('Puerto no abierto','Aún no se ha abierto el puerto')
+					self.console.configure(text = "Se ha cerrado el puerto")
 			except:
 				messagebox.showinfo('Puerto no abierto','Puerto no existe o no abierto.')
 				a_temp = 'Button1'
@@ -373,43 +373,39 @@ class Passwordchecker(tk.Frame):
 		self.console.configure(text = "Conectado a: " + self.ser.portstr)
 		#serial buffer cleaning
 		s = ""
-
-		while finish is not True and self.ser.is_open == True:
+		while finish is not True:
 			#monitor the buffer s to look for /n
+			if self.ser.is_open == False:
+				self.console.configure(text = "Se ha cerrado el puerto")
+				break
 			# the TRY catcher is to find if the port has been closed and react accordingly
 			while '/n' not in str(s):
 				try:
 					s = self.ser.read(40)
 				except:
-					#messagebox.showinfo('Puerto no abierto','Se ha cerrado el puerto exitosamente.')
 					self.console.configure(text = 'Se ha cerrado el puerto exitosamente.')
 					break
 				#changed else for finally:
 				finally:
-					pass
-				if finish == True:
-					break
+					if finish == True:
+						break
 			#remove the firt two characters 'b and the last characters /n
 			label_data = str(s)[2:-3]
 			self.console.configure(text = "Datos Recibidos: " + label_data)
 			#prevent data process if label_data is 0 characters long.
-			if finish == False and len(label_data)>0:
+			if len(label_data)>0:
 				#find the X in box.
 				if label_data.find('X') == -1:
 					#what if the string does not have X
 					self.console.configure(text = "Datos No Válidos: " + label_data)
 				else:
 					x_pos=label_data.find('X')
-					#print(x_pos)
-					#print(f"Shop Order is {label_data[0:x_pos-2]}")
-					#print(f"BOX is {label_data[x_pos-2:x_pos+1]}")
-					#print(f"StandardPack is {label_data[x_pos+1:len(label_data)]}")
 					ShopOrder = label_data[0:x_pos-2]
 					BoxType = label_data[x_pos-2:x_pos+1]
 					StandardPack =label_data[x_pos+1:len(label_data)]
-				#Launch label printing process..
-				print(ShopOrder,BoxType,StandardPack)
-				label_print2(ShopOrder,BoxType,StandardPack)
+					#Launch label printing process..
+					print(ShopOrder,BoxType,StandardPack)
+					label_print2(ShopOrder,BoxType,StandardPack)
 				ShopOrder = ""
 				BoxType = ""
 				StandardPack = ""
@@ -437,6 +433,8 @@ class Process(threading.Thread):
 		#while not finish:
 			#do not start serial until com info is selected.
 		run1.method1(ComPort,baud_Rate,Parity_data,stop_bits,byte_size)
+		run1.console.configure(text = f"Proceso Terminado: Puerto Cerrado")
+		
 		time.sleep(3)
 	
 	def stop(self):

@@ -104,12 +104,15 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#print(StandardPack)
 		pyautogui.write(f"{StandardPack}")
 		pyautogui.press('tab')
+		#numero de operario
 		pyautogui.write("20010380")
 		time.sleep(3)
+		#puesto de trabajo
 		pyautogui.press('tab')
-		#pyautogui.write("1455")
 		time.sleep(3)
 		pyautogui.press('tab')
+		#texto libre
+		pyautogui.write("impresa")
 		time.sleep(3)
 		pyautogui.press('tab')
 		time.sleep(3)
@@ -123,13 +126,11 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#yes no
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
 		#too much
-			
-
 		if error1_btn == None:
 			if error2_btn == None:
 				if error3_btn == None:
 					#no se detectó nada
-					warning_log("error1,2,3_btn")
+					warning_log("No se encontró ningún botón de respuesta")
 				else:
 					pyautogui.press('tab')
 					time.sleep(1)
@@ -459,31 +460,29 @@ class Passwordchecker(tk.Frame):
 					if finish == True:
 						break
 			#remove the firt two characters 'b and the last characters /n
-			label_data = str(s)[2:-3]
+			#label_data = str(s)[2:-3]
+			label_data = str(s)
 			self.console.configure(text = "Datos Recibidos: " + label_data)
 			#prevent data process if label_data is 0 characters long.
-			if len(label_data)>0:
-				#find the X in box.
-				if label_data.find('X') == -1:
-					#what if the string does not have X
-					self.console.configure(text = "Datos No Válidos: " + label_data)
-				else:
-					x_pos=label_data.find('X')
-					ShopOrder = label_data[0:x_pos-2]
-					BoxType = label_data[x_pos-2:x_pos+1]
-					StandardPack =label_data[x_pos+1:len(label_data)]
-#####################Launch label printing process..
-					label_print(ShopOrder,BoxType,StandardPack)
-					write_log(ShopOrder,BoxType,StandardPack)
-					self.console.configure(text = "Conectado a: " + self.ser.portstr)
-				ShopOrder = ""
-				BoxType = ""
-				StandardPack = ""
-				label_data = ""
-				s = ""
+			#find the X in box.
+			if label_data.find('X') == -1:
+				#what if the string does not have X
+				self.console.configure(text = "Datos No Válidos: " + label_data)
 			else:
-				self.console.configure(text = f"Puerto Cerrado o Error en {ComPort}")
-				break
+				x_pos=label_data.find('X')
+				ShopOrder = label_data[2:x_pos-2]
+				BoxType = label_data[x_pos-2:x_pos+1]
+				StandardPack =label_data[x_pos+1:len(label_data)-3]
+				print(f"{ShopOrder,BoxType,StandardPack}")
+####################Launch label printing process..
+				label_print2(ShopOrder,BoxType,StandardPack)
+				write_log(ShopOrder,BoxType,StandardPack)
+				self.console.configure(text = "Conectado a: " + self.ser.portstr)
+			ShopOrder = ""
+			BoxType = ""
+			StandardPack = ""
+			label_data = ""
+			s = ""
 
 
 #################Threading area 

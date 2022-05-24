@@ -1,5 +1,6 @@
 #----------------------import area
 from ast import Compare
+from base64 import standard_b64decode
 from cProfile import label
 import os
 import sys
@@ -150,6 +151,16 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#	app_icon = None,
 		#	timeout = 5,
 		#)
+
+def label_print2(ShopOrder,BoxType,StandardPack):
+		pyautogui.hotkey('win','r')
+		pyautogui.write('chrome.exe')
+		pyautogui.press('enter')
+		time.sleep(10)
+		print(ShopOrder,BoxType,StandardPack)
+		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
+		run1.console.configure(text = "Impresión Terminada")
+
 #---------------------------------End of Auxiliary Functions-------------------------#
 
 
@@ -378,11 +389,6 @@ class Passwordchecker(tk.Frame):
 					pass
 				if finish == True:
 					break
-			
-##############----------------This is the data processing area
-
-
-
 			#remove the firt two characters 'b and the last characters /n
 			label_data = str(s)[2:-3]
 			self.console.configure(text = "Datos Recibidos: " + label_data)
@@ -402,7 +408,8 @@ class Passwordchecker(tk.Frame):
 					BoxType = label_data[x_pos-2:x_pos+1]
 					StandardPack =label_data[x_pos+1:len(label_data)]
 				#Launch label printing process..
-				label_print(ShopOrder,BoxType,StandardPack)
+				print(ShopOrder,BoxType,StandardPack)
+				label_print2(ShopOrder,BoxType,StandardPack)
 				ShopOrder = ""
 				BoxType = ""
 				StandardPack = ""

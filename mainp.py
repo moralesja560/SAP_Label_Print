@@ -10,6 +10,7 @@ from tkinter import messagebox
 from functools import partial
 import tkinter as tk
 from unittest import expectedFailure
+from cv2 import _OutputArray_DEPTH_MASK_FLT
 from matplotlib.pyplot import text
 import pyautogui
 import serial
@@ -92,10 +93,66 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	#a protection to avoid printing empty labels
 	if len(str(ShopOrder))>0:
 ##########area to check if app is in position.
+		#check if Membrain is ready to take inputs
 		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial.png"),grayscale=False, confidence=.7)
-		if inicial_btn == None:
-			warning_log("Error de pantalla no encontrada.")
+		#check if Membrain is the main screen
+		inbox_btn = pyautogui.locateOnScreen(resource_path(r"images/boton1.png"),grayscale=False, confidence=.7)
+		#check if ok button was left open
+		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+		#check if yesno button was left open
+		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
+		
+		ok_flag = False
+		
+		if error2_btn == None:
+			#no ok button was left, try with yesno
+			if error3_btn == None:
+			#¿No button left open? try with the main screen
+				if inbox_btn == None:
+					#¿Still no? Maybe it was ok after all this time
+					if inicial_btn == None:
+						#throw error.
+							warning_log("No se puede identificar el punto de entrada")
+							run1.console.configure(text = "No se puede identificar el punto de entrada")
+					else:
+						pyautogui.click(435,142)
+						ok_flag = True
+				else:
+					#if main screen was found:
+					pyautogui.click(523,223)
+					ok_flag = True
+			else:
+				#if button left open, click 
+				pyautogui.press('tab')
+				time.sleep(1)
+				pyautogui.press('enter')
+				#si sale el error de excedentes.
+				time.sleep(2)
+				error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
+				if error35_btn == None:
+					ok_flag = True
+				else:
+				#hay problema, aqui es donde se usa el inbox
+					time.sleep(4)
+					pyautogui.press('enter')
+					time.sleep(1)
+					pyautogui.click(50,50)
+					time.sleep(1)
+					pyautogui.click(523,223)
+					time.sleep(1)
+					pyautogui.click(435,142)
+					ok_flag = True
 		else:
+			pyautogui.press('enter')
+			time.sleep(1)
+			pyautogui.click(435,142)
+			ok_flag = True
+
+		
+		if ok_flag == False:
+			pass
+		else:
+			pyautogui.click(435,142)
 			time.sleep(2)
 			pyautogui.write(f"{ShopOrder}")
 			pyautogui.press('enter')
@@ -122,11 +179,11 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#look for 3 scenarios
 			time.sleep(5)				
 			#when there's more
-			error1_btn = pyautogui.locateOnScreen(resource_path(r"images/error1.png"),grayscale=False, confidence=.7)
+			error1_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
 			#ok input
-			error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.7)
+			error2_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
 			#yes no
-			error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
+			error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
 			#too much
 			if error1_btn == None:
 				if error2_btn == None:
@@ -139,7 +196,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						pyautogui.press('enter')
 						#si sale el error de excedentes.
 						time.sleep(2)
-						error35_btn = pyautogui.locateOnScreen(resource_path(r"images/error35.png"),grayscale=False, confidence=.7)	
+						error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
 						if error35_btn == None:
 							pass
 						else:
@@ -229,12 +286,6 @@ def write_log(ShopOrder,BoxType,StandardPack):
 				file_object.write("\n")
 				# Append text at the end of file	
 				file_object.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
-		# Open a file with access mode 'a'
-		#file_object = open(ruta, 'a')
-		# Append 'hello' at the end of file
-		#file_object.append(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
-		# Close the file
-		#file_object.close()
 	else:
 		f= open(ruta,"w+")
 		f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
@@ -257,13 +308,7 @@ def warning_log(texto):
 			if len(data) > 0 :
 				file_object.write("\n")
 				# Append text at the end of file	
-				file_object.write(f" Hubo un error al imprimir: {texto}")
-		# Open a file with access mode 'a'
-		#file_object = open(ruta, 'a')
-		# Append 'hello' at the end of file
-		#file_object.append(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
-		# Close the file
-		#file_object.close()
+				file_object.write(f" Hubo un error durante impresión en {dt_string} con error: {texto}")
 	else:
 		f= open(ruta,"w+")
 		f.write(f" Hubo un error al imprimir: {texto}")
@@ -479,7 +524,7 @@ class Passwordchecker(tk.Frame):
 ####################Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
 				write_log(ShopOrder,BoxType,StandardPack)
-				self.console.configure(text = "Conectado a: " + self.ser.portstr)
+				#self.console.configure(text = "Conectado a: " + self.ser.portstr)
 			ShopOrder = ""
 			BoxType = ""
 			StandardPack = ""

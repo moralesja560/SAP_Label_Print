@@ -123,7 +123,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#yes no
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
 		#too much
-		error35_btn = pyautogui.locateOnScreen(resource_path(r"images/error35.png"),grayscale=False, confidence=.7)		
+			
 #		if error1_btn == None:
 #			print("error en deteccion1")
 			#log the label to take further action
@@ -159,11 +159,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					time.sleep(1)
 					pyautogui.press('enter')
 					#si sale el error de excedentes.
+					time.sleep(2)
+					error35_btn = pyautogui.locateOnScreen(resource_path(r"images/error35.png"),grayscale=False, confidence=.7)	
 					if error35_btn == None:
 						pass
 					else:
 						#hay problema, aqui es donde se usa el inbox
-						time.sleep(2)
+						time.sleep(4)
 						pyautogui.press('enter')
 						time.sleep(1)
 						pyautogui.click(50,50)

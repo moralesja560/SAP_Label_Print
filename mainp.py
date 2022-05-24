@@ -112,16 +112,36 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(3)
 		pyautogui.press('enter')
 		#look for 3 scenarios
-		time.sleep(10)		
-		print(pyautogui.position())
-		error_btn = pyautogui.locateOnScreen(resource_path(r"images/error1.png"),grayscale=False, confidence=.7)
-		#error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.9)
-		if error_btn == None:
-			print("error en deteccion")
+		time.sleep(5)				
+		#when there's more
+		error1_btn = pyautogui.locateOnScreen(resource_path(r"images/error1.png"),grayscale=False, confidence=.7)
+		#ok input
+		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.7)
+		#yes no
+		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
+		
+		if error1_btn == None:
+			print("error en deteccion1")
+			#log the label to take further action
+		else:
+			pyautogui.press('enter')
+
+		if error2_btn == None:
+			print("error en deteccion2")
+			#log the label to take further action
+		else:
+			time.sleep(1)
+			pyautogui.press('enter')
+			pyautogui.click(435,142)
+		
+		if error3_btn == None:
+			print("error en deteccion3")
+			#log the label to take further action
 		else:
 			pyautogui.press('tab')
 			time.sleep(1)
-			pyautogui.press('enter')	
+			pyautogui.press('enter')
+
 		run1.console.configure(text = "Impresión Terminada")
 		#435,142
 		#notification.notify(

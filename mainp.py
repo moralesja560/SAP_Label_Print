@@ -122,7 +122,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.7)
 		#yes no
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
-		
+		#too much
+		error35_btn = pyautogui.locateOnScreen(resource_path(r"images/error35.png"),grayscale=False, confidence=.7)		
 #		if error1_btn == None:
 #			print("error en deteccion1")
 			#log the label to take further action
@@ -157,6 +158,17 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					pyautogui.press('tab')
 					time.sleep(1)
 					pyautogui.press('enter')
+					#si sale el error de excedentes.
+					if error35_btn == None:
+						pass
+					else:
+						#hay problema, aqui es donde se usa el inbox
+						time.sleep(2)
+						pyautogui.press('enter')
+						time.sleep(1)
+						pyautogui.click(50,50)
+						time.sleep(1)
+						pyautogui.click(523,223)
 					pyautogui.click(435,142)
 			else:
 				time.sleep(1)
@@ -165,8 +177,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		else:
 			pyautogui.press('enter')
 			pyautogui.click(435,142)
-
-		run1.console.configure(text = "Impresión Terminada")
+		run1.console.configure(text = "Impresión Terminada: Revise Log")
 		#435,142
 		#notification.notify(
 		#	title = 'testing',
@@ -483,7 +494,7 @@ class Passwordchecker(tk.Frame):
 					BoxType = label_data[x_pos-2:x_pos+1]
 					StandardPack =label_data[x_pos+1:len(label_data)]
 #####################Launch label printing process..
-					label_print2(ShopOrder,BoxType,StandardPack)
+					label_print(ShopOrder,BoxType,StandardPack)
 					write_log(ShopOrder,BoxType,StandardPack)
 					self.console.configure(text = "Conectado a: " + self.ser.portstr)
 				ShopOrder = ""

@@ -164,7 +164,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.click(435,142)
 		else:
 			pyautogui.press('enter')
-
+			pyautogui.click(435,142)
 
 		run1.console.configure(text = "Impresión Terminada")
 		#435,142

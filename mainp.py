@@ -169,6 +169,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						pyautogui.click(50,50)
 						time.sleep(1)
 						pyautogui.click(523,223)
+						warning_log("error de etiquetas excedidas")
 					pyautogui.click(435,142)
 			else:
 				time.sleep(1)
@@ -273,7 +274,7 @@ def warning_log(texto):
 			if len(data) > 0 :
 				file_object.write("\n")
 				# Append text at the end of file	
-				file_object.write(f" No se pudo detectar {texto}")
+				file_object.write(f" Hubo un error al imprimir: {texto}")
 		# Open a file with access mode 'a'
 		#file_object = open(ruta, 'a')
 		# Append 'hello' at the end of file
@@ -282,7 +283,7 @@ def warning_log(texto):
 		#file_object.close()
 	else:
 		f= open(ruta,"w+")
-		f.write(f" No se pudo detectar {texto}")
+		f.write(f" Hubo un error al imprimir: {texto}")
 		# Close the file
 		f.close()		
 

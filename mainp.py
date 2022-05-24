@@ -91,80 +91,84 @@ def serial_ports():
 def label_print(ShopOrder,BoxType,StandardPack):
 	#a protection to avoid printing empty labels
 	if len(str(ShopOrder))>0:
-		#pyautogui.hotkey('win','r')
-		#pyautogui.write('chrome.exe')
-		#pyautogui.press('enter')
-		time.sleep(2)
-		pyautogui.write(f"{ShopOrder}")
-		pyautogui.press('enter')
-		time.sleep(10)
-		pyautogui.press('tab')
-		pyautogui.press('space')
-		time.sleep(7)
-		#print(StandardPack)
-		pyautogui.write(f"{StandardPack}")
-		pyautogui.press('tab')
-		#numero de operario
-		pyautogui.write("20010380")
-		time.sleep(3)
-		#puesto de trabajo
-		pyautogui.press('tab')
-		time.sleep(3)
-		pyautogui.press('tab')
-		#texto libre
-		pyautogui.write("impresa")
-		time.sleep(3)
-		pyautogui.press('tab')
-		time.sleep(3)
-		pyautogui.press('enter')
-		#look for 3 scenarios
-		time.sleep(5)				
-		#when there's more
-		error1_btn = pyautogui.locateOnScreen(resource_path(r"images/error1.png"),grayscale=False, confidence=.7)
-		#ok input
-		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.7)
-		#yes no
-		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
-		#too much
-		if error1_btn == None:
-			if error2_btn == None:
-				if error3_btn == None:
-					#no se detectó nada
-					warning_log("No se encontró ningún botón de respuesta")
+##########area to check if app is in position.
+		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial.png"),grayscale=False, confidence=.7)
+		if inicial_btn == None:
+			warning_log("Error de pantalla no encontrada.")
+		else:
+			time.sleep(2)
+			pyautogui.write(f"{ShopOrder}")
+			pyautogui.press('enter')
+			time.sleep(10)
+			pyautogui.press('tab')
+			pyautogui.press('space')
+			time.sleep(7)
+			#print(StandardPack)
+			pyautogui.write(f"{StandardPack}")
+			pyautogui.press('tab')
+			#numero de operario
+			pyautogui.write("20010380")
+			time.sleep(3)
+			#puesto de trabajo
+			pyautogui.press('tab')
+			time.sleep(3)
+			pyautogui.press('tab')
+			#texto libre
+			pyautogui.write("impresa")
+			time.sleep(3)
+			pyautogui.press('tab')
+			time.sleep(3)
+			pyautogui.press('enter')
+			#look for 3 scenarios
+			time.sleep(5)				
+			#when there's more
+			error1_btn = pyautogui.locateOnScreen(resource_path(r"images/error1.png"),grayscale=False, confidence=.7)
+			#ok input
+			error2_btn = pyautogui.locateOnScreen(resource_path(r"images/error2.png"),grayscale=False, confidence=.7)
+			#yes no
+			error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
+			#too much
+			if error1_btn == None:
+				if error2_btn == None:
+					if error3_btn == None:
+						#no se detectó nada
+						warning_log("No se encontró ningún botón de respuesta")
+					else:
+						pyautogui.press('tab')
+						time.sleep(1)
+						pyautogui.press('enter')
+						#si sale el error de excedentes.
+						time.sleep(2)
+						error35_btn = pyautogui.locateOnScreen(resource_path(r"images/error35.png"),grayscale=False, confidence=.7)	
+						if error35_btn == None:
+							pass
+						else:
+							#hay problema, aqui es donde se usa el inbox
+							time.sleep(4)
+							pyautogui.press('enter')
+							time.sleep(1)
+							pyautogui.click(50,50)
+							time.sleep(1)
+							pyautogui.click(523,223)
+							warning_log("error de etiquetas excedidas")
+						pyautogui.click(435,142)
 				else:
-					pyautogui.press('tab')
 					time.sleep(1)
 					pyautogui.press('enter')
-					#si sale el error de excedentes.
-					time.sleep(2)
-					error35_btn = pyautogui.locateOnScreen(resource_path(r"images/error35.png"),grayscale=False, confidence=.7)	
-					if error35_btn == None:
-						pass
-					else:
-						#hay problema, aqui es donde se usa el inbox
-						time.sleep(4)
-						pyautogui.press('enter')
-						time.sleep(1)
-						pyautogui.click(50,50)
-						time.sleep(1)
-						pyautogui.click(523,223)
-						warning_log("error de etiquetas excedidas")
 					pyautogui.click(435,142)
 			else:
-				time.sleep(1)
 				pyautogui.press('enter')
 				pyautogui.click(435,142)
-		else:
-			pyautogui.press('enter')
-			pyautogui.click(435,142)
-		run1.console.configure(text = "Impresión Terminada: Revise Log")
-		#435,142
-		#notification.notify(
-		#	title = 'testing',
+			run1.console.configure(text = "Impresión Terminada: Revise Log")
+			#435,142
+			#notification.notify(
+			#	title = 'testing',
 		#	message ='message',
 		#	app_icon = None,
 		#	timeout = 5,
 		#)
+	else:
+		warning_log("Shop Order con valor nulo")
 
 def label_print2(ShopOrder,BoxType,StandardPack):
 		pyautogui.hotkey('win','r')
@@ -367,9 +371,7 @@ class Passwordchecker(tk.Frame):
 		global Parity_data
 		global stop_bits
 		global byte_size
-
-		#go to def run() in thread 2 and config it to pass these variables to the method1 second thread.
-		
+		#go to def run() in thread 2 and config it to pass these variables to the method1 second thread.	
 		#### area to check if the info coming from the optionmenu is valid and all the option menus were opened and selected.
 			
 		#button to Open COM
@@ -475,7 +477,7 @@ class Passwordchecker(tk.Frame):
 				StandardPack =label_data[x_pos+1:len(label_data)-3]
 				print(f"{ShopOrder,BoxType,StandardPack}")
 ####################Launch label printing process..
-				label_print2(ShopOrder,BoxType,StandardPack)
+				label_print(ShopOrder,BoxType,StandardPack)
 				write_log(ShopOrder,BoxType,StandardPack)
 				self.console.configure(text = "Conectado a: " + self.ser.portstr)
 			ShopOrder = ""

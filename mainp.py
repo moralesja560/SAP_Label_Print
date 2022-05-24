@@ -15,6 +15,8 @@ import pyautogui
 import serial
 import sys
 import glob
+from os.path import exists
+from datetime import datetime
 #---------------------------------...
 
 
@@ -159,6 +161,7 @@ def label_print2(ShopOrder,BoxType,StandardPack):
 		time.sleep(10)
 		print(ShopOrder,BoxType,StandardPack)
 		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
+		
 		run1.console.configure(text = "Impresión Terminada")
 
 #---------------------------------End of Auxiliary Functions-------------------------#
@@ -192,6 +195,35 @@ for row in csvreader:
 	rows2.append(row)
 
 file.close()
+
+def write_log(ShopOrder,BoxType,StandardPack):
+	now = datetime.now()
+	dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+	print("date and time =", dt_string)	
+	mis_docs = My_Documents(5)
+	ruta = str(mis_docs)+ r"\registro_etiquetas.txt"
+	file_exists = os.path.exists(ruta)
+	if file_exists == True:
+		with open(ruta, "a+") as file_object:
+			# Move read cursor to the start of file.
+			file_object.seek(0)
+			# If file is not empty then append '\n'
+			data = file_object.read(100)
+			if len(data) > 0 :
+				file_object.write("\n")
+				# Append text at the end of file	
+				file_object.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+		# Open a file with access mode 'a'
+		#file_object = open(ruta, 'a')
+		# Append 'hello' at the end of file
+		#file_object.append(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+		# Close the file
+		#file_object.close()
+	else:
+		f= open(ruta,"w+")
+		f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+		# Close the file
+		f.close()
 
 
 #/////-----------------------End of Reading and Writing Files--------------------------#
@@ -245,11 +277,8 @@ class Passwordchecker(tk.Frame):
 			self.console.place(x=700,y=590)
 			self.console.configure(text = "")
 			self.console.configure(fg="white", bg="black", font=("Console",10))
-
-
 		#call the port selector function and retrieve all available COM ports.
 		portList = serial_ports()
-
 ######### Create Dropdown menus for COM options 
 		#ComPort.
 		self.ComList = StringVar()
@@ -403,9 +432,10 @@ class Passwordchecker(tk.Frame):
 					ShopOrder = label_data[0:x_pos-2]
 					BoxType = label_data[x_pos-2:x_pos+1]
 					StandardPack =label_data[x_pos+1:len(label_data)]
-					#Launch label printing process..
-					print(ShopOrder,BoxType,StandardPack)
+#####################Launch label printing process..
 					label_print2(ShopOrder,BoxType,StandardPack)
+					write_log(ShopOrder,BoxType,StandardPack)
+					self.console.configure(text = "Conectado a: " + self.ser.portstr)
 				ShopOrder = ""
 				BoxType = ""
 				StandardPack = ""
@@ -434,7 +464,7 @@ class Process(threading.Thread):
 			#do not start serial until com info is selected.
 		run1.method1(ComPort,baud_Rate,Parity_data,stop_bits,byte_size)
 		run1.console.configure(text = f"Proceso Terminado: Puerto Cerrado")
-		
+
 		time.sleep(3)
 	
 	def stop(self):

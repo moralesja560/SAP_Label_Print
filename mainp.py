@@ -94,13 +94,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#pyautogui.hotkey('win','r')
 		#pyautogui.write('chrome.exe')
 		#pyautogui.press('enter')
-		time.sleep(5)
+		time.sleep(2)
 		pyautogui.write(f"{ShopOrder}")
 		pyautogui.press('enter')
 		time.sleep(10)
 		pyautogui.press('tab')
 		pyautogui.press('space')
-		time.sleep(3)
+		time.sleep(7)
 		#print(StandardPack)
 		pyautogui.write(f"{StandardPack}")
 		pyautogui.press('tab')
@@ -124,30 +124,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/error3.png"),grayscale=False, confidence=.7)
 		#too much
 			
-#		if error1_btn == None:
-#			print("error en deteccion1")
-			#log the label to take further action
-#			warning_log("error1_btn")
-#		else:
-#			pyautogui.press('enter')
-
-#		if error2_btn == None:
-#			print("error en deteccion2")
-			#log the label to take further action
-#			warning_log("error2_btn")
-#		else:
-#			time.sleep(1)
-#			pyautogui.press('enter')
-#			pyautogui.click(435,142)
-
-#		if error3_btn == None:
-#			print("error en deteccion3")
-#			#log the label to take further action
-#			warning_log("error3_btn")
-#		else:
-#			pyautogui.press('tab')
-#			time.sleep(1)
-#			pyautogui.press('enter')
 
 		if error1_btn == None:
 			if error2_btn == None:

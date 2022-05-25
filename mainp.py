@@ -166,7 +166,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			time.sleep(3)
 			pyautogui.press('tab')
 			#texto libre
-			pyautogui.write("impresa")
+			pyautogui.write("Auto Print")
 			time.sleep(3)
 			pyautogui.press('tab')
 			time.sleep(3)

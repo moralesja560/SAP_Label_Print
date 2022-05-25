@@ -1,7 +1,5 @@
 #----------------------import area
-from ast import Compare
-from base64 import standard_b64decode
-from cProfile import label
+
 import os
 import sys
 import time, threading
@@ -9,24 +7,21 @@ from tkinter import *
 from tkinter import messagebox
 from functools import partial
 import tkinter as tk
-from unittest import expectedFailure
-from cv2 import _OutputArray_DEPTH_MASK_FLT
-from matplotlib.pyplot import text
 import pyautogui
 import serial
 import sys
 import glob
-from os.path import exists
+
 from datetime import datetime
 #---------------------------------...
 
 
 ############progress check
 ######-------TASKS
-####-----production run to test pyautogui.
-####----carga las imagenes de error y crea el escenario para regresar a seguir imprimiendo.
-# quiza se pueda una forma de registrar esas etiquetas que no se imprimieron para que luego se impriman manual.
 ### sistema de registro en un TXT
+	# Botón para abrir el registro.
+## colocar los parámetros en el GUI para seleccionar el tiempo de procesamiento. 
+## error handling cuando un puerto no pueda abrirse por seleccionar uno inexisistente.
 
 
 #####--------RECOMMENDATIONS
@@ -340,14 +335,14 @@ class Passwordchecker(tk.Frame):
 		self.parent.protocol("WM_DELETE_WINDOW", self.quit)
 		self.parent.title("Mubea de Mexico - Interfaz para impresión de etiquetas.")
 		# a label that contains the background image
-		self.background_image = PhotoImage(file = resource_path("images/UI.png"))
+		self.background_image = PhotoImage(file = resource_path("images/UI2.png"))
 		label1 = Label(self.parent, image = self.background_image)
 		label1.place(x = 0,y = 0)
 		#general parameters for the buttons.
 		h_offset = 2
 		w_offset = 4
 		self.fg_offset = "white"
-		self.bg_offset = '#3d85c5'
+		self.bg_offset = '#314a94'
 ######Button declaration area
 		for i in range(len(rows)):
 		#process the first button
@@ -358,56 +353,63 @@ class Passwordchecker(tk.Frame):
 			globals()[a_temp].place(x =int(rows[i-1][2]),y=int(rows[i-1][3]))
 			globals()[a_temp].configure(bg = self.bg_offset)
 			globals()[a_temp].configure(fg = self.fg_offset)
-			globals()[a_temp].configure(font=("Helvetica", 10, "bold"))
+			globals()[a_temp].configure(font=("Helvetica", 8, "bold"))
 			globals()[a_temp].configure(text = rows[i-1][4])
 			#self.selector is the function inside the main class
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
 
 			self.console = Label(self.parent,width = w_offset*9, height = h_offset)
-			self.console.place(x=700,y=590)
+			self.console.place(x=200,y=590)
 			self.console.configure(text = "")
 			self.console.configure(fg="white", bg="black", font=("Console",10))
 		#call the port selector function and retrieve all available COM ports.
 		portList = serial_ports()
 ######### Create Dropdown menus for COM options 
 		#ComPort.
+		dropwidth = 18
+		dropfront = "white"
+		dropbg = '#314a94'
+		dropfont = ("Sans-serif",10)
+		dropx = 838
+		dropy = 441
+
 		self.ComList = StringVar()
-		self.ComList.set("COM9")
+		self.ComList.set("Selecc Puerto")
 		dropdown1 = OptionMenu(self.parent,self.ComList,*portList)
-		dropdown1.place(x=418,y=590)
-		dropdown1.configure(width=14)
+		dropdown1.place(x=int(dropx),y=int(dropy))
+		dropdown1.configure( fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont )
 
 		#Speed.
 		speeds = [9600,19200,38400,57600,115200]
 		self.baudRate1 = StringVar()
 		self.baudRate1.set("9600")
 		dropdown2 = OptionMenu(self.parent,self.baudRate1,*speeds)
-		dropdown2.place(x=418,y=620)
-		dropdown2.configure(width=14)
+		dropdown2.place(x=int(dropx),y=int(dropy)+30)
+		dropdown2.configure(fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont)
 
 		#Parity
 		parity = [serial.PARITY_EVEN,serial.PARITY_NONE,serial.PARITY_ODD]
 		self.Parity1 = StringVar()
 		self.Parity1.set("N")
 		dropdown3 = OptionMenu(self.parent,self.Parity1,*parity)
-		dropdown3.place(x=418,y=650)
-		dropdown3.configure(width=14)
+		dropdown3.place(x=int(dropx),y=int(dropy)+60)
+		dropdown3.configure(fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont)
 
 		#stop_bits
 		sbits = [serial.STOPBITS_ONE,serial.STOPBITS_ONE_POINT_FIVE,serial.STOPBITS_TWO]
 		self.stopBits1 = IntVar()
 		self.stopBits1.set("1")
 		dropdown4 = OptionMenu(self.parent,self.stopBits1,*sbits)
-		dropdown4.place(x=418,y=680)
-		dropdown4.configure(width=14)
+		dropdown4.place(x=int(dropx),y=int(dropy)+90)
+		dropdown4.configure(fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont)
 
 		#byte_size
 		byte_s = [serial.EIGHTBITS,serial.FIVEBITS,serial.SIXBITS,serial.SEVENBITS]
 		self.byteSize1 = IntVar()
 		self.byteSize1.set("8")
 		dropdown5 = OptionMenu(self.parent,self.byteSize1,*byte_s)
-		dropdown5.place(x=418,y=710)
-		dropdown5.configure(width=14)
+		dropdown5.place(x=int(dropx),y=int(dropy)+120)
+		dropdown5.configure(fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont)
 
 ##########Selector is the function that commands buttons actions
 	def Selector(self,num):

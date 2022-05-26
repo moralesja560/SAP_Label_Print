@@ -89,7 +89,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	if len(str(ShopOrder))>0:
 ##########area to check if app is in position.
 		#check if Membrain is ready to take inputs
-		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial.png"),grayscale=False, confidence=.7)
+		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial2.png"),grayscale=False, confidence=.7)
 		#check if Membrain is the main screen
 		inbox_btn = pyautogui.locateOnScreen(resource_path(r"images/boton1.png"),grayscale=False, confidence=.7)
 		#check if ok button was left open

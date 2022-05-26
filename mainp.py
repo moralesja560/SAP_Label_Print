@@ -18,10 +18,8 @@ from datetime import datetime
 
 ############progress check
 ######-------TASKS
-### sistema de registro en un TXT
-	# Botón para abrir el registro.
-## colocar los parámetros en el GUI para seleccionar el tiempo de procesamiento. 
-## error handling cuando un puerto no pueda abrirse por seleccionar uno inexisistente.
+### debugging y perfeccionamiento de la app.
+###no hacer nada mas.
 
 
 #####--------RECOMMENDATIONS

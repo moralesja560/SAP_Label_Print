@@ -102,7 +102,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		if error2_btn == None:
 			#no ok button was left, try with yesno
 			if error3_btn == None:
-			#¿No button left open? try with the main screen
+			#Yes/NO button wasn't? try with the main screen
 				if inbox_btn == None:
 					#¿Still no? Maybe it was ok after all this time
 					if inicial_btn == None:
@@ -110,6 +110,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 							warning_log("No se puede identificar el punto de entrada")
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
 					else:
+						#initial orange screen detected.
 						pyautogui.click(435,142)
 						ok_flag = True
 				else:
@@ -121,13 +122,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.press('tab')
 				time.sleep(1)
 				pyautogui.press('enter')
-				#si sale el error de excedentes.
+				#if HU was exceeded
 				time.sleep(2)
 				error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
 				if error35_btn == None:
 					ok_flag = True
 				else:
-				#hay problema, aqui es donde se usa el inbox
+				#main screen after all, click on the screen
 					time.sleep(4)
 					pyautogui.press('enter')
 					time.sleep(1)
@@ -138,6 +139,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					pyautogui.click(435,142)
 					ok_flag = True
 		else:
+			#there was a ok button left
 			pyautogui.press('enter')
 			time.sleep(1)
 			pyautogui.click(435,142)
@@ -152,73 +154,74 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.write(f"{ShopOrder}")
 			pyautogui.press('enter')
 			time.sleep(10)
-			pyautogui.press('tab')
-			pyautogui.press('space')
-			time.sleep(7)
-			#print(StandardPack)
-			pyautogui.write(f"{StandardPack}")
-			pyautogui.press('tab')
-			#numero de operario
-			pyautogui.write("20010380")
-			time.sleep(3)
-			#puesto de trabajo
-			pyautogui.press('tab')
-			time.sleep(3)
-			pyautogui.press('tab')
-			#texto libre
-			pyautogui.write("Auto Print")
-			time.sleep(3)
-			pyautogui.press('tab')
-			time.sleep(3)
-			pyautogui.press('enter')
-			#look for 3 scenarios
-			time.sleep(5)				
-			#when there's more
-			error1_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
-			#ok input
-			error2_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
-			#yes no
-			error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-			#too much
-			if error1_btn == None:
-				if error2_btn == None:
-					if error3_btn == None:
-						#no se detectó nada
-						warning_log("No se encontró ningún botón de respuesta")
+			#what if the HU is wrong. 
+			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+			if error4_btn == None:
+				#no issue, continue
+				pyautogui.press('tab')
+				pyautogui.press('space')
+				time.sleep(7)
+				#print(StandardPack)
+				pyautogui.write(f"{StandardPack}")
+				pyautogui.press('tab')
+				#numero de operario
+				pyautogui.write("20010380")
+				time.sleep(3)
+				#puesto de trabajo
+				pyautogui.press('tab')
+				time.sleep(3)
+				pyautogui.press('tab')
+				#texto libre
+				pyautogui.write("Auto Print")
+				time.sleep(3)
+				pyautogui.press('tab')
+				time.sleep(3)
+				pyautogui.press('enter')
+				#look for 3 scenarios
+				time.sleep(5)				
+				#when there's more
+				error1_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+				#ok input
+				error2_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+				#yes no
+				error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
+				#too much
+				if error1_btn == None:
+					if error2_btn == None:
+						if error3_btn == None:
+							#no se detectó nada
+							warning_log("No se encontró ningún botón de respuesta")
+						else:
+							pyautogui.press('tab')
+							time.sleep(1)
+							pyautogui.press('enter')
+							#si sale el error de excedentes.
+							time.sleep(2)
+							error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
+							if error35_btn == None:
+								pass
+							else:
+								#hay problema, aqui es donde se usa el inbox
+								time.sleep(4)
+								pyautogui.press('enter')
+								time.sleep(1)
+								pyautogui.click(50,50)
+								time.sleep(1)
+								pyautogui.click(523,223)
+								warning_log("error de etiquetas excedidas")
+							pyautogui.click(435,142)
 					else:
-						pyautogui.press('tab')
 						time.sleep(1)
 						pyautogui.press('enter')
-						#si sale el error de excedentes.
-						time.sleep(2)
-						error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
-						if error35_btn == None:
-							pass
-						else:
-							#hay problema, aqui es donde se usa el inbox
-							time.sleep(4)
-							pyautogui.press('enter')
-							time.sleep(1)
-							pyautogui.click(50,50)
-							time.sleep(1)
-							pyautogui.click(523,223)
-							warning_log("error de etiquetas excedidas")
 						pyautogui.click(435,142)
 				else:
-					time.sleep(1)
 					pyautogui.press('enter')
 					pyautogui.click(435,142)
+				run1.console.configure(text = "Impresión Terminada: Revise Log")
 			else:
-				pyautogui.press('enter')
-				pyautogui.click(435,142)
-			run1.console.configure(text = "Impresión Terminada: Revise Log")
-			#435,142
-			#notification.notify(
-			#	title = 'testing',
-		#	message ='message',
-		#	app_icon = None,
-		#	timeout = 5,
-		#)
+				#error in HU
+				warning_log("HU incorrecta")
+				run1.console.configure(text = "HU incorrecta")
 	else:
 		warning_log("Shop Order con valor nulo")
 

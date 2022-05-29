@@ -147,12 +147,15 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.click(435,142)
 			ok_flag = True
 
-		
+###############This is the procedure start
+
 		if ok_flag == False:
 			pass
 		else:
+			#click on the HU field
 			pyautogui.click(435,142)
 			time.sleep(2)
+			#write the shop order
 			pyautogui.write(f"{ShopOrder}")
 			pyautogui.press('enter')
 			time.sleep(10)
@@ -162,7 +165,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#no issue, continue
 				pyautogui.press('tab')
 				pyautogui.press('space')
-				time.sleep(7)
+				time.sleep(10)
 				#print(StandardPack)
 				pyautogui.write(f"{StandardPack}")
 				pyautogui.press('tab')
@@ -178,48 +181,55 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				time.sleep(3)
 				pyautogui.press('tab')
 				time.sleep(3)
+#################this enter is to store the label
 				pyautogui.press('enter')
-				#look for 3 scenarios
-				time.sleep(5)				
-				#when there's more
-				error1_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+				time.sleep(7)				
+				#Look for 2 scenarios: 
+				#After the label input, usually a Yes/no warning appears.
+				#let's look for a yes/no and an error label
 				#ok input
-				error2_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+				error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 				#yes no
 				error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-				#too much
-				if error1_btn == None:
-					if error2_btn == None:
-						if error3_btn == None:
-							#no se detectó nada
-							warning_log("No se encontró ningún botón de respuesta")
-						else:
-							pyautogui.press('tab')
-							time.sleep(1)
-							pyautogui.press('enter')
-							#si sale el error de excedentes.
-							time.sleep(2)
-							error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
-							if error35_btn == None:
-								pass
-							else:
-								#hay problema, aqui es donde se usa el inbox
-								time.sleep(4)
-								pyautogui.press('enter')
-								time.sleep(1)
-								pyautogui.click(50,50)
-								time.sleep(1)
-								pyautogui.click(523,223)
-								warning_log("error de etiquetas excedidas")
-							pyautogui.click(435,142)
-					else:
+				
+				if error3_btn is not None:
+					#the usual Yes/No
+					pyautogui.press('tab')
+					time.sleep(1)
+					pyautogui.press('enter')
+					#What if there's an error?
+					time.sleep(3)
+					error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)	
+					if error35_btn is not None:
+						#write the warning and return to HU input by using boton1.png
 						time.sleep(1)
+						warning_log("Error al ingresar la etiqueta")
+						time.sleep(4)
+						pyautogui.press('enter')
+						time.sleep(1)
+						pyautogui.click(50,50)
+						time.sleep(1)
+						pyautogui.click(523,223)
 						pyautogui.press('enter')
 						pyautogui.click(435,142)
-				else:
+					else:
+						#No error: This is the good ending.
+						pyautogui.press('enter')
+						write_log(ShopOrder,BoxType,StandardPack)
+						run1.console.configure(text = "Impresión Terminada: Revise Log")
+				if error2_btn is not None:
+					#what is there was an error after the input (e.g. network)
+					#write the warning and return to HU input by using boton1.png
+					time.sleep(1)
+					warning_log("Error al ingresar la etiqueta")
+					time.sleep(4)
+					pyautogui.press('enter')
+					time.sleep(1)
+					pyautogui.click(50,50)
+					time.sleep(1)
+					pyautogui.click(523,223)
 					pyautogui.press('enter')
 					pyautogui.click(435,142)
-				run1.console.configure(text = "Impresión Terminada: Revise Log")
 			else:
 				#error in HU
 				warning_log("HU incorrecta")
@@ -524,7 +534,7 @@ class Passwordchecker(tk.Frame):
 				print(f"{ShopOrder,BoxType,StandardPack}")
 ####################Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
-				write_log(ShopOrder,BoxType,StandardPack)
+				
 				#self.console.configure(text = "Conectado a: " + self.ser.portstr)
 			ShopOrder = ""
 			BoxType = ""

@@ -111,6 +111,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						#throw error.
 							warning_log("No se puede identificar el punto de entrada")
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
+							return
 					else:
 						#initial orange screen detected.
 						pyautogui.click(435,142)
@@ -163,6 +164,14 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#what if the HU is wrong. 
 			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			if error4_btn == None:
+				error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
+				if error5_btn is not None:
+					pass
+					#process is going ok
+				else:
+					warning_log("No se encontró el embalaje")
+					run1.console.configure(text = "No se encontró la secc de embalaje")
+					return
 				#no issue, continue
 				pyautogui.press('tab')
 				pyautogui.press('space')
@@ -192,7 +201,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 				#yes no
 				error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-				
+		
 				if error3_btn is not None:
 					#the usual Yes/No
 					pyautogui.press('tab')
@@ -240,8 +249,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.press('backspace')
 				warning_log("HU incorrecta")
 				run1.console.configure(text = "HU incorrecta")
+				return
 	else:
 		warning_log("Shop Order con valor nulo")
+		return
 
 def label_print2(ShopOrder,BoxType,StandardPack):
 		pyautogui.hotkey('win','r')

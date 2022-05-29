@@ -1,5 +1,6 @@
 #----------------------import area
 
+import subprocess
 import os
 import sys
 import time, threading
@@ -79,6 +80,9 @@ def serial_ports():
         except (OSError, serial.SerialException):
             pass
     return result
+
+#---------------------------------End of Auxiliary Functions-------------------------#
+
 
 ###################################This is the function that actually prints the labels.
 
@@ -233,37 +237,34 @@ def label_print2(ShopOrder,BoxType,StandardPack):
 		
 		run1.console.configure(text = "Impresión Terminada")
 
-#---------------------------------End of Auxiliary Functions-------------------------#
 
+#---------------------------------End of Main Function-------------------------------#
 
 #/////----------------------------Reading and Writing Files--------------------------#
 
 
 #This CSV is for button data. You can add a button if you modify this adequately.
 import csv
-file = open(resource_path("images/basic_btn_data.csv"))
-type(file)
-csvreader = csv.reader(file)
-header = []
-header = next(csvreader)
-header
-rows = []
-for row in csvreader:
-	rows.append(row)
 
-file.close()
+with open(resource_path("images/basic_btn_data.csv")) as file:
+	type(file)
+	csvreader = csv.reader(file)
+	header = []
+	header = next(csvreader)
+	header
+	rows = []
+	for row in csvreader:
+		rows.append(row)
 
-file = open(resource_path("images/entry_btn_data.csv"))
-type(file)
-csvreader = csv.reader(file)
-header = []
-header = next(csvreader)
-header
-rows2 = []
-for row in csvreader:
-	rows2.append(row)
-
-file.close()
+with open(resource_path("images/entry_btn_data.csv")) as file:
+	type(file)
+	csvreader = csv.reader(file)
+	header = []
+	header = next(csvreader)
+	header
+	rows2 = []
+	for row in csvreader:
+		rows2.append(row)
 
 def write_log(ShopOrder,BoxType,StandardPack):
 	now = datetime.now()
@@ -283,11 +284,9 @@ def write_log(ShopOrder,BoxType,StandardPack):
 				# Append text at the end of file	
 				file_object.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
 	else:
-		f= open(ruta,"w+")
-		f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
-		# Close the file
-		f.close()
-
+		with open(ruta,"w+") as f:
+			f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+		
 def warning_log(texto):
 	now = datetime.now()
 	dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -306,17 +305,13 @@ def warning_log(texto):
 				# Append text at the end of file	
 				file_object.write(f" Hubo un error durante impresión en {dt_string} con error: {texto}")
 	else:
-		f= open(ruta,"w+")
-		f.write(f" Hubo un error al imprimir: {texto}")
-		# Close the file
-		f.close()		
-
+		with open(ruta,"w+") as f:
+			f.write(f" Hubo un error al imprimir: {texto}")
+		
 
 #/////-----------------------End of Reading and Writing Files--------------------------#
 
 #-----------------------------Start of tkinter classes-----------------------------#
-
-#This stuff is actually difficult to understand.
 
 #This class PasswordChecker stores the necessary data to run a tkinter gui.
 class Passwordchecker(tk.Frame):
@@ -336,7 +331,7 @@ class Passwordchecker(tk.Frame):
 		self.parent.protocol("WM_DELETE_WINDOW", self.quit)
 		self.parent.title("Mubea de Mexico - Interfaz para impresión de etiquetas.")
 		# a label that contains the background image
-		self.background_image = PhotoImage(file = resource_path("images/UI2.png"))
+		self.background_image = PhotoImage(file = resource_path("images/UI3.png"))
 		label1 = Label(self.parent, image = self.background_image)
 		label1.place(x = 0,y = 0)
 		#general parameters for the buttons.
@@ -359,8 +354,8 @@ class Passwordchecker(tk.Frame):
 			#self.selector is the function inside the main class
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
 
-			self.console = Label(self.parent,width = w_offset*9, height = h_offset)
-			self.console.place(x=200,y=590)
+			self.console = Label(self.parent,width = w_offset*15, height = h_offset)
+			self.console.place(x=475,y=695)
 			self.console.configure(text = "")
 			self.console.configure(fg="white", bg="black", font=("Console",10))
 		#call the port selector function and retrieve all available COM ports.
@@ -371,8 +366,8 @@ class Passwordchecker(tk.Frame):
 		dropfront = "white"
 		dropbg = '#314a94'
 		dropfont = ("Sans-serif",10)
-		dropx = 838
-		dropy = 441
+		dropx = 405
+		dropy = 351
 
 		self.ComList = StringVar()
 		self.ComList.set("Selecc Puerto")
@@ -450,9 +445,6 @@ class Passwordchecker(tk.Frame):
 					#disable button 
 						a_temp = 'Button1'
 						globals()[a_temp].configure(state = "disabled")
-			#else:
-				# A warning that no port is selected.
-			#	messagebox.showinfo('Puerto no seleccionado','Click en la lista para seleccionar un puerto COM')
 		#button to close COM
 		if num == 20:
 			# When button "Close Port" is clicked but the thread is not alive, an error occurs.
@@ -472,6 +464,12 @@ class Passwordchecker(tk.Frame):
 				globals()[a_temp].configure(state = "active")
 				globals()[a_temp].configure(bg = self.bg_offset)
 				globals()[a_temp].configure(fg = self.fg_offset)
+		if num == 30:
+			#button to open the management console
+			temp_mis_docs = My_Documents(37)
+			mis_docs = temp_mis_docs + "/devmgmt.msc"
+			subprocess.run([mis_docs],shell=True)
+
 
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):

@@ -164,6 +164,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#what if the HU is wrong. 
 			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			if error4_btn == None:
+				#error5 if to detect if script is going well.
 				error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
 				if error5_btn is not None:
 					pass

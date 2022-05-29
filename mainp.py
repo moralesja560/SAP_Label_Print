@@ -155,7 +155,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#click on the HU field
 			pyautogui.click(435,142)
 			time.sleep(2)
-			#write the shop order
+			#write the shop order but before a healthy backspace
+			pyautogui.press('backspace')
 			pyautogui.write(f"{ShopOrder}")
 			pyautogui.press('enter')
 			time.sleep(10)
@@ -198,7 +199,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					time.sleep(1)
 					pyautogui.press('enter')
 					#What if there's an error?
-					time.sleep(3)
+					time.sleep(6)
 					error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)	
 					if error35_btn is not None:
 						#write the warning and return to HU input by using boton1.png
@@ -232,6 +233,11 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					pyautogui.click(435,142)
 			else:
 				#error in HU
+				pyautogui.press('enter')
+				time.sleep(1)
+				pyautogui.click(435,142)
+				time.sleep(1)
+				pyautogui.press('backspace')
 				warning_log("HU incorrecta")
 				run1.console.configure(text = "HU incorrecta")
 	else:

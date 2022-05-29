@@ -1,3 +1,4 @@
 Nombre,buttn_name,x_pos,y_pos,text,command,Width,2
-OpenCom,Button1,880,610,Abrir Puerto,10,12,2
-CloseCom,Button1,880,650,Cerrar Puerto,20,12,2
+OpenCom,Button1,438,505,Abrir Puerto,10,12,2
+CloseCom,Button2,438,545,Cerrar Puerto,20,12,2
+PortLook,Button3,125,240,Saber Puerto,30,12,2

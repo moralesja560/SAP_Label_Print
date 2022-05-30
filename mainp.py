@@ -12,7 +12,6 @@ import pyautogui
 import serial
 import sys
 import glob
-
 from datetime import datetime
 #---------------------------------...
 
@@ -109,7 +108,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#¿Still no? Maybe it was ok after all this time
 					if inicial_btn == None:
 						#throw error.
-							warning_log("No se puede identificar el punto de entrada")
+							write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
 							return
 					else:
@@ -170,7 +169,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					pass
 					#process is going ok
 				else:
-					warning_log("No se encontró el embalaje")
+					#warning_log("No se encontró el embalaje")
+					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 					run1.console.configure(text = "No se encontró la secc de embalaje")
 					return
 				#no issue, continue
@@ -214,7 +214,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					if error35_btn is not None:
 						#write the warning and return to HU input by using boton1.png
 						time.sleep(1)
-						warning_log("Error al ingresar la etiqueta")
+						#warning_log("Error al ingresar la etiqueta")
+						write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 						time.sleep(4)
 						pyautogui.press('enter')
 						time.sleep(1)
@@ -226,13 +227,15 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					else:
 						#No error: This is the good ending.
 						pyautogui.press('enter')
-						write_log(ShopOrder,BoxType,StandardPack)
+						#write_log('ok',ShopOrder,BoxType,StandardPack)
+						write_log("ok","No error",ShopOrder,BoxType,StandardPack)
 						run1.console.configure(text = "Impresión Terminada: Revise Log")
 				if error2_btn is not None:
 					#what is there was an error after the input (e.g. network)
 					#write the warning and return to HU input by using boton1.png
 					time.sleep(1)
-					warning_log("Error al ingresar la etiqueta")
+					#warning_log("Error al ingresar la etiqueta")
+					write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 					time.sleep(4)
 					pyautogui.press('enter')
 					time.sleep(1)
@@ -248,11 +251,12 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.click(435,142)
 				time.sleep(1)
 				pyautogui.press('backspace')
-				warning_log("HU incorrecta")
+				#warning_log("HU incorrecta")
+				write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
 				run1.console.configure(text = "HU incorrecta")
 				return
 	else:
-		warning_log("Shop Order con valor nulo")
+		write_log("nok","Shop Order con valor nulo",ShopOrder,BoxType,StandardPack)
 		return
 
 def label_print2(ShopOrder,BoxType,StandardPack):
@@ -262,7 +266,6 @@ def label_print2(ShopOrder,BoxType,StandardPack):
 		time.sleep(10)
 		print(ShopOrder,BoxType,StandardPack)
 		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
-		
 		run1.console.configure(text = "Impresión Terminada")
 
 
@@ -294,7 +297,7 @@ with open(resource_path("images/entry_btn_data.csv")) as file:
 	for row in csvreader:
 		rows2.append(row)
 
-def write_log(ShopOrder,BoxType,StandardPack):
+def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	now = datetime.now()
 	dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 	#print("date and time =", dt_string)	
@@ -309,33 +312,18 @@ def write_log(ShopOrder,BoxType,StandardPack):
 			data = file_object.read(100)
 			if len(data) > 0 :
 				file_object.write("\n")
-				# Append text at the end of file	
-				file_object.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+				# Append text at the end of file
+				if logtype == 'ok':
+					file_object.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+				else:
+					file_object.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
 	else:
 		with open(ruta,"w+") as f:
-			f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
-		
-def warning_log(texto):
-	now = datetime.now()
-	dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-	#print("date and time =", dt_string)	
-	mis_docs = My_Documents(5)
-	ruta = str(mis_docs)+ r"\registro_etiquetas.txt"
-	file_exists = os.path.exists(ruta)
-	if file_exists == True:
-		with open(ruta, "a+") as file_object:
-			# Move read cursor to the start of file.
-			file_object.seek(0)
-			# If file is not empty then append '\n'
-			data = file_object.read(100)
-			if len(data) > 0 :
-				file_object.write("\n")
-				# Append text at the end of file	
-				file_object.write(f" Hubo un error durante impresión en {dt_string} con error: {texto}")
-	else:
-		with open(ruta,"w+") as f:
-			f.write(f" Hubo un error al imprimir: {texto}")
-		
+			if logtype == 'ok':
+				f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+			else:
+				f.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
+
 
 #/////-----------------------End of Reading and Writing Files--------------------------#
 
@@ -549,7 +537,6 @@ class Passwordchecker(tk.Frame):
 				ShopOrder = label_data[2:x_pos-2]
 				BoxType = label_data[x_pos-2:x_pos+1]
 				StandardPack =label_data[x_pos+1:len(label_data)-3]
-				print(f"{ShopOrder,BoxType,StandardPack}")
 ####################Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
 				

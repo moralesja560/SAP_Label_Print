@@ -80,6 +80,18 @@ def serial_ports():
             pass
     return result
 
+def take_screenshot():
+	now = datetime.now()
+	dt_string = now.strftime("%d%m%Y-%H%M%S")
+	mis_docs = My_Documents(5)
+	im = pyautogui.screenshot(region=(410,350, 700, 300))
+	#check if folder exists
+	isFile = os.path.isdir(f"{mis_docs}/scfolder")
+	print(isFile)
+	if isFile == False:
+		os.mkdir(f"{mis_docs}/scfolder/")
+	im.save(f"{mis_docs}/scfolder/sc-{dt_string}.png")
+
 #---------------------------------End of Auxiliary Functions-------------------------#
 
 
@@ -108,6 +120,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#¿Still no? Maybe it was ok after all this time
 					if inicial_btn == None:
 						#throw error.
+							take_screenshot()
 							write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
 							return
@@ -170,6 +183,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#process is going ok
 				else:
 					#warning_log("No se encontró el embalaje")
+					take_screenshot()
 					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 					run1.console.configure(text = "No se encontró la secc de embalaje")
 					return
@@ -215,6 +229,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						#write the warning and return to HU input by using boton1.png
 						time.sleep(1)
 						#warning_log("Error al ingresar la etiqueta")
+						take_screenshot()
 						write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 						time.sleep(4)
 						pyautogui.press('enter')
@@ -235,6 +250,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#write the warning and return to HU input by using boton1.png
 					time.sleep(1)
 					#warning_log("Error al ingresar la etiqueta")
+					take_screenshot()
 					write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 					time.sleep(4)
 					pyautogui.press('enter')
@@ -252,10 +268,12 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				time.sleep(1)
 				pyautogui.press('backspace')
 				#warning_log("HU incorrecta")
+				take_screenshot()
 				write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
 				run1.console.configure(text = "HU incorrecta")
 				return
 	else:
+		take_screenshot()
 		write_log("nok","Shop Order con valor nulo",ShopOrder,BoxType,StandardPack)
 		return
 
@@ -323,6 +341,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 				f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
 			else:
 				f.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
+
 
 
 #/////-----------------------End of Reading and Writing Files--------------------------#

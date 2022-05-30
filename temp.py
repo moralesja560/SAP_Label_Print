@@ -1,10 +1,7 @@
-from asyncio import subprocess
-
-
-import subprocess
+from genericpath import isfile
 import os 
-
-
+import pyautogui
+from datetime import datetime
 def My_Documents(location):
 	import ctypes.wintypes
 		#####-----This section discovers My Documents default path --------
@@ -23,7 +20,14 @@ def My_Documents(location):
 #for i in range(1,81):
 #	mis_docs = My_Documents(i)
 #	print(f"{i} y la ruta es {mis_docs}")
+now = datetime.now()
+dt_string = now.strftime("%d%m%Y-%H%M%S")
+mis_docs = My_Documents(5)
+im = pyautogui.screenshot(region=(410,350, 700, 300))
+#check if folder exists
+isFile = os.path.isdir(f"{mis_docs}/scfolder")
+print(isFile)
+if isFile == False:
+	os.mkdir(f"{mis_docs}/scfolder/")
 
-temp_mis_docs = My_Documents(37)
-mis_docs = temp_mis_docs + "/devmgmt.msc"
-subprocess.run([mis_docs],shell=True)
+im.save(f"{mis_docs}/scfolder/sc-{dt_string}.png")

@@ -87,7 +87,6 @@ def take_screenshot():
 	im = pyautogui.screenshot(region=(410,350, 700, 300))
 	#check if folder exists
 	isFile = os.path.isdir(f"{mis_docs}/scfolder")
-	print(isFile)
 	if isFile == False:
 		os.mkdir(f"{mis_docs}/scfolder/")
 	im.save(f"{mis_docs}/scfolder/sc-{dt_string}.png")
@@ -262,13 +261,14 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					pyautogui.click(435,142)
 			else:
 				#error in HU
+				take_screenshot()
 				pyautogui.press('enter')
 				time.sleep(1)
 				pyautogui.click(435,142)
 				time.sleep(1)
 				pyautogui.press('backspace')
 				#warning_log("HU incorrecta")
-				take_screenshot()
+				
 				write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
 				run1.console.configure(text = "HU incorrecta")
 				return

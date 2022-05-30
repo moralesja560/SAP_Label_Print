@@ -268,7 +268,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				time.sleep(1)
 				pyautogui.press('backspace')
 				#warning_log("HU incorrecta")
-				
 				write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
 				run1.console.configure(text = "HU incorrecta")
 				return
@@ -276,15 +275,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		take_screenshot()
 		write_log("nok","Shop Order con valor nulo",ShopOrder,BoxType,StandardPack)
 		return
-
-def label_print2(ShopOrder,BoxType,StandardPack):
-		pyautogui.hotkey('win','r')
-		pyautogui.write('chrome.exe')
-		pyautogui.press('enter')
-		time.sleep(10)
-		print(ShopOrder,BoxType,StandardPack)
-		pyautogui.write(f"{ShopOrder,BoxType,StandardPack}")
-		run1.console.configure(text = "Impresión Terminada")
 
 
 #---------------------------------End of Main Function-------------------------------#

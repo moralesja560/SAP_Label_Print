@@ -13,13 +13,22 @@ import serial
 import sys
 import glob
 from datetime import datetime
+from dotenv import load_dotenv
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+import json
+import requests
 #---------------------------------...
 
 
 ############progress check
 ######-------TASKS
-### debugging y perfeccionamiento de la app.
-###no hacer nada mas.
+### dale commit a este branch que sigue en desarrollo.
+### hay que cargar los usuarios desde el pastebin 
+## preparar un script para enviar mensajes de prueba
+###vigilar la recursividad en el uso de las funciona.
+### hacer una función maestra para mandar llamar con argumentos si queremos foto o texto y pasarle la info para que 
+###gestione ese código de Telegram.
 
 
 #####--------RECOMMENDATIONS
@@ -28,7 +37,9 @@ from datetime import datetime
 #optimización de procesos.
 #mensajes de informacion y error en todos lados
 
-
+######-----------------Sensitive Data Load-----------------####
+load_dotenv()
+token = os.getenv('TOK_EN_BOT')
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -91,7 +102,44 @@ def take_screenshot():
 		os.mkdir(f"{mis_docs}/scfolder/")
 	im.save(f"{mis_docs}/scfolder/sc-{dt_string}.png")
 
+
 #---------------------------------End of Auxiliary Functions-------------------------#
+
+#--------------------------------Telegram Messaging Management----------------------#
+def send_message(user_id, text,token):
+	global json_respuesta
+	url = f"https://api.telegram.org/{token}/sendMessage?chat_id={user_id}&text={text}"
+	#resp = requests.get(url)
+	#hacemos la petición
+	try:
+		respuesta  = urlopen(Request(url))
+	except Exception as e:
+		print(f"Ha ocurrido un error al enviar el mensaje: {e}")
+	else:
+		#recibimos la información
+		cuerpo_respuesta = respuesta.read()
+		# Procesamos la respuesta json
+		json_respuesta = json.loads(cuerpo_respuesta.decode("utf-8"))
+		print("mensaje enviado exitosamente")
+
+   
+def send_photo(user_id, image,token):
+	img = open(image, 'rb')
+	TOKEN = token
+	CHAT_ID = user_id
+	url = f'https://api.telegram.org/{TOKEN}/sendPhoto?chat_id={CHAT_ID}'
+	#resp = requests.get(url)
+	#hacemos la petición
+
+	respuesta = requests.post(url, files={'photo': img})
+
+	if '200' in str(respuesta):
+		print(f"mensaje enviado exitosamente con código {respuesta}")
+	else:
+		print(f"Ha ocurrido un error al enviar el mensaje: {respuesta}")
+
+#--------------------------------Telegram Messaging Management END----------------------#
+
 
 
 ###################################This is the function that actually prints the labels.

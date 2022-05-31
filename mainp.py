@@ -649,7 +649,6 @@ if __name__ == '__main__':
 	root = tk.Tk()
 	SecondThread = Process()
 	run1 = Passwordchecker(root)
-	#root.after(50, SecondThread.start)
 	root.mainloop() #GUI.start()
 	#print("Exiting....")
 	finish = True

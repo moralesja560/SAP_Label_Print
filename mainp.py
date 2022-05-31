@@ -13,13 +13,22 @@ import serial
 import sys
 import glob
 from datetime import datetime
+from dotenv import load_dotenv
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+import json
+import requests
 #---------------------------------...
 
 
 ############progress check
 ######-------TASKS
-### debugging y perfeccionamiento de la app.
-###no hacer nada mas.
+### dale commit a este branch que sigue en desarrollo.
+### hay que cargar los usuarios desde el pastebin 
+## preparar un script para enviar mensajes de prueba
+###vigilar la recursividad en el uso de las funciona.
+### hacer una función maestra para mandar llamar con argumentos si queremos foto o texto y pasarle la info para que 
+###gestione ese código de Telegram.
 
 
 #####--------RECOMMENDATIONS
@@ -28,7 +37,10 @@ from datetime import datetime
 #optimización de procesos.
 #mensajes de informacion y error en todos lados
 
-
+######-----------------Sensitive Data Load-----------------####
+load_dotenv()
+token_Tel = os.getenv('TOK_EN_BOT')
+Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -89,9 +101,49 @@ def take_screenshot():
 	isFile = os.path.isdir(f"{mis_docs}/scfolder")
 	if isFile == False:
 		os.mkdir(f"{mis_docs}/scfolder/")
-	im.save(f"{mis_docs}/scfolder/sc-{dt_string}.png")
+	ruta_img = f"{mis_docs}/scfolder/sc-{dt_string}.png"
+	im.save(ruta_img)
+	return ruta_img
+
 
 #---------------------------------End of Auxiliary Functions-------------------------#
+
+#--------------------------------Telegram Messaging Management----------------------#
+
+def send_message(user_id, text,token):
+	global json_respuesta
+	url = f"https://api.telegram.org/{token}/sendMessage?chat_id={user_id}&text={text}"
+	#resp = requests.get(url)
+	#hacemos la petición
+	try:
+		respuesta  = urlopen(Request(url))
+	except Exception as e:
+		print(f"Ha ocurrido un error al enviar el mensaje: {e}")
+	else:
+		#recibimos la información
+		cuerpo_respuesta = respuesta.read()
+		# Procesamos la respuesta json
+		json_respuesta = json.loads(cuerpo_respuesta.decode("utf-8"))
+		print("mensaje enviado exitosamente")
+
+   
+def send_photo(user_id, image,token):
+	img = open(image, 'rb')
+	TOKEN = token
+	CHAT_ID = user_id
+	url = f'https://api.telegram.org/{TOKEN}/sendPhoto?chat_id={CHAT_ID}'
+	#resp = requests.get(url)
+	#hacemos la petición
+
+	respuesta = requests.post(url, files={'photo': img})
+
+	if '200' in str(respuesta):
+		print(f"mensaje enviado exitosamente con código {respuesta}")
+	else:
+		print(f"Ha ocurrido un error al enviar el mensaje: {respuesta}")
+
+#--------------------------------Telegram Messaging Management END----------------------#
+
 
 
 ###################################This is the function that actually prints the labels.
@@ -119,7 +171,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#¿Still no? Maybe it was ok after all this time
 					if inicial_btn == None:
 						#throw error.
-							take_screenshot()
+							ruta_foto = take_screenshot()
+							send_message(Grupo_SAP_Label,quote('No se puede identificar el punto de entrada. El Membrain debe estar como la foto siguiente:'),token_Tel)
+							send_photo(Grupo_SAP_Label,resource_path(r"images/inicial2.png"),token_Tel)
 							write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
 							return
@@ -182,7 +236,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#process is going ok
 				else:
 					#warning_log("No se encontró el embalaje")
-					take_screenshot()
+					ruta_foto = take_screenshot()
+					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+					send_message(Grupo_SAP_Label,quote('no se encontró el embalaje'),token_Tel)
 					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 					run1.console.configure(text = "No se encontró la secc de embalaje")
 					return
@@ -228,7 +284,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						#write the warning and return to HU input by using boton1.png
 						time.sleep(1)
 						#warning_log("Error al ingresar la etiqueta")
-						take_screenshot()
+						ruta_foto = take_screenshot()
+						send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+						send_message(Grupo_SAP_Label,quote('Error al ingresar la etiqueta'),token_Tel)
 						write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 						time.sleep(4)
 						pyautogui.press('enter')
@@ -249,7 +307,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#write the warning and return to HU input by using boton1.png
 					time.sleep(1)
 					#warning_log("Error al ingresar la etiqueta")
-					take_screenshot()
+					ruta_foto = take_screenshot()
+					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+					send_message(Grupo_SAP_Label,quote('Error al ingresar la etiqueta'),token_Tel)
 					write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 					time.sleep(4)
 					pyautogui.press('enter')
@@ -261,7 +321,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					pyautogui.click(435,142)
 			else:
 				#error in HU
-				take_screenshot()
+				ruta_foto = take_screenshot()
+				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+				send_message(Grupo_SAP_Label,quote('Error en la Orden de Fabricación'),token_Tel)
 				pyautogui.press('enter')
 				time.sleep(1)
 				pyautogui.click(435,142)
@@ -272,7 +334,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				run1.console.configure(text = "HU incorrecta")
 				return
 	else:
-		take_screenshot()
 		write_log("nok","Shop Order con valor nulo",ShopOrder,BoxType,StandardPack)
 		return
 
@@ -520,18 +581,18 @@ class Passwordchecker(tk.Frame):
 			#monitor the buffer s to look for /n
 			if self.ser.is_open == False:
 				self.console.configure(text = "Se ha cerrado el puerto")
-				break
+				return
 			# the TRY catcher is to find if the port has been closed and react accordingly
 			while '/n' not in str(s):
 				try:
 					s = self.ser.read(40)
 				except:
 					self.console.configure(text = 'Se ha cerrado el puerto exitosamente.')
-					break
+					return
 				#changed else for finally:
 				finally:
 					if finish == True:
-						break
+						return
 			#remove the firt two characters 'b and the last characters /n
 			#label_data = str(s)[2:-3]
 			label_data = str(s)
@@ -588,7 +649,6 @@ if __name__ == '__main__':
 	root = tk.Tk()
 	SecondThread = Process()
 	run1 = Passwordchecker(root)
-	#root.after(50, SecondThread.start)
 	root.mainloop() #GUI.start()
 	#print("Exiting....")
 	finish = True

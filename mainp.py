@@ -40,6 +40,7 @@ import requests
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
+Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -171,8 +172,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					if inicial_btn == None:
 						#throw error.
 							ruta_foto = take_screenshot()
-							send_photo('5304828826',ruta_foto,token_Tel)
-							send_message('5304828826',quote('No se puede identificar el punto de entrada ¿Estará abierto el Membrain?'),token_Tel)
+							send_message(Grupo_SAP_Label,quote('No se puede identificar el punto de entrada. El Membrain debe estar como la foto siguiente:'),token_Tel)
+							send_photo(Grupo_SAP_Label,resource_path(r"images/inicial2.png"),token_Tel)
 							write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
 							return
@@ -236,8 +237,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				else:
 					#warning_log("No se encontró el embalaje")
 					ruta_foto = take_screenshot()
-					send_photo('5304828826',ruta_foto,token_Tel)
-					send_message('5304828826',quote('no se encontró el embalaje'),token_Tel)
+					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+					send_message(Grupo_SAP_Label,quote('no se encontró el embalaje'),token_Tel)
 					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 					run1.console.configure(text = "No se encontró la secc de embalaje")
 					return
@@ -284,8 +285,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						time.sleep(1)
 						#warning_log("Error al ingresar la etiqueta")
 						ruta_foto = take_screenshot()
-						send_photo('5304828826',ruta_foto,token_Tel)
-						send_message('5304828826',quote('Error al ingresar la etiqueta'),token_Tel)
+						send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+						send_message(Grupo_SAP_Label,quote('Error al ingresar la etiqueta'),token_Tel)
 						write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 						time.sleep(4)
 						pyautogui.press('enter')
@@ -307,8 +308,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					time.sleep(1)
 					#warning_log("Error al ingresar la etiqueta")
 					ruta_foto = take_screenshot()
-					send_photo('5304828826',ruta_foto,token_Tel)
-					send_message('5304828826',quote('Error al ingresar la etiqueta'),token_Tel)
+					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+					send_message(Grupo_SAP_Label,quote('Error al ingresar la etiqueta'),token_Tel)
 					write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 					time.sleep(4)
 					pyautogui.press('enter')
@@ -321,8 +322,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			else:
 				#error in HU
 				ruta_foto = take_screenshot()
-				send_photo('5304828826',ruta_foto,token_Tel)
-				send_message('5304828826',quote('Error en la Orden de Fabricación'),token_Tel)
+				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+				send_message(Grupo_SAP_Label,quote('Error en la Orden de Fabricación'),token_Tel)
 				pyautogui.press('enter')
 				time.sleep(1)
 				pyautogui.click(435,142)
@@ -580,18 +581,18 @@ class Passwordchecker(tk.Frame):
 			#monitor the buffer s to look for /n
 			if self.ser.is_open == False:
 				self.console.configure(text = "Se ha cerrado el puerto")
-				break
+				return
 			# the TRY catcher is to find if the port has been closed and react accordingly
 			while '/n' not in str(s):
 				try:
 					s = self.ser.read(40)
 				except:
 					self.console.configure(text = 'Se ha cerrado el puerto exitosamente.')
-					break
+					return
 				#changed else for finally:
 				finally:
 					if finish == True:
-						break
+						return
 			#remove the firt two characters 'b and the last characters /n
 			#label_data = str(s)[2:-3]
 			label_data = str(s)

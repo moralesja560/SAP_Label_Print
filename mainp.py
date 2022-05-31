@@ -39,7 +39,7 @@ import requests
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
-token = os.getenv('TOK_EN_BOT')
+token_Tel = os.getenv('TOK_EN_BOT')
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -100,12 +100,15 @@ def take_screenshot():
 	isFile = os.path.isdir(f"{mis_docs}/scfolder")
 	if isFile == False:
 		os.mkdir(f"{mis_docs}/scfolder/")
-	im.save(f"{mis_docs}/scfolder/sc-{dt_string}.png")
+	ruta_img = f"{mis_docs}/scfolder/sc-{dt_string}.png"
+	im.save(ruta_img)
+	return ruta_img
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
 
 #--------------------------------Telegram Messaging Management----------------------#
+
 def send_message(user_id, text,token):
 	global json_respuesta
 	url = f"https://api.telegram.org/{token}/sendMessage?chat_id={user_id}&text={text}"
@@ -167,7 +170,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#¿Still no? Maybe it was ok after all this time
 					if inicial_btn == None:
 						#throw error.
-							take_screenshot()
+							ruta_foto = take_screenshot()
+							send_photo('1878359468',ruta_foto,token_Tel)
+							send_message('1878359468',quote('No se puede identificar el punto de entrada ¿Estará abierto el Membrain?'),token_Tel)
 							write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
 							return
@@ -230,7 +235,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#process is going ok
 				else:
 					#warning_log("No se encontró el embalaje")
-					take_screenshot()
+					ruta_foto = take_screenshot()
+					send_photo('1878359468',ruta_foto,token_Tel)
+					send_message('1878359468',quote('no se encontró el embalaje'),token_Tel)
 					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 					run1.console.configure(text = "No se encontró la secc de embalaje")
 					return
@@ -276,7 +283,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						#write the warning and return to HU input by using boton1.png
 						time.sleep(1)
 						#warning_log("Error al ingresar la etiqueta")
-						take_screenshot()
+						ruta_foto = take_screenshot()
+						send_photo('1878359468',ruta_foto,token_Tel)
+						send_message('1878359468',quote('Error al ingresar la etiqueta'),token_Tel)
 						write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 						time.sleep(4)
 						pyautogui.press('enter')
@@ -297,7 +306,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#write the warning and return to HU input by using boton1.png
 					time.sleep(1)
 					#warning_log("Error al ingresar la etiqueta")
-					take_screenshot()
+					ruta_foto = take_screenshot()
+					send_photo('1878359468',ruta_foto,token_Tel)
+					send_message('1878359468',quote('Error al ingresar la etiqueta'),token_Tel)
 					write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 					time.sleep(4)
 					pyautogui.press('enter')
@@ -309,7 +320,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					pyautogui.click(435,142)
 			else:
 				#error in HU
-				take_screenshot()
+				ruta_foto = take_screenshot()
+				send_photo('1878359468',ruta_foto,token_Tel)
+				send_message('1878359468',quote('Error en la Orden de Fabricación'),token_Tel)
 				pyautogui.press('enter')
 				time.sleep(1)
 				pyautogui.click(435,142)
@@ -320,7 +333,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				run1.console.configure(text = "HU incorrecta")
 				return
 	else:
-		take_screenshot()
 		write_log("nok","Shop Order con valor nulo",ShopOrder,BoxType,StandardPack)
 		return
 

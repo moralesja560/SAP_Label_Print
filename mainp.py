@@ -23,12 +23,8 @@ import requests
 
 ############progress check
 ######-------TASKS
-### dale commit a este branch que sigue en desarrollo.
 ### hay que cargar los usuarios desde el pastebin 
 ## preparar un script para enviar mensajes de prueba
-###vigilar la recursividad en el uso de las funciona.
-### hacer una función maestra para mandar llamar con argumentos si queremos foto o texto y pasarle la info para que 
-###gestione ese código de Telegram.
 
 
 #####--------RECOMMENDATIONS

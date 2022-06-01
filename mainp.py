@@ -222,12 +222,18 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.press('backspace')
 			pyautogui.write(f"{ShopOrder}")
 			pyautogui.press('enter')
-			time.sleep(10)
+			time.sleep(6)
 			#what if the HU is wrong. 
 			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			if error4_btn == None:
-				#error5 if to detect if script is going well.
-				error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
+				for i in range(0,3):
+				#3 tries before failing
+				#error5 if to detect if script is going well.				
+					error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
+					print(f"try {i}: status: {error5_btn}")
+					if error5_btn is not None:
+						break
+					time.sleep(4)
 				if error5_btn is not None:
 					pass
 					#process is going ok

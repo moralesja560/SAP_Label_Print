@@ -25,6 +25,8 @@ import requests
 ######-------TASKS
 ### hay que cargar los usuarios desde el pastebin 
 ## preparar un script para enviar mensajes de prueba
+### borrar el campo de entrada antes de arrancar. 
+##enviar notificación de cambio de numero de parte
 
 
 #####--------RECOMMENDATIONS

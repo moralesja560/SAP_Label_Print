@@ -23,7 +23,7 @@ import requests
 
 ############progress check
 ######-------TASKS
-##crea un txt para almacenar el nombre de la linea y usarlo en las notificaciones.
+##quiza un segundo intento despues de una etiqueta fallida. 
 
 
 

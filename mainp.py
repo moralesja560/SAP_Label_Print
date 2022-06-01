@@ -224,7 +224,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.press('enter')
 			time.sleep(6)
 			#what if the HU is wrong. 
-			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)			
+			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			if error4_btn == None:
 				for i in range(0,3):
 				#3 tries before failing

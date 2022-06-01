@@ -264,7 +264,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#Look for 2 scenarios: 
 				#After the label input, usually a Yes/no warning appears.
 				#let's look for a yes/no and an error label
-				#ok input
+				#
 				error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 				#yes no
 				error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)

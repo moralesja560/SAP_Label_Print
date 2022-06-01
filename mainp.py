@@ -222,7 +222,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.press('backspace')
 			pyautogui.write(f"{ShopOrder}")
 			pyautogui.press('enter')
-			#time.sleep(13)
+			time.sleep(6)
 			#what if the HU is wrong. 
 			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)			
 			if error4_btn == None:

@@ -159,7 +159,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
 		
 		ok_flag = False
-		
+
 		if error2_btn == None:
 			#no ok button was left, try with yesno
 			if error3_btn == None:
@@ -230,6 +230,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#3 tries before failing
 				#error5 if to detect if script is going well.				
 					error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
+					
 					print(f"try {i}: status: {error5_btn}")
 					if error5_btn is not None:
 						break
@@ -241,7 +242,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#warning_log("No se encontró el embalaje")
 					ruta_foto = take_screenshot()
 					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-					send_message(Grupo_SAP_Label,quote('no se encontró el embalaje'),token_Tel)
+					send_message(Grupo_SAP_Label,quote('El servidor no responde, imprima la etiqueta manual usando el botón del panel'),token_Tel)
 					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 					run1.console.configure(text = "No se encontró la secc de embalaje")
 					return

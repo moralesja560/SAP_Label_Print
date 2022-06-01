@@ -264,11 +264,15 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#Look for 2 scenarios: 
 				#After the label input, usually a Yes/no warning appears.
 				#let's look for a yes/no and an error label
-				#
+				#error
 				error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 				#yes no
 				error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-		
+				#puro ok
+				error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+				#a little timer to ease the sea
+				time.sleep(2)
+				#a third event is missing: OK only
 				if error3_btn is not None:
 					#the usual Yes/No
 					pyautogui.press('tab')
@@ -316,6 +320,12 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					pyautogui.click(523,223)
 					pyautogui.press('enter')
 					pyautogui.click(435,142)
+				if error6_btn is not None:
+					#just a simple ok
+					pyautogui.press('enter')
+					pyautogui.click(435,142)
+					write_log("ok","No error",ShopOrder,BoxType,StandardPack)
+					run1.console.configure(text = "Impresión Terminada: Revise Log")
 			else:
 				#error in HU
 				ruta_foto = take_screenshot()

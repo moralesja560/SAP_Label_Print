@@ -25,7 +25,6 @@ import requests
 ######-------TASKS
 ### hay que cargar los usuarios desde el pastebin 
 ## preparar un script para enviar mensajes de prueba
-### borrar el campo de entrada antes de arrancar. 
 ##enviar notificación de cambio de numero de parte
 
 
@@ -265,7 +264,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#Look for 2 scenarios: 
 				#After the label input, usually a Yes/no warning appears.
 				#let's look for a yes/no and an error label
-				#ok input
+				#
 				error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 				#yes no
 				error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
@@ -575,6 +574,8 @@ class Passwordchecker(tk.Frame):
 		self.console.configure(text = "Conectado a: " + self.ser.portstr)
 		#serial buffer cleaning
 		s = ""
+		#variable initialization
+		ShopOrder_comp = ""
 		while finish is not True:
 			#monitor the buffer s to look for /n
 			if self.ser.is_open == False:
@@ -602,13 +603,26 @@ class Passwordchecker(tk.Frame):
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 			else:
 				x_pos=label_data.find('X')
+				#we store Shop Order data in two separate vars,  but we do not clear one,
+				#no issue if it's the same data, but will send a notification if there's change.
 				ShopOrder = label_data[2:x_pos-2]
 				BoxType = label_data[x_pos-2:x_pos+1]
 				StandardPack =label_data[x_pos+1:len(label_data)-3]
 ####################Launch label printing process..
 				label_print(ShopOrder,BoxType,StandardPack)
-				
-				#self.console.configure(text = "Conectado a: " + self.ser.portstr)
+			#if the var is empty (as usual when new run, please fill it, then just compare it)
+			print(f"la var shop order_comp esta asi: {ShopOrder_comp}")
+			if ShopOrder_comp == "" or ShopOrder_comp == None:
+				ShopOrder_comp = label_data[2:x_pos-2]
+				print(f"se ha llenado la variable shoporder_comp con los datos {ShopOrder_comp}")
+			#if variable is already done, then compare:
+			if ShopOrder_comp == ShopOrder:
+				print('SH está igual')
+			else:
+				send_message(Grupo_SAP_Label,quote(f'Se ha cambiado la Shop Order: \n Shop Order Anterior: {ShopOrder_comp} \n Shop Order Nueva: {ShopOrder}'), token_Tel)
+				#ShopOrder update to prevent this again.
+				ShopOrder_comp = ShopOrder
+
 			ShopOrder = ""
 			BoxType = ""
 			StandardPack = ""

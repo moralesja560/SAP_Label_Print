@@ -23,9 +23,8 @@ import requests
 
 ############progress check
 ######-------TASKS
-### hay que cargar los usuarios desde el pastebin 
-## preparar un script para enviar mensajes de prueba
-##enviar notificación de cambio de numero de parte
+##crea un txt para almacenar el nombre de la linea y usarlo en las notificaciones.
+
 
 
 #####--------RECOMMENDATIONS
@@ -169,7 +168,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					if inicial_btn == None:
 						#throw error.
 							ruta_foto = take_screenshot()
-							send_message(Grupo_SAP_Label,quote('No se puede identificar el punto de entrada. El Membrain debe estar como la foto siguiente:'),token_Tel)
+							send_message(Grupo_SAP_Label,quote(f" En {last_request} no se puede identificar el punto de entrada. El Membrain debe estar como la foto siguiente:"),token_Tel)
 							send_photo(Grupo_SAP_Label,resource_path(r"images/inicial2.png"),token_Tel)
 							write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
@@ -242,7 +241,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#warning_log("No se encontró el embalaje")
 					ruta_foto = take_screenshot()
 					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-					send_message(Grupo_SAP_Label,quote('El servidor no responde, imprima la etiqueta manual usando el botón del panel'),token_Tel)
+					send_message(Grupo_SAP_Label,quote(f" En {last_request}: El servidor no responde, imprima la etiqueta manual usando el botón del panel"),token_Tel)
 					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 					run1.console.configure(text = "No se encontró la secc de embalaje")
 					return
@@ -294,7 +293,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						#warning_log("Error al ingresar la etiqueta")
 						ruta_foto = take_screenshot()
 						send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-						send_message(Grupo_SAP_Label,quote('Error al ingresar la etiqueta'),token_Tel)
+						send_message(Grupo_SAP_Label,quote(f" En {last_request}: Error al ingresar la etiqueta"),token_Tel)
 						write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 						time.sleep(4)
 						pyautogui.press('enter')
@@ -317,7 +316,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#warning_log("Error al ingresar la etiqueta")
 					ruta_foto = take_screenshot()
 					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-					send_message(Grupo_SAP_Label,quote('Error al ingresar la etiqueta'),token_Tel)
+					send_message(Grupo_SAP_Label,quote(f" En {last_request}: Error al ingresar la etiqueta"),token_Tel)
 					write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 					time.sleep(4)
 					pyautogui.press('enter')
@@ -337,7 +336,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#error in HU
 				ruta_foto = take_screenshot()
 				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-				send_message(Grupo_SAP_Label,quote('Error en la Orden de Fabricación'),token_Tel)
+				send_message(Grupo_SAP_Label,quote(f" En {last_request}: Error en la Orden de Fabricación"),token_Tel)
 				pyautogui.press('enter')
 				time.sleep(1)
 				pyautogui.click(435,142)
@@ -379,6 +378,9 @@ with open(resource_path("images/entry_btn_data.csv")) as file:
 	rows2 = []
 	for row in csvreader:
 		rows2.append(row)
+
+with open(resource_path(r'images/idline.txt'), 'r') as f:
+	last_request = f.readline()
 
 def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	now = datetime.now()
@@ -636,7 +638,7 @@ class Passwordchecker(tk.Frame):
 			if ShopOrder_comp == ShopOrder:
 				print('SH está igual')
 			else:
-				send_message(Grupo_SAP_Label,quote(f'Se ha cambiado la Shop Order: \n Shop Order Anterior: {ShopOrder_comp} \n Shop Order Nueva: {ShopOrder}'), token_Tel)
+				send_message(Grupo_SAP_Label,quote(f'En {last_request}: Se ha cambiado la Shop Order: \n Shop Order Anterior: {ShopOrder_comp} \n Shop Order Nueva: {ShopOrder}'), token_Tel)
 				#ShopOrder update to prevent this again.
 				ShopOrder_comp = ShopOrder
 

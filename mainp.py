@@ -23,9 +23,10 @@ import requests
 
 ############progress check
 ######-------TASKS
-### hay que cargar los usuarios desde el pastebin 
-## preparar un script para enviar mensajes de prueba
-##enviar notificación de cambio de numero de parte
+#no hay segundo intento, es mejor que la impriman manual. Como quiera lo del grupo fue una excelente idea. 
+#Este código es la versión de producción. Ya está probado en piso y se ve que funciona bien.
+
+
 
 
 #####--------RECOMMENDATIONS
@@ -169,7 +170,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					if inicial_btn == None:
 						#throw error.
 							ruta_foto = take_screenshot()
-							send_message(Grupo_SAP_Label,quote('No se puede identificar el punto de entrada. El Membrain debe estar como la foto siguiente:'),token_Tel)
+							send_message(Grupo_SAP_Label,quote(f" En {Line_ID} No puedo identificar el Membrain para imprimir la etiqueta: El Membrain necesita estar abierto y listo."),token_Tel)
 							send_photo(Grupo_SAP_Label,resource_path(r"images/inicial2.png"),token_Tel)
 							write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 							run1.console.configure(text = "No se puede identificar el punto de entrada")
@@ -226,23 +227,18 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#what if the HU is wrong. 
 			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			if error4_btn == None:
-				for i in range(0,3):
-				#3 tries before failing
+				for i in range(0,10):
+				# tries before failing
 				#error5 if to detect if script is going well.				
 					error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
-					
 					print(f"try {i}: status: {error5_btn}")
 					if error5_btn is not None:
 						break
-					time.sleep(4)
-				if error5_btn is not None:
-					pass
-					#process is going ok
-				else:
-					#warning_log("No se encontró el embalaje")
+					time.sleep(5)
+				if error5_btn == None:
 					ruta_foto = take_screenshot()
 					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-					send_message(Grupo_SAP_Label,quote('El servidor no responde, imprima la etiqueta manual usando el botón del panel'),token_Tel)
+					send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Intenté crear una etiqueta, pero parece que el Membrain ya no respondió, intenta de nuevo en manual usando el botón del panel"),token_Tel)
 					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 					run1.console.configure(text = "No se encontró la secc de embalaje")
 					return
@@ -291,10 +287,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					if error35_btn is not None:
 						#write the warning and return to HU input by using boton1.png
 						time.sleep(1)
-						#warning_log("Error al ingresar la etiqueta")
 						ruta_foto = take_screenshot()
 						send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-						send_message(Grupo_SAP_Label,quote('Error al ingresar la etiqueta'),token_Tel)
+						send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 						write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 						time.sleep(4)
 						pyautogui.press('enter')
@@ -317,7 +312,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 					#warning_log("Error al ingresar la etiqueta")
 					ruta_foto = take_screenshot()
 					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-					send_message(Grupo_SAP_Label,quote('Error al ingresar la etiqueta'),token_Tel)
+					send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 					write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 					time.sleep(4)
 					pyautogui.press('enter')
@@ -337,7 +332,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#error in HU
 				ruta_foto = take_screenshot()
 				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-				send_message(Grupo_SAP_Label,quote('Error en la Orden de Fabricación'),token_Tel)
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
 				pyautogui.press('enter')
 				time.sleep(1)
 				pyautogui.click(435,142)
@@ -379,6 +374,9 @@ with open(resource_path("images/entry_btn_data.csv")) as file:
 	rows2 = []
 	for row in csvreader:
 		rows2.append(row)
+
+with open(resource_path(r'images/idline.txt'), 'r') as f:
+	Line_ID = f.readline()
 
 def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	now = datetime.now()
@@ -636,7 +634,7 @@ class Passwordchecker(tk.Frame):
 			if ShopOrder_comp == ShopOrder:
 				print('SH está igual')
 			else:
-				send_message(Grupo_SAP_Label,quote(f'Se ha cambiado la Shop Order: \n Shop Order Anterior: {ShopOrder_comp} \n Shop Order Nueva: {ShopOrder}'), token_Tel)
+				send_message(Grupo_SAP_Label,quote(f'En {Line_ID}: Se ha cambiado la Shop Order: \n Shop Order Anterior: {ShopOrder_comp} \n Shop Order Nueva: {ShopOrder}'), token_Tel)
 				#ShopOrder update to prevent this again.
 				ShopOrder_comp = ShopOrder
 

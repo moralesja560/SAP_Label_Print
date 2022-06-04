@@ -234,7 +234,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 						break
 					time.sleep(5)
 				if error5_btn == None:
-					#warning_log("No se encontró el embalaje")
 					ruta_foto = take_screenshot()
 					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 					send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Intenté crear una etiqueta, pero parece que el Membrain ya no respondió, intenta de nuevo en manual usando el botón del panel"),token_Tel)

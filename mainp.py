@@ -23,8 +23,10 @@ import requests
 
 ############progress check
 ######-------TASKS
-##quiza un segundo intento despues de una etiqueta fallida. 
-##identificacion de linea para que las notificaciones lleven la identificación
+#no hay segundo intento, es mejor que la impriman manual. Como quiera lo del grupo fue una excelente idea. 
+#Este código es la versión de producción. Ya está probado en piso y se ve que funciona bien.
+
+
 
 
 #####--------RECOMMENDATIONS

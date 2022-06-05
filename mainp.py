@@ -631,16 +631,16 @@ class Passwordchecker(tk.Frame):
 #####-------------------------------Shop Order management. Prevent any Shop Order to be printed if it's has less than 6 characters.
 			###send a message if a Shop Order is less than 6 characters, then clean vars, then continue.
 			print(len(ShopOrder))
-			if len(ShopOrder) < 6 and  len(ShopOrder_comp)<6 :
+			if len(ShopOrder) < 7 and  len(ShopOrder_comp)<7 :
 				#send a message that we cannot print a label with that info.
-				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: La Shop Order debe tener 6 digitos. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
+				send_message(Grupo_SAP_Label,quote(f"En {Line_ID}: La Shop Order debe tener 7 digitos. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
 				ShopOrder = ""
 				BoxType = ""
 				StandardPack = ""
 				label_data = ""
 				s = ""
 				continue
-			elif len(ShopOrder) < 6 and  len(ShopOrder_comp)==6 :
+			elif len(ShopOrder) < 7 and  len(ShopOrder_comp)==7 :
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
 			#if the var is empty (as usual when new run, please fill it, then just compare it)

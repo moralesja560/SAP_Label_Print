@@ -643,6 +643,7 @@ class Passwordchecker(tk.Frame):
 			elif len(ShopOrder) < 7 and  len(ShopOrder_comp)==7 :
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
+					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
 			#if the var is empty (as usual when new run, please fill it, then just compare it)
 			if ShopOrder_comp == "" or ShopOrder_comp == None:
 				ShopOrder_comp = label_data[2:x_pos-2]

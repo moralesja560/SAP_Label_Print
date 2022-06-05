@@ -94,7 +94,7 @@ def take_screenshot():
 	now = datetime.now()
 	dt_string = now.strftime("%d%m%Y-%H%M%S")
 	mis_docs = My_Documents(5)
-	im = pyautogui.screenshot(region=(410,350, 700, 300))
+	im = pyautogui.screenshot(region=(0,0, 1200, 700))
 	#check if folder exists
 	isFile = os.path.isdir(f"{mis_docs}/scfolder")
 	if isFile == False:
@@ -343,7 +343,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				run1.console.configure(text = "HU incorrecta")
 				return
 	else:
-		write_log("nok","Shop Order con valor nulo",ShopOrder,BoxType,StandardPack)
+		write_log("nok","Shop Order con longitud incorrecta",ShopOrder,BoxType,StandardPack)
 		return
 
 
@@ -616,6 +616,9 @@ class Passwordchecker(tk.Frame):
 			if label_data.find('X') == -1:
 				#what if the string does not have X
 				self.console.configure(text = "Datos No Válidos: " + label_data)
+				label_data = ""
+				s = ""
+				continue
 			else:
 				x_pos=label_data.find('X')
 				#we store Shop Order data in two separate vars,  but we do not clear one,
@@ -623,10 +626,25 @@ class Passwordchecker(tk.Frame):
 				ShopOrder = label_data[2:x_pos-2]
 				BoxType = label_data[x_pos-2:x_pos+1]
 				StandardPack =label_data[x_pos+1:len(label_data)-3]
-####################Launch label printing process..
-				label_print(ShopOrder,BoxType,StandardPack)
+
+
+#####-------------------------------Shop Order management. Prevent any Shop Order to be printed if it's has less than 6 characters.
+			###send a message if a Shop Order is less than 6 characters, then clean vars, then continue.
+			print(len(ShopOrder))
+			if len(ShopOrder) < 7 and  len(ShopOrder_comp)<7 :
+				#send a message that we cannot print a label with that info.
+				send_message(Grupo_SAP_Label,quote(f"En {Line_ID}: La Shop Order debe tener 7 digitos. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
+				ShopOrder = ""
+				BoxType = ""
+				StandardPack = ""
+				label_data = ""
+				s = ""
+				continue
+			elif len(ShopOrder) < 7 and  len(ShopOrder_comp)==7 :
+				#Use the previous Shop Order to print the new label
+					ShopOrder = ShopOrder_comp
+					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
 			#if the var is empty (as usual when new run, please fill it, then just compare it)
-			print(f"la var shop order_comp esta asi: {ShopOrder_comp}")
 			if ShopOrder_comp == "" or ShopOrder_comp == None:
 				ShopOrder_comp = label_data[2:x_pos-2]
 				print(f"se ha llenado la variable shoporder_comp con los datos {ShopOrder_comp}")
@@ -637,7 +655,8 @@ class Passwordchecker(tk.Frame):
 				send_message(Grupo_SAP_Label,quote(f'En {Line_ID}: Se ha cambiado la Shop Order: \n Shop Order Anterior: {ShopOrder_comp} \n Shop Order Nueva: {ShopOrder}'), token_Tel)
 				#ShopOrder update to prevent this again.
 				ShopOrder_comp = ShopOrder
-
+####################Launch label printing process..
+			label_print(ShopOrder,BoxType,StandardPack)
 			ShopOrder = ""
 			BoxType = ""
 			StandardPack = ""

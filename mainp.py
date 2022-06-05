@@ -626,8 +626,6 @@ class Passwordchecker(tk.Frame):
 				ShopOrder = label_data[2:x_pos-2]
 				BoxType = label_data[x_pos-2:x_pos+1]
 				StandardPack =label_data[x_pos+1:len(label_data)-3]
-
-
 #####-------------------------------Shop Order management. Prevent any Shop Order to be printed if it's has less than 6 characters.
 			###send a message if a Shop Order is less than 6 characters, then clean vars, then continue.
 			print(len(ShopOrder))

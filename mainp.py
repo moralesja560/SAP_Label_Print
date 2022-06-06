@@ -393,11 +393,11 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 			data = file_object.read(100)
 			if len(data) > 0 :
 				file_object.write("\n")
-				# Append text at the end of file
-				if logtype == 'ok':
-					file_object.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
-				else:
-					file_object.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
+			# Append text at the end of file
+			if logtype == 'ok':
+				file_object.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
+			else:
+				file_object.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
 	else:
 		with open(ruta,"w+") as f:
 			if logtype == 'ok':

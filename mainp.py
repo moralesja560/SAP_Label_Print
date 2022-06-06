@@ -23,8 +23,11 @@ import requests
 
 ############progress check
 ######-------TASKS
-#no hay segundo intento, es mejor que la impriman manual. Como quiera lo del grupo fue una excelente idea. 
-#Este código es la versión de producción. Ya está probado en piso y se ve que funciona bien.
+#Lo del grupo fue una excelente idea. 
+#Este código es la versión de producción. 
+#Error de HU en uso cuando ambas terminales quieren imprimir la misma HU.
+#Ha tenido una excelente recepción en piso y está funcionando correctamente. 
+#Integrar quizá un lector de errores para actuar conforme al error o guardar la HU.
 
 
 

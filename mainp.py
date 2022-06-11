@@ -602,7 +602,7 @@ class Passwordchecker(tk.Frame):
 			# the TRY catcher is to find if the port has been closed and react accordingly
 			while '/n' not in str(s):
 				try:
-					s = self.ser.read(40)
+					s = self.ser.read(17)
 				except:
 					self.console.configure(text = 'Se ha cerrado el puerto exitosamente.')
 					return

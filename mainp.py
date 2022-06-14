@@ -41,7 +41,7 @@ import requests
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
-Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
+Grupo_SAP_Label = os.getenv('JORGE_MORALES')
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -594,6 +594,7 @@ class Passwordchecker(tk.Frame):
 		s = ""
 		#variable initialization
 		ShopOrder_comp = ""
+		StandardP_comp = ""
 		while finish is not True:
 			#monitor the buffer s to look for /n
 			if self.ser.is_open == False:
@@ -628,11 +629,11 @@ class Passwordchecker(tk.Frame):
 				#no issue if it's the same data, but will send a notification if there's change.
 				ShopOrder = label_data[2:x_pos-2]
 				BoxType = label_data[x_pos-2:x_pos+1]
-				StandardPack =label_data[x_pos+1:len(label_data)-3]
+				StandardPack =label_data[x_pos+1:x_pos+4]
 #####-------------------------------Shop Order management. Prevent any Shop Order to be printed if it's has less than 6 characters.
-			###send a message if a Shop Order is less than 6 characters, then clean vars, then continue.
-			print(len(ShopOrder))
-			if len(ShopOrder) < 7 and  len(ShopOrder_comp)<7 :
+			###send a message if a Shop Order is less than  characters, then clean vars, then continue.
+			print(f' Longitud de Shop Order es {len(ShopOrder)}')
+			if len(ShopOrder) != 7 and  len(ShopOrder_comp)!=7 :
 				#send a message that we cannot print a label with that info.
 				send_message(Grupo_SAP_Label,quote(f"En {Line_ID}: La Shop Order debe tener 7 digitos. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
 				ShopOrder = ""
@@ -641,7 +642,7 @@ class Passwordchecker(tk.Frame):
 				label_data = ""
 				s = ""
 				continue
-			elif len(ShopOrder) < 7 and  len(ShopOrder_comp)==7 :
+			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 :
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
@@ -651,11 +652,43 @@ class Passwordchecker(tk.Frame):
 				print(f"se ha llenado la variable shoporder_comp con los datos {ShopOrder_comp}")
 			#if variable is already done, then compare:
 			if ShopOrder_comp == ShopOrder:
-				print('SH está igual')
+				print(f'SH está igual: {ShopOrder}')
 			else:
 				send_message(Grupo_SAP_Label,quote(f'En {Line_ID}: Se ha cambiado la Shop Order: \n Shop Order Anterior: {ShopOrder_comp} \n Shop Order Nueva: {ShopOrder}'), token_Tel)
 				#ShopOrder update to prevent this again.
 				ShopOrder_comp = ShopOrder
+###---------------SHOP ORDER MANAGEMENT END-------------------------#
+
+####-------------Standard Pack Management ---------------------------#
+			###send a message if a Shop Order is less than  characters, then clean vars, then continue.
+			if StandardP_comp == "" or StandardP_comp == None:
+				StandardP_comp = label_data[x_pos+1:len(label_data)-3]
+				print(f"se ha llenado la variable SP con los datos {StandardP_comp}")
+			print(f' Longitud de Standard Pack es {len(StandardPack)}')
+			if len(StandardPack) != 3 and  len(StandardP_comp)!=3 :
+				#send a message that we cannot print a label with that info.
+				send_message(Grupo_SAP_Label,quote(f"En {Line_ID}: El Standard Pack debe tener 3 digitos. ¿Es {StandardPack} un Standard Pack válido?"),token_Tel)
+				ShopOrder = ""
+				BoxType = ""
+				StandardPack = ""
+				label_data = ""
+				s = ""
+				continue
+			elif (len(StandardPack) != 7 or '/' in StandardPack) and  len(StandardP_comp)==7 :
+				#Use the previous Shop Order to print the new label
+					StandardPack = StandardP_comp
+					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
+			#if the var is empty (as usual when new run, please fill it, then just compare it)
+
+			#if variable is already done, then compare:
+			if StandardP_comp == StandardPack:
+				print(f'SP está igual: {StandardPack}')
+			else:
+				send_message(Grupo_SAP_Label,quote(f'En {Line_ID}: Se ha cambiado el Standard Pack: \n SP Anterior: {StandardP_comp} \n SP Nuevo: {StandardPack}'), token_Tel)
+				#ShopOrder update to prevent this again.
+				StandardP_comp = StandardPack
+
+
 ####################Launch label printing process..
 			label_print(ShopOrder,BoxType,StandardPack)
 			ShopOrder = ""

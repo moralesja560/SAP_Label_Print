@@ -674,7 +674,7 @@ class Passwordchecker(tk.Frame):
 				label_data = ""
 				s = ""
 				continue
-			elif (len(StandardPack) != 7 or '/' in StandardPack) and  len(StandardP_comp)==7 :
+			elif (len(StandardPack) != 3 or '/' in StandardPack) and  len(StandardP_comp)==3 :
 				#Use the previous Shop Order to print the new label
 					StandardPack = StandardP_comp
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
@@ -691,13 +691,14 @@ class Passwordchecker(tk.Frame):
 
 ####################Launch label printing process..
 			label_print(ShopOrder,BoxType,StandardPack)
+			#waiting time before restarting the process.
+			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 5 mins")
+			time.sleep(300)
 			ShopOrder = ""
 			BoxType = ""
 			StandardPack = ""
 			label_data = ""
 			s = ""
-
-
 #################Threading area 
 class Process(threading.Thread):
 	def __init__(self):

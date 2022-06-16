@@ -627,8 +627,11 @@ class Passwordchecker(tk.Frame):
 				x_pos=label_data.find('X')
 				#we store Shop Order data in two separate vars,  but we do not clear one,
 				#no issue if it's the same data, but will send a notification if there's change.
-				ShopOrder = label_data[2:x_pos-2]
+				#ShopOrder = label_data[2:x_pos-2]
+				ShopOrder = label_data[x_pos-9:x_pos-2]
+				print(f"Nuevass Shop Order: {ShopOrder}")
 				BoxType = label_data[x_pos-2:x_pos+1]
+				#Standard Pack was changed due to serial data overflow. 
 				StandardPack =label_data[x_pos+1:x_pos+4]
 #####-------------------------------Shop Order management. Prevent any Shop Order to be printed if it's has less than 6 characters.
 			###send a message if a Shop Order is less than  characters, then clean vars, then continue.
@@ -692,8 +695,8 @@ class Passwordchecker(tk.Frame):
 ####################Launch label printing process..
 			label_print(ShopOrder,BoxType,StandardPack)
 			#waiting time before restarting the process.
-			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 5 mins")
-			time.sleep(300)
+			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 1 mins")
+			time.sleep(60)
 			ShopOrder = ""
 			BoxType = ""
 			StandardPack = ""

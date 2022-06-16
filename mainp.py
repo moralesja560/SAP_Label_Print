@@ -41,7 +41,7 @@ import requests
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
-Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
+Grupo_SAP_Label = os.getenv('JORGE_MORALES')
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -614,7 +614,11 @@ class Passwordchecker(tk.Frame):
 			#remove the firt two characters 'b and the last characters /n
 			#label_data = str(s)[2:-3]
 			label_data = str(s)
-			self.console.configure(text = "Datos Recibidos: " + label_data)
+			#once its store, destroy port
+
+			self.ser.close()
+			self.console.configure(text = "Puerto Cerrado. Datos Recibidos: " + label_data)
+			print(f"Cadena Recibida: {label_data}")
 			#prevent data process if label_data is 0 characters long.
 			#find the X in box.
 			if label_data.find('X') == -1:
@@ -629,7 +633,6 @@ class Passwordchecker(tk.Frame):
 				#no issue if it's the same data, but will send a notification if there's change.
 				#ShopOrder = label_data[2:x_pos-2]
 				ShopOrder = label_data[x_pos-9:x_pos-2]
-				print(f"Nuevass Shop Order: {ShopOrder}")
 				BoxType = label_data[x_pos-2:x_pos+1]
 				#Standard Pack was changed due to serial data overflow. 
 				StandardPack =label_data[x_pos+1:x_pos+4]
@@ -645,7 +648,7 @@ class Passwordchecker(tk.Frame):
 				label_data = ""
 				s = ""
 				continue
-			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 :
+			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
@@ -702,6 +705,9 @@ class Passwordchecker(tk.Frame):
 			StandardPack = ""
 			label_data = ""
 			s = ""
+			#Open the port again.
+			self.ser.open()
+			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
 #################Threading area 
 class Process(threading.Thread):
 	def __init__(self):

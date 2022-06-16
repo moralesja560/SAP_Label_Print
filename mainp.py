@@ -234,7 +234,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				# tries before failing
 				#error5 if to detect if script is going well.				
 					error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
-					print(f"try {i}: status: {error5_btn}")
+					print(f"Intento de encontrar el embalaje {i}: status: {error5_btn}")
 					if error5_btn is not None:
 						break
 					time.sleep(5)
@@ -626,9 +626,11 @@ class Passwordchecker(tk.Frame):
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 				label_data = ""
 				s = ""
+				self.ser.open()
 				continue
 			else:
 				x_pos=label_data.find('X')
+				print("X encontrada")
 				#we store Shop Order data in two separate vars,  but we do not clear one,
 				#no issue if it's the same data, but will send a notification if there's change.
 				#ShopOrder = label_data[2:x_pos-2]
@@ -647,10 +649,13 @@ class Passwordchecker(tk.Frame):
 				StandardPack = ""
 				label_data = ""
 				s = ""
+				self.ser.open()
+				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
 			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
+					print("Se ha enviado un warning que llego cortada la etiqueta Shop Order.")
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
 			#if the var is empty (as usual when new run, please fill it, then just compare it)
 			if ShopOrder_comp == "" or ShopOrder_comp == None:
@@ -679,10 +684,13 @@ class Passwordchecker(tk.Frame):
 				StandardPack = ""
 				label_data = ""
 				s = ""
+				self.ser.open()
+				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
 			elif (len(StandardPack) != 3 or '/' in StandardPack) and  len(StandardP_comp)==3 :
 				#Use the previous Shop Order to print the new label
 					StandardPack = StandardP_comp
+					print("Se ha enviado un warning que llego cortada la etiqueta Standard Pack.")
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
 			#if the var is empty (as usual when new run, please fill it, then just compare it)
 

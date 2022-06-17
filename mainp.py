@@ -23,8 +23,14 @@ import requests
 
 ############progress check
 ######-------TASKS
-#reducir la cantidad de notificaciones y tratar de reparar los errores mas importantes.
+#Intentar algo para leer el error en Python
+#Integrar el GR cancelado como posible punto de entrada
+#Seleccionar las notificaciones para recibir las mas importantes.
+#Subir el log a pastebin
+#Integrar un metodo de centralización para evitar el bug de la doble shop order.
+#Killswitch para notificaciones
 #continuar en pruebas.
+#optimización en el análisis de Shop Order
 
 
 
@@ -584,7 +590,6 @@ class Passwordchecker(tk.Frame):
 				bytesize=byte_size,\
 				timeout=1)
 		#A notice that the COM has been opened
-		#print("connected to: " + self.ser.portstr)
 		self.console.configure(text = "Conectado a: " + self.ser.portstr)
 		#serial buffer cleaning
 		s = ""
@@ -607,19 +612,18 @@ class Passwordchecker(tk.Frame):
 				finally:
 					if finish == True:
 						return
-			#remove the firt two characters 'b and the last characters /n
-			#label_data = str(s)[2:-3]
 			label_data = str(s)
-			#once its store, destroy port
-
+			#once its stored, destroy port
 			self.ser.close()
 			self.console.configure(text = "Puerto Cerrado. Datos Recibidos: " + label_data)
 			print(f"Cadena Recibida: {label_data}")
 			#prevent data process if label_data is 0 characters long.
 			#find the X in box.
-			if label_data.find('X') == -1:
+			if label_data.find('X') == -1 or len(label_data) != 17:
 				#what if the string does not have X
 				self.console.configure(text = "Datos No Válidos: " + label_data)
+				print(f"Se recibió esta cadena {label_data}, pero parece que no es válida")
+				write_log("nok","La información no es válida. Llegó la siguiente cadena",{label_data},"BOX","SP")
 				label_data = ""
 				s = ""
 				self.ser.open()
@@ -629,7 +633,6 @@ class Passwordchecker(tk.Frame):
 				print("X encontrada")
 				#we store Shop Order data in two separate vars,  but we do not clear one,
 				#no issue if it's the same data, but will send a notification if there's change.
-				#ShopOrder = label_data[2:x_pos-2]
 				ShopOrder = label_data[x_pos-9:x_pos-2]
 				BoxType = label_data[x_pos-2:x_pos+1]
 				#Standard Pack was changed due to serial data overflow. 
@@ -648,7 +651,7 @@ class Passwordchecker(tk.Frame):
 				self.ser.open()
 				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
-			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
+			elif (len(ShopOrder) != 7 or '/' in ShopOrder or "'" in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
 					print("Se ha enviado un warning que llego cortada la etiqueta Shop Order.")

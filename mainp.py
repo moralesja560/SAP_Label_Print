@@ -23,12 +23,8 @@ import requests
 
 ############progress check
 ######-------TASKS
-#Lo del grupo fue una excelente idea. 
-#Este código es la versión de producción. 
-#Error de HU en uso cuando ambas terminales quieren imprimir la misma HU.
-#Ha tenido una excelente recepción en piso y está funcionando correctamente. 
-#Integrar quizá un lector de errores para actuar conforme al error o guardar la HU.
-
+#reducir la cantidad de notificaciones y tratar de reparar los errores mas importantes.
+#continuar en pruebas.
 
 
 
@@ -41,7 +37,7 @@ import requests
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
-Grupo_SAP_Label = os.getenv('JORGE_MORALES')
+Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
 
 #---------------------------------------Auxiliary Functions-------------------------#
 

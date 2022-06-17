@@ -613,10 +613,8 @@ class Passwordchecker(tk.Frame):
 					if finish == True:
 						return
 			#remove the firt two characters 'b and the last characters /n
-			#label_data = str(s)[2:-3]
 			label_data = str(s)
 			#once its store, destroy port
-
 			self.ser.close()
 			self.console.configure(text = "Puerto Cerrado. Datos Recibidos: " + label_data)
 			print(f"Cadena Recibida: {label_data}")
@@ -627,6 +625,7 @@ class Passwordchecker(tk.Frame):
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 				label_data = ""
 				s = ""
+				self.console.configure(text = "Puerto Abierto.: Listo para recibir")
 				self.ser.open()
 				continue
 			else:
@@ -651,7 +650,7 @@ class Passwordchecker(tk.Frame):
 				label_data = ""
 				s = ""
 				self.ser.open()
-				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
+				run1.console.configure(text = f"Datos Incorrectos: Puerto Abierto")
 				continue
 			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
 				#Use the previous Shop Order to print the new label

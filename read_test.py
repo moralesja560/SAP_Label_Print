@@ -10,15 +10,25 @@ def resource_path(relative_path):
 
 
 # read image
-img = cv2.imread(resource_path(r"images/HUread.png"))
+img = cv2.imread(resource_path(r"images/OF_error2.png"))
 
 # configurations
-config = ('-l eng --oem 1 --psm 3')
+#config = ('-l eng --oem 1 --psm 3')
 
 # pytessercat
 pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
-text = pytesseract.image_to_string(img, config=config)
 
-# print text
-text = text.split('\n')
-print(text)
+
+for i in range(0,13):
+	config = (f'-l eng --oem 1 --psm 6')
+	text = pytesseract.image_to_string(img, config=config)
+	# print text
+	print(i)
+	text = text.split('\n')
+	print(text)
+
+#HU processing
+#x_pos= text.find('HU')
+#print(text[x_pos+3:x_pos+12])
+
+

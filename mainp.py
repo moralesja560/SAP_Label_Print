@@ -276,7 +276,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			print(f"Intento de encontrar el PI {i}: status: {error5_btn}")
 			if error8_btn is not None:
 				break
-			time.sleep(5)
+			time.sleep(3)
 		if error8_btn == None:
 			ruta_foto = take_screenshot()
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)

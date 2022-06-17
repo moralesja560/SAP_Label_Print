@@ -23,12 +23,8 @@ import requests
 
 ############progress check
 ######-------TASKS
-#Lo del grupo fue una excelente idea. 
-#Este código es la versión de producción. 
-#Error de HU en uso cuando ambas terminales quieren imprimir la misma HU.
-#Ha tenido una excelente recepción en piso y está funcionando correctamente. 
-#Integrar quizá un lector de errores para actuar conforme al error o guardar la HU.
-
+#reducir la cantidad de notificaciones y tratar de reparar los errores mas importantes.
+#continuar en pruebas.
 
 
 
@@ -234,7 +230,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				# tries before failing
 				#error5 if to detect if script is going well.				
 					error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
-					print(f"try {i}: status: {error5_btn}")
+					print(f"Intento de encontrar el embalaje {i}: status: {error5_btn}")
 					if error5_btn is not None:
 						break
 					time.sleep(5)
@@ -614,7 +610,11 @@ class Passwordchecker(tk.Frame):
 			#remove the firt two characters 'b and the last characters /n
 			#label_data = str(s)[2:-3]
 			label_data = str(s)
-			self.console.configure(text = "Datos Recibidos: " + label_data)
+			#once its store, destroy port
+
+			self.ser.close()
+			self.console.configure(text = "Puerto Cerrado. Datos Recibidos: " + label_data)
+			print(f"Cadena Recibida: {label_data}")
 			#prevent data process if label_data is 0 characters long.
 			#find the X in box.
 			if label_data.find('X') == -1:
@@ -622,14 +622,15 @@ class Passwordchecker(tk.Frame):
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 				label_data = ""
 				s = ""
+				self.ser.open()
 				continue
 			else:
 				x_pos=label_data.find('X')
+				print("X encontrada")
 				#we store Shop Order data in two separate vars,  but we do not clear one,
 				#no issue if it's the same data, but will send a notification if there's change.
 				#ShopOrder = label_data[2:x_pos-2]
 				ShopOrder = label_data[x_pos-9:x_pos-2]
-				print(f"Nuevass Shop Order: {ShopOrder}")
 				BoxType = label_data[x_pos-2:x_pos+1]
 				#Standard Pack was changed due to serial data overflow. 
 				StandardPack =label_data[x_pos+1:x_pos+4]
@@ -644,10 +645,13 @@ class Passwordchecker(tk.Frame):
 				StandardPack = ""
 				label_data = ""
 				s = ""
+				self.ser.open()
+				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
-			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 :
+			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
+					print("Se ha enviado un warning que llego cortada la etiqueta Shop Order.")
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
 			#if the var is empty (as usual when new run, please fill it, then just compare it)
 			if ShopOrder_comp == "" or ShopOrder_comp == None:
@@ -676,10 +680,13 @@ class Passwordchecker(tk.Frame):
 				StandardPack = ""
 				label_data = ""
 				s = ""
+				self.ser.open()
+				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
 			elif (len(StandardPack) != 3 or '/' in StandardPack) and  len(StandardP_comp)==3 :
 				#Use the previous Shop Order to print the new label
 					StandardPack = StandardP_comp
+					print("Se ha enviado un warning que llego cortada la etiqueta Standard Pack.")
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
 			#if the var is empty (as usual when new run, please fill it, then just compare it)
 
@@ -702,6 +709,9 @@ class Passwordchecker(tk.Frame):
 			StandardPack = ""
 			label_data = ""
 			s = ""
+			#Open the port again.
+			self.ser.open()
+			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
 #################Threading area 
 class Process(threading.Thread):
 	def __init__(self):

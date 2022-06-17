@@ -18,6 +18,8 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 import json
 import requests
+import cv2
+import pytesseract
 #---------------------------------...
 
 
@@ -107,6 +109,25 @@ def take_screenshot():
 	ruta_img = f"{mis_docs}/scfolder/sc-{dt_string}.png"
 	im.save(ruta_img)
 	return ruta_img
+
+def read_from_img(img):
+	#check if program is installed
+	file_exists2 = os.path.exists('C:/Program Files/Tesseract/tesseract.exe')
+	if file_exists2 == False:
+		#there's not Tesseract Installed
+		write_log("nok","Tesseract no está instalado",'0','0','0')
+		return
+	# read image
+	image = cv2.imread(img)
+	# configurations
+	config = ('-l eng --oem 1 --psm 3')
+	# pytessercat
+	pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
+	text = pytesseract.image_to_string(image, config=config)
+	# print text
+	text = text.split('\n')
+	print(text)
+	return text
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#

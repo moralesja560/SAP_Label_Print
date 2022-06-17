@@ -23,9 +23,14 @@ import requests
 
 ############progress check
 ######-------TASKS
-#reducir la cantidad de notificaciones y tratar de reparar los errores mas importantes.
+#Intentar algo para leer el error en Python
+#Integrar el GR cancelado como posible punto de entrada
+#Seleccionar las notificaciones para recibir las mas importantes.
+#Subir el log a pastebin
+#Integrar un metodo de centralización para evitar el bug de la doble shop order.
+#Killswitch para notificaciones
 #continuar en pruebas.
-
+#optimización en el análisis de Shop Order
 
 
 #####--------RECOMMENDATIONS

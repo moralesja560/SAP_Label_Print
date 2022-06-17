@@ -162,190 +162,210 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
 		#check if yesno button was left open
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-		
+		#check for GR Cancel
+		error7_btn = pyautogui.locateOnScreen(resource_path(r"images/GR_Cancel2.png"),grayscale=False, confidence=.7)
 		ok_flag = False
+		#Test every scenario to look for possible entry points.
+		# test for ok_flag to avoid double_checking
 
-		if error2_btn == None:
-			#no ok button was left, try with yesno
-			if error3_btn == None:
-			#Yes/NO button wasn't? try with the main screen
-				if inbox_btn == None:
-					#¿Still no? Maybe it was ok after all this time
-					if inicial_btn == None:
-						#throw error.
-							ruta_foto = take_screenshot()
-							send_message(Grupo_SAP_Label,quote(f" En {Line_ID} No puedo identificar el Membrain para imprimir la etiqueta: El Membrain necesita estar abierto y listo."),token_Tel)
-							send_photo(Grupo_SAP_Label,resource_path(r"images/inicial2.png"),token_Tel)
-							write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
-							run1.console.configure(text = "No se puede identificar el punto de entrada")
-							return
-					else:
-						#initial orange screen detected.
-						pyautogui.click(435,142)
-						ok_flag = True
-				else:
-					#if main screen was found:
-					pyautogui.click(523,223)
-					ok_flag = True
-			else:
-				#if button left open, click 
-				pyautogui.press('tab')
-				time.sleep(1)
-				pyautogui.press('enter')
-				#if HU was exceeded
-				time.sleep(2)
-				error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
-				if error35_btn == None:
-					ok_flag = True
-				else:
-				#main screen after all, click on the screen
-					time.sleep(4)
-					pyautogui.press('enter')
-					time.sleep(1)
-					pyautogui.click(50,50)
-					time.sleep(1)
-					pyautogui.click(523,223)
-					time.sleep(1)
-					pyautogui.click(435,142)
-					ok_flag = True
-		else:
-			#there was a ok button left
+		#there was a ok button left
+		if error2_btn != None and ok_flag == False:
 			pyautogui.press('enter')
 			time.sleep(1)
 			pyautogui.click(435,142)
 			ok_flag = True
+			#no ok button was left, try with yesno
+		if error3_btn != None and ok_flag == False:
+			#if button left open, click 
+			pyautogui.press('tab')
+			time.sleep(1)
+			pyautogui.press('enter')
+			#if HU was exceeded
+			time.sleep(3)
+			error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
+			if error35_btn != None and ok_flag == False:
+			#main screen after all, click on the screen
+				time.sleep(4)
+				pyautogui.press('enter')
+				time.sleep(1)
+				pyautogui.click(50,50)
+				time.sleep(1)
+				pyautogui.click(523,223)
+				time.sleep(1)
+				pyautogui.click(435,142)
+			ok_flag = True
+		#Yes/NO button wasn't? try with the main screen
+		if inbox_btn != None and ok_flag == False:
+		#if main screen was found:
+			pyautogui.click(523,223)
+			ok_flag = True
+		#¿Still no? Maybe it was ok after all this time
+		if inicial_btn != None and ok_flag == False:
+		#initial orange screen detected.
+			pyautogui.click(435,142)
+			ok_flag = True
+		#Maybe it was left in GR Cancel
+		if error7_btn != None and ok_flag == False:
+			#main screen then click on the screen
+			time.sleep(4)
+			pyautogui.press('enter')
+			time.sleep(1)
+			pyautogui.click(50,50)
+			time.sleep(1)
+			pyautogui.click(523,223)
+			time.sleep(1)
+			pyautogui.click(435,142)
+			ok_flag = True
+		#throw error if ok_flag it's false after this
+		if ok_flag == False:
+			ruta_foto = take_screenshot()
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID} Intenté imprimir una etiqueta, pero no veo el Membrain. Aquí está una foto de la pantalla:"),token_Tel)
+			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+			write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
+			run1.console.configure(text = "No se puede identificar el punto de entrada")
+			return
 
 ###############This is the procedure start
 
-		if ok_flag == False:
-			pass
-		else:
-			#click on the HU field
-			pyautogui.click(435,142)
-			time.sleep(2)
-			#write the shop order but before a healthy backspace
-			pyautogui.press('backspace')
-			pyautogui.write(f"{ShopOrder}")
+		#click on the HU field
+		pyautogui.click(435,142)
+		time.sleep(2)
+		#write the shop order but before a healthy backspace
+		pyautogui.press('backspace')
+		pyautogui.write(f"{ShopOrder}")
+		pyautogui.press('enter')
+		time.sleep(6)
+		#what if the HU is wrong. 
+		error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+		if error4_btn is not None:
+			#error in HU
+			ruta_foto = take_screenshot()
+			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
 			pyautogui.press('enter')
+			time.sleep(1)
+			pyautogui.click(435,142)
+			time.sleep(1)
+			pyautogui.press('backspace')
+			write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
+			run1.console.configure(text = "HU incorrecta")
+			return
+		for i in range(0,10):
+		# tries before failing
+		#error5 if to detect if script is going well.				
+			error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
+			print(f"Intento de encontrar el embalaje {i}: status: {error5_btn}")
+			if error5_btn is not None:
+				break
+			time.sleep(5)
+		if error5_btn == None:
+			ruta_foto = take_screenshot()
+			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Estaba creando una etiqueta, pero el Membrain ya no respondió. ¿Se podrá intentar de nuevo?"),token_Tel)
+			write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
+			run1.console.configure(text = "No se encontró la secc de embalaje")
+			return
+		#no issue, continue
+		pyautogui.press('tab')
+		pyautogui.press('space')
+		time.sleep(2)
+		#This is where i can save some time by locating the screen.
+		for i in range(0,10):
+			#try locating the screen 10 times
+			error8_btn = pyautogui.locateOnScreen(resource_path(r"images/PI.png"),grayscale=False, confidence=.7)
+			print(f"Intento de encontrar el PI {i}: status: {error5_btn}")
+			if error8_btn is not None:
+				break
+			time.sleep(5)
+		if error8_btn == None:
+			ruta_foto = take_screenshot()
+			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Estaba creando una etiqueta, pero el Membrain ya no respondió. ¿Se podrá intentar de nuevo?"),token_Tel)
+			write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
+			run1.console.configure(text = "No se encontró la secc de embalaje")
+			return
+		#print(StandardPack)
+		pyautogui.write(f"{StandardPack}")
+		pyautogui.press('tab')
+		#numero de operario
+		pyautogui.write("20010380")
+		time.sleep(2)
+		#puesto de trabajo
+		pyautogui.press('tab')
+		time.sleep(2)
+		pyautogui.press('tab')
+		#texto libre
+		pyautogui.write("Auto Print")
+		time.sleep(2)
+		pyautogui.press('tab')
+		time.sleep(2)
+###############this enter is to store the label
+		pyautogui.press('enter')
+		time.sleep(7)				
+		#Look for 2 scenarios: 
+		#After the label input, usually a Yes/no warning appears.
+		#let's look for a yes/no and an error label
+		#error
+		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+		#yes no
+		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
+		#puro ok
+		error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+		#a little timer to ease the sea
+		time.sleep(2)
+		#a third event is missing: OK only
+		if error3_btn is not None:
+			#the usual Yes/No
+			pyautogui.press('tab')
+			time.sleep(1)
+			pyautogui.press('enter')
+			#What if there's an error?
 			time.sleep(6)
-			#what if the HU is wrong. 
-			error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
-			if error4_btn == None:
-				for i in range(0,10):
-				# tries before failing
-				#error5 if to detect if script is going well.				
-					error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
-					print(f"Intento de encontrar el embalaje {i}: status: {error5_btn}")
-					if error5_btn is not None:
-						break
-					time.sleep(5)
-				if error5_btn == None:
-					ruta_foto = take_screenshot()
-					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-					send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Intenté crear una etiqueta, pero parece que el Membrain ya no respondió, intenta de nuevo en manual usando el botón del panel"),token_Tel)
-					write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
-					run1.console.configure(text = "No se encontró la secc de embalaje")
-					return
-				#no issue, continue
-				pyautogui.press('tab')
-				pyautogui.press('space')
-				time.sleep(10)
-				#print(StandardPack)
-				pyautogui.write(f"{StandardPack}")
-				pyautogui.press('tab')
-				#numero de operario
-				pyautogui.write("20010380")
-				time.sleep(3)
-				#puesto de trabajo
-				pyautogui.press('tab')
-				time.sleep(3)
-				pyautogui.press('tab')
-				#texto libre
-				pyautogui.write("Auto Print")
-				time.sleep(3)
-				pyautogui.press('tab')
-				time.sleep(3)
-#################this enter is to store the label
-				pyautogui.press('enter')
-				time.sleep(7)				
-				#Look for 2 scenarios: 
-				#After the label input, usually a Yes/no warning appears.
-				#let's look for a yes/no and an error label
-				#error
-				error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
-				#yes no
-				error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-				#puro ok
-				error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
-				#a little timer to ease the sea
-				time.sleep(2)
-				#a third event is missing: OK only
-				if error3_btn is not None:
-					#the usual Yes/No
-					pyautogui.press('tab')
-					time.sleep(1)
-					pyautogui.press('enter')
-					#What if there's an error?
-					time.sleep(6)
-					error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)	
-					if error35_btn is not None:
-						#write the warning and return to HU input by using boton1.png
-						time.sleep(1)
-						ruta_foto = take_screenshot()
-						send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-						send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
-						write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
-						time.sleep(4)
-						pyautogui.press('enter')
-						time.sleep(1)
-						pyautogui.click(50,50)
-						time.sleep(1)
-						pyautogui.click(523,223)
-						pyautogui.press('enter')
-						pyautogui.click(435,142)
-					else:
-						#No error: This is the good ending.
-						pyautogui.press('enter')
-						#write_log('ok',ShopOrder,BoxType,StandardPack)
-						write_log("ok","No error",ShopOrder,BoxType,StandardPack)
-						run1.console.configure(text = "Impresión Terminada: Revise Log")
-				if error2_btn is not None:
-					#what is there was an error after the input (e.g. network)
-					#write the warning and return to HU input by using boton1.png
-					time.sleep(1)
-					#warning_log("Error al ingresar la etiqueta")
-					ruta_foto = take_screenshot()
-					send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-					send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
-					write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
-					time.sleep(4)
-					pyautogui.press('enter')
-					time.sleep(1)
-					pyautogui.click(50,50)
-					time.sleep(1)
-					pyautogui.click(523,223)
-					pyautogui.press('enter')
-					pyautogui.click(435,142)
-				if error6_btn is not None:
-					#just a simple ok
-					pyautogui.press('enter')
-					pyautogui.click(435,142)
-					write_log("ok","No error",ShopOrder,BoxType,StandardPack)
-					run1.console.configure(text = "Impresión Terminada: Revise Log")
-			else:
-				#error in HU
+			error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)	
+			if error35_btn is not None:
+				#write the warning and return to HU input by using boton1.png
+				time.sleep(1)
 				ruta_foto = take_screenshot()
 				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
+				write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
+				time.sleep(4)
 				pyautogui.press('enter')
 				time.sleep(1)
-				pyautogui.click(435,142)
+				pyautogui.click(50,50)
 				time.sleep(1)
-				pyautogui.press('backspace')
-				#warning_log("HU incorrecta")
-				write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
-				run1.console.configure(text = "HU incorrecta")
-				return
+				pyautogui.click(523,223)
+				pyautogui.press('enter')
+				pyautogui.click(435,142)
+			else:
+				#No error: This is the good ending.
+				pyautogui.press('enter')
+				#write_log('ok',ShopOrder,BoxType,StandardPack)
+				write_log("ok","No error",ShopOrder,BoxType,StandardPack)
+				run1.console.configure(text = "Impresión Terminada: Revise Log")
+		if error2_btn is not None:
+			#what is there was an error after the input (e.g. network)
+			#write the warning and return to HU input by using boton1.png
+			time.sleep(1)
+			#warning_log("Error al ingresar la etiqueta")
+			ruta_foto = take_screenshot()
+			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
+			write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
+			time.sleep(4)
+			pyautogui.press('enter')
+			time.sleep(1)
+			pyautogui.click(50,50)
+			time.sleep(1)
+			pyautogui.click(523,223)
+			pyautogui.press('enter')
+			pyautogui.click(435,142)
+		if error6_btn is not None:
+			#just a simple ok
+			pyautogui.press('enter')
+			pyautogui.click(435,142)
+			write_log("ok","No error",ShopOrder,BoxType,StandardPack)
+			run1.console.configure(text = "Impresión Terminada: Revise Log")
 	else:
 		write_log("nok","Shop Order con longitud incorrecta",ShopOrder,BoxType,StandardPack)
 		return

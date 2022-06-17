@@ -53,7 +53,7 @@ def write_log(texto):
 for i in range(1,21):
 	if i <= 10:
 		confi = i/10
-		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=confi)
+		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/GR_Cancel2.png"),grayscale=False, confidence=confi)
 		if inicial_btn == None:
 			pass
 		else:
@@ -65,7 +65,7 @@ for i in range(1,21):
 			write_log(f" prueba {i} con confidence {confi} y grayscale false :{inicial_btn}, con coordenadas centrales {button7x, button7y}")
 	else:
 		confi = (i-10)/10
-		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=True, confidence=confi)
+		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/GR_Cancel2.png"),grayscale=True, confidence=confi)
 		if inicial_btn == None:
 			pass
 		else:

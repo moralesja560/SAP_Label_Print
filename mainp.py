@@ -633,10 +633,8 @@ class Passwordchecker(tk.Frame):
 					if finish == True:
 						return
 			#remove the firt two characters 'b and the last characters /n
-			#label_data = str(s)[2:-3]
 			label_data = str(s)
 			#once its store, destroy port
-
 			self.ser.close()
 			self.console.configure(text = "1.- Puerto Cerrado. Datos Recibidos: " + label_data)
 			print(f"Cadena Recibida: {label_data}")
@@ -647,6 +645,7 @@ class Passwordchecker(tk.Frame):
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 				label_data = ""
 				s = ""
+				self.console.configure(text = "Puerto Abierto.: Listo para recibir")
 				self.ser.open()
 				continue
 			else:

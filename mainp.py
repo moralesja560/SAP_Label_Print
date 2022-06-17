@@ -111,6 +111,7 @@ def take_screenshot():
 	return ruta_img
 
 def read_from_img(img):
+	#wait for branch merging then try to adjust screenshot area to allow tesseract to read accurately
 	#check if program is installed
 	file_exists2 = os.path.exists('C:/Program Files/Tesseract/tesseract.exe')
 	if file_exists2 == False:

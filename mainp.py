@@ -638,7 +638,7 @@ class Passwordchecker(tk.Frame):
 			#once its store, destroy port
 
 			self.ser.close()
-			self.console.configure(text = "Puerto Cerrado. Datos Recibidos: " + label_data)
+			self.console.configure(text = "1.- Puerto Cerrado. Datos Recibidos: " + label_data)
 			print(f"Cadena Recibida: {label_data}")
 			#prevent data process if label_data is 0 characters long.
 			#find the X in box.
@@ -651,7 +651,7 @@ class Passwordchecker(tk.Frame):
 				continue
 			else:
 				x_pos=label_data.find('X')
-				print("X encontrada")
+				print("2.- X encontrada")
 				#we store Shop Order data in two separate vars,  but we do not clear one,
 				#no issue if it's the same data, but will send a notification if there's change.
 				#ShopOrder = label_data[2:x_pos-2]
@@ -661,7 +661,6 @@ class Passwordchecker(tk.Frame):
 				StandardPack =label_data[x_pos+1:x_pos+4]
 #####-------------------------------Shop Order management. Prevent any Shop Order to be printed if it's has less than 6 characters.
 			###send a message if a Shop Order is less than  characters, then clean vars, then continue.
-			print(f' Longitud de Shop Order es {len(ShopOrder)}')
 			if len(ShopOrder) != 7 and  len(ShopOrder_comp)!=7 :
 				#send a message that we cannot print a label with that info.
 				send_message(Grupo_SAP_Label,quote(f"En {Line_ID}: La Shop Order debe tener 7 digitos. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
@@ -671,20 +670,21 @@ class Passwordchecker(tk.Frame):
 				label_data = ""
 				s = ""
 				self.ser.open()
+				print(" 2.4.- Error: No llegó bien la Shop Order.")
 				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
 			elif (len(ShopOrder) != 7 or '/' in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
-					print("Se ha enviado un warning que llego cortada la etiqueta Shop Order.")
+					print(" 2.5.- Se ha enviado un warning que llego cortada la etiqueta Shop Order.")
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
 			#if the var is empty (as usual when new run, please fill it, then just compare it)
 			if ShopOrder_comp == "" or ShopOrder_comp == None:
 				ShopOrder_comp = label_data[2:x_pos-2]
-				print(f"se ha llenado la variable shoporder_comp con los datos {ShopOrder_comp}")
+				print(f"3.- variable shoporder_comp se llena {ShopOrder_comp}")
 			#if variable is already done, then compare:
 			if ShopOrder_comp == ShopOrder:
-				print(f'SH está igual: {ShopOrder}')
+				print(f'3.- Shop Order válida y repetida: {ShopOrder}')
 			else:
 				send_message(Grupo_SAP_Label,quote(f'En {Line_ID}: Se ha cambiado la Shop Order: \n Shop Order Anterior: {ShopOrder_comp} \n Shop Order Nueva: {ShopOrder}'), token_Tel)
 				#ShopOrder update to prevent this again.
@@ -695,8 +695,7 @@ class Passwordchecker(tk.Frame):
 			###send a message if a Shop Order is less than  characters, then clean vars, then continue.
 			if StandardP_comp == "" or StandardP_comp == None:
 				StandardP_comp = label_data[x_pos+1:len(label_data)-3]
-				print(f"se ha llenado la variable SP con los datos {StandardP_comp}")
-			print(f' Longitud de Standard Pack es {len(StandardPack)}')
+				print(f"4.- se ha llenado la variable SP con los datos {StandardP_comp}")
 			if len(StandardPack) != 3 and  len(StandardP_comp)!=3 :
 				#send a message that we cannot print a label with that info.
 				send_message(Grupo_SAP_Label,quote(f"En {Line_ID}: El Standard Pack debe tener 3 digitos. ¿Es {StandardPack} un Standard Pack válido?"),token_Tel)
@@ -706,12 +705,13 @@ class Passwordchecker(tk.Frame):
 				label_data = ""
 				s = ""
 				self.ser.open()
+				print(f'4.1.- Error: No llegó bien el Standard Pack')
 				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
 			elif (len(StandardPack) != 3 or '/' in StandardPack) and  len(StandardP_comp)==3 :
 				#Use the previous Shop Order to print the new label
 					StandardPack = StandardP_comp
-					print("Se ha enviado un warning que llego cortada la etiqueta Standard Pack.")
+					print("4.2.- Se ha enviado un warning que llego cortada la etiqueta Standard Pack.")
 					write_log("nok","La información llegó cortada, pero si se imprimió la etiqueta",ShopOrder,BoxType,StandardPack)
 			#if the var is empty (as usual when new run, please fill it, then just compare it)
 

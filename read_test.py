@@ -10,26 +10,31 @@ def resource_path(relative_path):
 
 
 # read image
-img = cv2.imread(resource_path(r"images/error11.png"))
+img = cv2.imread(resource_path(r"images/HUerror.png"))
 
 # configurations
-#config = ('-l eng --oem 1 --psm 3')
+config = ('-l eng --oem 1 --psm 3')
 
 # pytessercat
 pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
 
 
-for i in range(0,13):
-	config = (f'-l eng --oem 1 --psm {i}')
-	try:
-		text = pytesseract.image_to_string(img, config=config)
-	except:
-		print("error")
-	else:
-	# print text
-		print(i)
-		#text = text.split('\n')
-		print(text)
+text = pytesseract.image_to_string(img, config=config)
+text = text.split('\n')
+
+for letter in text:
+	#check for nonexistant HU
+	if len(letter)<2:
+		continue
+	if "no existe" in letter:
+		print("procesamiento de cadena por HU no existente")
+	if "OF" in letter:
+		print("procesamiento de cadena por OF")
+	if "tratando" in letter:
+		print("procesamiento de cadena por error de HU")
+	if "HU planificada" in letter:
+		print("Bug de misma Shop Order")
+
 
 #HU processing
 #x_pos= text.find('HU')

@@ -116,7 +116,7 @@ def take_screenshot(type):
 	dt_string = now.strftime("%d%m%Y-%H%M%S")
 	mis_docs = My_Documents(5)
 	if type == "error":
-		im = pyautogui.screenshot(region=(500,350,450,190))
+		im = pyautogui.screenshot(region=(500,350,510,190))
 	else:
 		im = pyautogui.screenshot(region=(0,0, 1200, 700))
 	#check if folder exists
@@ -352,9 +352,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(2)
 		pyautogui.press('tab')
 		time.sleep(2)
-###############this enter is to store the label
+###############---------------THIS ENTER IS TO STORE THE LABEL.
 		pyautogui.press('enter')
-		time.sleep(7)				
+		time.sleep(7)
+############################################
 		#Look for 2 scenarios: 
 		#After the label input, usually a Yes/no warning appears.
 		#let's look for a yes/no and an error label
@@ -379,6 +380,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#write the warning and return to HU input by using boton1.png
 				time.sleep(1)
 				ruta_foto = take_screenshot("error")
+				texto_error = read_from_img(ruta_foto)
+				print (texto_error)
+				write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 				write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
@@ -400,11 +404,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				write_log("ok","No error",ShopOrder,BoxType,StandardPack)
 				run1.console.configure(text = "Impresión Terminada: Revise Log")
 		if error2_btn is not None:
-			#what is there was an error after the input (e.g. network)
+			#what if there was an error after the input (e.g. network, Shop Order Overfill)
 			#write the warning and return to HU input by using boton1.png
 			time.sleep(1)
-			#warning_log("Error al ingresar la etiqueta")
 			ruta_foto = take_screenshot("error")
+			texto_error = read_from_img(ruta_foto)
+			print (texto_error)
+			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 			write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
@@ -783,6 +789,7 @@ class Passwordchecker(tk.Frame):
 			else:
 				send_message(Grupo_SAP_Label,quote(f'En {Line_ID}: Se ha cambiado el Standard Pack: \n SP Anterior: {StandardP_comp} \n SP Nuevo: {StandardPack}'), token_Tel)
 				#ShopOrder update to prevent this again.
+				print(f'4.- SP se ha cambiado por un Standard Pack válido: {StandardPack}')
 				StandardP_comp = StandardPack
 
 

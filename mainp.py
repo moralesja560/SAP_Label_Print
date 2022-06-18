@@ -704,8 +704,8 @@ class Passwordchecker(tk.Frame):
 			label_data = str(s)
 			#once its stored, destroy port
 			self.ser.close()
-			self.console.configure(text = "1.- Puerto Cerrado. Datos Recibidos: " + label_data)
-			print(f"Cadena Recibida: {label_data}")
+			self.console.configure(text = " Puerto Cerrado. Datos Recibidos: " + label_data)
+			print(f"1.- Cadena Recibida: {label_data}")
 			#prevent data process if label_data is 0 characters long.
 			#find the X in box.
 			if label_data.find('X') == -1 or len(label_data) != 18:
@@ -798,6 +798,7 @@ class Passwordchecker(tk.Frame):
 			#waiting time before restarting the process.
 			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 1 mins")
 			time.sleep(60)
+			print("5.- Limpieza de variables")
 			ShopOrder = ""
 			BoxType = ""
 			StandardPack = ""
@@ -805,6 +806,7 @@ class Passwordchecker(tk.Frame):
 			s = ""
 			#Open the port again.
 			self.ser.open()
+			print("6.- Reapertura de puerto")
 			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
 #################Threading area 
 class Process(threading.Thread):

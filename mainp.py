@@ -24,7 +24,6 @@ import requests
 ############progress check
 ######-------TASKS
 #Intentar algo para leer el error en Python
-#Integrar el GR cancelado como posible punto de entrada
 #Seleccionar las notificaciones para recibir las mas importantes.
 #Subir el log a pastebin
 #Integrar un metodo de centralización para evitar el bug de la doble shop order.
@@ -672,7 +671,7 @@ class Passwordchecker(tk.Frame):
 				print(" 2.4.- Error: No llegó bien la Shop Order.")
 				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
-			elif (len(ShopOrder) != 7 or '/' in ShopOrder or "'" in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
+			elif (len(ShopOrder) != 7 or '/' in ShopOrder or "'" in ShopOrder or 'b' in ShopOrder) and  len(ShopOrder_comp)==7 : #dfd
 				#Use the previous Shop Order to print the new label
 					ShopOrder = ShopOrder_comp
 					print(" 2.5.- Se ha enviado un warning que llego cortada la etiqueta Shop Order.")
@@ -707,7 +706,7 @@ class Passwordchecker(tk.Frame):
 				print(f'4.1.- Error: No llegó bien el Standard Pack')
 				run1.console.configure(text = f"Puerto Abierto: Listo para Recibir Error: Datos Incorrectos")
 				continue
-			elif (len(StandardPack) != 3 or '/' in StandardPack or "'" in StandardPack) and  len(StandardP_comp)==3 :
+			elif (len(StandardPack) != 3 or '/' in StandardPack or "'" in StandardPack or 'b' in StandardPack) and  len(StandardP_comp)==3 :
 				#Use the previous Shop Order to print the new label
 					StandardPack = StandardP_comp
 					print("4.2.- Se ha enviado un warning que llego cortada la etiqueta Standard Pack.")

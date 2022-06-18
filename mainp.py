@@ -101,7 +101,10 @@ def take_screenshot():
 	now = datetime.now()
 	dt_string = now.strftime("%d%m%Y-%H%M%S")
 	mis_docs = My_Documents(5)
-	im = pyautogui.screenshot(region=(0,0, 1200, 700))
+	if type == "error":
+		im = pyautogui.screenshot(region=(0,0, 1200, 700))
+	else:
+		im = pyautogui.screenshot(region=(500,350,450,190))
 	#check if folder exists
 	isFile = os.path.isdir(f"{mis_docs}/scfolder")
 	if isFile == False:

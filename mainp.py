@@ -18,6 +18,8 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 import json
 import requests
+import cv2
+import pytesseract
 #---------------------------------...
 
 
@@ -97,7 +99,10 @@ def take_screenshot():
 	now = datetime.now()
 	dt_string = now.strftime("%d%m%Y-%H%M%S")
 	mis_docs = My_Documents(5)
-	im = pyautogui.screenshot(region=(0,0, 1200, 700))
+	if type == "error":
+		im = pyautogui.screenshot(region=(0,0, 1200, 700))
+	else:
+		im = pyautogui.screenshot(region=(500,350,450,190))
 	#check if folder exists
 	isFile = os.path.isdir(f"{mis_docs}/scfolder")
 	if isFile == False:
@@ -105,6 +110,26 @@ def take_screenshot():
 	ruta_img = f"{mis_docs}/scfolder/sc-{dt_string}.png"
 	im.save(ruta_img)
 	return ruta_img
+
+def read_from_img(img):
+	#wait for branch merging then try to adjust screenshot area to allow tesseract to read accurately
+	#check if program is installed
+	file_exists2 = os.path.exists('C:/Program Files/Tesseract/tesseract.exe')
+	if file_exists2 == False:
+		#there's not Tesseract Installed
+		write_log("nok","Tesseract no está instalado",'0','0','0')
+		return
+	# read image
+	image = cv2.imread(img)
+	# configurations
+	config = ('-l eng --oem 1 --psm 3')
+	# pytessercat
+	pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
+	text = pytesseract.image_to_string(image, config=config)
+	# print text
+	text = text.split('\n')
+	print(text)
+	return text
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
@@ -608,7 +633,6 @@ class Passwordchecker(tk.Frame):
 				bytesize=byte_size,\
 				timeout=1)
 		#A notice that the COM has been opened
-		#print("connected to: " + self.ser.portstr)
 		self.console.configure(text = "Conectado a: " + self.ser.portstr)
 		#serial buffer cleaning
 		s = ""
@@ -631,17 +655,18 @@ class Passwordchecker(tk.Frame):
 				finally:
 					if finish == True:
 						return
-			#remove the firt two characters 'b and the last characters /n
 			label_data = str(s)
-			#once its store, destroy port
+			#once its stored, destroy port
 			self.ser.close()
 			self.console.configure(text = "1.- Puerto Cerrado. Datos Recibidos: " + label_data)
 			print(f"Cadena Recibida: {label_data}")
 			#prevent data process if label_data is 0 characters long.
 			#find the X in box.
-			if label_data.find('X') == -1:
+			if label_data.find('X') == -1 or len(label_data) != 17:
 				#what if the string does not have X
 				self.console.configure(text = "Datos No Válidos: " + label_data)
+				print(f"Se recibió esta cadena {label_data}, pero parece que no es válida")
+				write_log("nok","La información no es válida. Llegó la siguiente cadena",{label_data},"BOX","SP")
 				label_data = ""
 				s = ""
 				self.console.configure(text = "Puerto Abierto.: Listo para recibir")
@@ -652,7 +677,6 @@ class Passwordchecker(tk.Frame):
 				print("2.- X encontrada")
 				#we store Shop Order data in two separate vars,  but we do not clear one,
 				#no issue if it's the same data, but will send a notification if there's change.
-				#ShopOrder = label_data[2:x_pos-2]
 				ShopOrder = label_data[x_pos-9:x_pos-2]
 				BoxType = label_data[x_pos-2:x_pos+1]
 				#Standard Pack was changed due to serial data overflow. 

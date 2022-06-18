@@ -8,6 +8,7 @@ from tkinter import *
 from tkinter import messagebox
 from functools import partial
 import tkinter as tk
+from matplotlib.pyplot import text
 import pyautogui
 import serial
 import sys
@@ -24,8 +25,23 @@ import pytesseract
 
 
 ############progress check
-######-------TASKS
+######-------ENDED TASKS
+#Integrar GR como punto de entrada
+	#excelente funcionamiento
+#Integrar la búsqueda de PI para reducción del tiempo del script
+	#excelente funcionamiento
+#Descartar cadenas de texto repetidas o corruptas
+	#Ya no pasan Shop Orders que no sean de  7 digitos
+	#tampoco pasan cadenas que sean distintas de 18 caracteres
+#Prevención de envíos masivos de etiquetas
+	#No le afecta al programa si presiona el botón manual muchas veces.
+#Procedimiento de retorno para todas las funciones que desembocan en error
+#Optimización de la consola para mantener el enfoque en el debugging
+#Mejores y mas humanos textos de error.
+
+######## ------------ PENDING TASKS
 #Intentar algo para leer el error en Python
+	#Ya se lee correctamente, pero falta pegarle a la limpieza y envío de la información
 #Seleccionar las notificaciones para recibir las mas importantes.
 #Subir el log a pastebin
 #Integrar un metodo de centralización para evitar el bug de la doble shop order.
@@ -43,7 +59,7 @@ import pytesseract
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
-Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
+Grupo_SAP_Label = os.getenv('JORGE_MORALES')
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -95,14 +111,14 @@ def serial_ports():
             pass
     return result
 
-def take_screenshot():
+def take_screenshot(type):
 	now = datetime.now()
 	dt_string = now.strftime("%d%m%Y-%H%M%S")
 	mis_docs = My_Documents(5)
 	if type == "error":
-		im = pyautogui.screenshot(region=(0,0, 1200, 700))
-	else:
 		im = pyautogui.screenshot(region=(500,350,450,190))
+	else:
+		im = pyautogui.screenshot(region=(0,0, 1200, 700))
 	#check if folder exists
 	isFile = os.path.isdir(f"{mis_docs}/scfolder")
 	if isFile == False:
@@ -118,6 +134,7 @@ def read_from_img(img):
 	if file_exists2 == False:
 		#there's not Tesseract Installed
 		write_log("nok","Tesseract no está instalado",'0','0','0')
+		print("No encontré Tesseract")
 		return
 	# read image
 	image = cv2.imread(img)
@@ -127,8 +144,7 @@ def read_from_img(img):
 	pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
 	text = pytesseract.image_to_string(image, config=config)
 	# print text
-	text = text.split('\n')
-	print(text)
+	#text = text.split('\n')
 	return text
 
 
@@ -242,7 +258,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			ok_flag = True
 		#throw error if ok_flag it's false after this
 		if ok_flag == False:
-			ruta_foto = take_screenshot()
+			ruta_foto = take_screenshot("full")
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID} Intenté imprimir una etiqueta, pero no veo el Membrain. Aquí está una foto de la pantalla:"),token_Tel)
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
@@ -263,7 +279,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 		if error4_btn is not None:
 			#error in HU
-			ruta_foto = take_screenshot()
+			ruta_foto = take_screenshot("error")
+			texto_error = read_from_img(ruta_foto)
+			print(texto_error)
+			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
 			pyautogui.press('enter')
@@ -283,11 +302,16 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				break
 			time.sleep(5)
 		if error5_btn == None:
-			ruta_foto = take_screenshot()
+			ruta_foto = take_screenshot("full")
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Estaba creando una etiqueta, pero el Membrain ya no respondió. ¿Se podrá intentar de nuevo?"),token_Tel)
 			write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "No se encontró la secc de embalaje")
+			pyautogui.click(50,50)
+			time.sleep(1)
+			pyautogui.click(523,223)
+			pyautogui.press('enter')
+			pyautogui.click(435,142)
 			return
 		#no issue, continue
 		pyautogui.press('tab')
@@ -302,11 +326,16 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				break
 			time.sleep(3)
 		if error8_btn == None:
-			ruta_foto = take_screenshot()
+			ruta_foto = take_screenshot("full")
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Estaba creando una etiqueta, pero el Membrain ya no respondió. ¿Se podrá intentar de nuevo?"),token_Tel)
 			write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "No se encontró la secc de embalaje")
+			pyautogui.click(50,50)
+			time.sleep(1)
+			pyautogui.click(523,223)
+			pyautogui.press('enter')
+			pyautogui.click(435,142)
 			return
 		#print(StandardPack)
 		pyautogui.write(f"{StandardPack}")
@@ -349,7 +378,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			if error35_btn is not None:
 				#write the warning and return to HU input by using boton1.png
 				time.sleep(1)
-				ruta_foto = take_screenshot()
+				ruta_foto = take_screenshot("error")
 				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 				write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
@@ -363,8 +392,11 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.click(435,142)
 			else:
 				#No error: This is the good ending.
+				ruta_foto = take_screenshot("error")
+				texto_error = read_from_img(ruta_foto)
+				print (texto_error)
+				write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 				pyautogui.press('enter')
-				#write_log('ok',ShopOrder,BoxType,StandardPack)
 				write_log("ok","No error",ShopOrder,BoxType,StandardPack)
 				run1.console.configure(text = "Impresión Terminada: Revise Log")
 		if error2_btn is not None:
@@ -372,7 +404,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#write the warning and return to HU input by using boton1.png
 			time.sleep(1)
 			#warning_log("Error al ingresar la etiqueta")
-			ruta_foto = take_screenshot()
+			ruta_foto = take_screenshot("error")
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 			write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
@@ -386,6 +418,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.click(435,142)
 		if error6_btn is not None:
 			#just a simple ok
+			ruta_foto = take_screenshot("error")
+			texto_error = read_from_img(ruta_foto)
+			print (texto_error)
+			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			pyautogui.press('enter')
 			pyautogui.click(435,142)
 			write_log("ok","No error",ShopOrder,BoxType,StandardPack)
@@ -444,14 +480,18 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 			# Append text at the end of file
 			if logtype == 'ok':
 				file_object.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
-			else:
+			elif logtype == 'nok':
 				file_object.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
+			elif logtype == 'log':
+				file_object.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
 	else:
 		with open(ruta,"w+") as f:
 			if logtype == 'ok':
 				f.write(f" Etiqueta Impresa en {dt_string} con los datos {ShopOrder,BoxType,StandardPack}")
-			else:
+			elif logtype == 'nok':
 				f.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
+			elif logtype == 'log':
+				file_object.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
 
 
 
@@ -662,14 +702,14 @@ class Passwordchecker(tk.Frame):
 			print(f"Cadena Recibida: {label_data}")
 			#prevent data process if label_data is 0 characters long.
 			#find the X in box.
-			if label_data.find('X') == -1 or len(label_data) != 17:
+			if label_data.find('X') == -1 or len(label_data) != 18:
 				#what if the string does not have X
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 				print(f"Se recibió esta cadena {label_data}, pero parece que no es válida")
-				write_log("nok","La información no es válida. Llegó la siguiente cadena",{label_data},"BOX","SP")
+				write_log("nok","La información no es válida",{label_data},"BOX","SP")
 				label_data = ""
 				s = ""
-				self.console.configure(text = "Puerto Abierto.: Listo para recibir")
+				self.console.configure(text = "Puerto Abierto: Descarte de datos inválidos")
 				self.ser.open()
 				continue
 			else:
@@ -739,7 +779,7 @@ class Passwordchecker(tk.Frame):
 
 			#if variable is already done, then compare:
 			if StandardP_comp == StandardPack:
-				print(f'SP está igual: {StandardPack}')
+				print(f'4.- SP está igual: {StandardPack}')
 			else:
 				send_message(Grupo_SAP_Label,quote(f'En {Line_ID}: Se ha cambiado el Standard Pack: \n SP Anterior: {StandardP_comp} \n SP Nuevo: {StandardPack}'), token_Tel)
 				#ShopOrder update to prevent this again.

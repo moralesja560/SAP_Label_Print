@@ -1,3 +1,10 @@
+#------------------Author Info----------------------#
+#			The SAP Automatic Labeling System
+# Designed and developed by: Ing Jorge Alberto Morales, MBA
+# Controls Engineer for Mubea Coil Springs Mexico
+# JorgeAlberto.Morales@mubea.com
+#---------------------------------------------------#
+
 #----------------------import area
 
 import subprocess
@@ -33,28 +40,31 @@ import pytesseract
 #Descartar cadenas de texto repetidas o corruptas
 	#Ya no pasan Shop Orders que no sean de  7 digitos
 	#tampoco pasan cadenas que sean distintas de 18 caracteres
+	#Si pasan letras, pero son desechadas de inmediato
 #Prevención de envíos masivos de etiquetas
 	#No le afecta al programa si presiona el botón manual muchas veces.
 #Procedimiento de retorno para todas las funciones que desembocan en error
+	#Retorno con 1: Segundo intento
+	#Retorno con 0: Todo bien
 #Optimización de la consola para mantener el enfoque en el debugging
-#Mejores y mas humanos textos de error.
+	#Mejores y mas humanos textos de error.
+#Intentar algo para leer el error en Python
+	#Ya puedo leer el error con Tesseract y operar correctamente
 
 ######## ------------ PENDING TASKS
-#Intentar algo para leer el error en Python
-	#Ya se lee correctamente, pero falta pegarle a la limpieza y envío de la información
+
+####Configurar el resto de errores para canalizarlas:
+	#canalizar hacia un segundo intento o notificación
+	#el bug de la doble shop order se puede procesar leyendo el error "HU planificada está en uso"
+	#Guardar la HU por motivos de registro
+
 #Seleccionar las notificaciones para recibir las mas importantes.
 #Subir el log a pastebin
-#Integrar un metodo de centralización para evitar el bug de la doble shop order.
 #Killswitch para notificaciones
 #continuar en pruebas.
 #optimización en el análisis de Shop Order
 
 
-#####--------RECOMMENDATIONS
-#Utiliza mejor los prints para señalar info importante.
-# comentarios en todos lados..
-#optimización de procesos.
-#mensajes de informacion y error en todos lados
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
@@ -160,9 +170,11 @@ def read_from_img(img):
 		elif "ninguna orden para" in letter:
 			processed_text = "Configuración del Membrain equivocada"
 		elif "HTTP" in letter or "RTC" in letter:
-			processed_text = "No respondió el SAP"
+			processed_text = "No respondio el SAP"
 		elif "Entrada de mercancias" in letter:
-			processed_text = "Proceso terminó normal"
+			HU_step1 = letter.find("HU")
+			print(f"Proceso terminó normal: {letter[HU_step1:HU_step1+12]}")
+			processed_text = f"Proceso termina normal {letter[HU_step1:HU_step1+12]}"
 		elif "eliminada" in letter:
 			processed_text = "HU ya fue eliminada"
 		elif "maestro de personal" in letter:
@@ -439,7 +451,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.press('enter')
 				pyautogui.click(435,142)
 			else:
-				#No error: This is the good ending.
+				#No error but a yes/no message: This is the good ending 1.
 				ruta_foto = take_screenshot("error")
 				texto_error = read_from_img(ruta_foto)
 				print (texto_error)
@@ -467,15 +479,15 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.press('enter')
 			pyautogui.click(435,142)
 		if error6_btn is not None:
-			#just a simple ok
+			#Good ending 2: take note of the HU
 			ruta_foto = take_screenshot("error")
 			texto_error = read_from_img(ruta_foto)
-			print (texto_error)
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			pyautogui.press('enter')
 			pyautogui.click(435,142)
 			write_log("ok","No error",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "Impresión Terminada: Revise Log")
+			return 0
 	else:
 		write_log("nok","Shop Order con longitud incorrecta",ShopOrder,BoxType,StandardPack)
 		return

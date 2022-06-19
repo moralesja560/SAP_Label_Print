@@ -41,7 +41,9 @@ for image in directory_list:
 		elif "HTTP" in letter or "RTC" in letter:
 			print("No respondió el SAP")
 		elif "Entrada de mercancias" in letter:
-			print("Proceso terminó normal")
+			HU_step1 = letter.find("HU")
+			print(f"Proceso terminó normal, HU es {letter[HU_step1:HU_step1+12]}")
+			#'Entrada de mercancias en HU 156444885 a 3000 contabilizada'
 		elif "eliminada" in letter:
 			print("HU ya fue eliminada")
 		elif "maestro de personal" in letter:

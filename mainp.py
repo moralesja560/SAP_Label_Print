@@ -150,27 +150,27 @@ def read_from_img(img):
 		if len(letter)<3:
 			continue
 		elif "no existe" in letter:
-			print("HU no existente")
+			processed_text = "HU no existente"
 		elif "OF" in letter:
-			print("Shop Order con OF") 
+			processed_text = "Shop Order con OF"
 		elif "tratando" in letter:
-			print("HU está siendo usada en otro lado")
+			processed_text = "HU está siendo usada en otro lado"
 		elif "HU planificada" in letter:
-			print("Bug de misma Shop Order")
+			processed_text = "Bug de misma Shop Order"
 		elif "ninguna orden para" in letter:
-			print("Configuración del Membrain equivocada")
+			processed_text = "Configuración del Membrain equivocada"
 		elif "HTTP" in letter or "RTC" in letter:
-			print("No respondió el SAP")
+			processed_text = "No respondió el SAP"
 		elif "Entrada de mercancias" in letter:
-			print("Proceso terminó normal")
+			processed_text = "Proceso terminó normal"
 		elif "eliminada" in letter:
-			print("HU ya fue eliminada")
+			processed_text = "HU ya fue eliminada"
 		elif "maestro de personal" in letter:
-			print("Numero de empleado no existe")
+			processed_text = "Numero de empleado no existe"
 		else:
-			print(f"El error tenía esto {letter}, pero no pude detectar caracteres")
+			processed_text = f"El error tenía esto {letter}, pero no pude detectar caracteres"
 
-	return text
+	return processed_text
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
@@ -216,6 +216,7 @@ def send_photo(user_id, image,token):
 ###################################This is the function that actually prints the labels.
 
 def label_print(ShopOrder,BoxType,StandardPack):
+	global return_codename
 	#a protection to avoid printing empty labels
 	if len(str(ShopOrder))>0:
 ##########area to check if app is in position.
@@ -306,18 +307,36 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#error in HU
 			ruta_foto = take_screenshot("error")
 			texto_error = read_from_img(ruta_foto)
-			print(texto_error)
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
-			pyautogui.press('enter')
-			time.sleep(1)
-			pyautogui.click(435,142)
-			time.sleep(1)
-			pyautogui.press('backspace')
-			write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
-			run1.console.configure(text = "HU incorrecta")
-			return
+			if "Membrain equivocada" in texto_error:
+				#send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+				#send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Parece que está mal configurado el Membrain"),token_Tel)
+				pyautogui.press('enter')
+				time.sleep(1)
+				pyautogui.click(435,142)
+				time.sleep(1)
+				pyautogui.press('tab')
+				time.sleep(1)
+				pyautogui.press('tab')
+				time.sleep(1)
+				pyautogui.press('space')
+				time.sleep(1)
+				pyautogui.click(435,142)
+				pyautogui.press('backspace')
+				return_codename = 1
+				return return_codename
+			elif "HU no existente" in texto_error:			
+				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
+				pyautogui.press('enter')
+				time.sleep(1)
+				pyautogui.click(435,142)
+				time.sleep(1)
+				pyautogui.press('backspace')
+				write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
+				run1.console.configure(text = "HU incorrecta")
+				return_codename = 1
+				return return_codename
 		for i in range(0,10):
 		# tries before failing
 		#error5 if to detect if script is going well.				
@@ -819,7 +838,10 @@ class Passwordchecker(tk.Frame):
 
 
 ####################Launch label printing process..
-			label_print(ShopOrder,BoxType,StandardPack)
+			nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+			if nuevo_intento == 1:
+				print("se intenta de nuevo la etiqueta")
+				nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 			#waiting time before restarting the process.
 			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 1 mins")
 			time.sleep(60)

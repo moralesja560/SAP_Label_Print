@@ -57,12 +57,11 @@ import pytesseract
 	#canalizar hacia un segundo intento o notificación
 	#el bug de la doble shop order se puede procesar leyendo el error "HU planificada está en uso"
 	#Guardar la HU por motivos de registro
-
+	#asegurarse que todos los returns lleven un código 0 o 1.
 #Seleccionar las notificaciones para recibir las mas importantes.
 #Subir el log a pastebin
 #Killswitch para notificaciones
 #continuar en pruebas.
-#optimización en el análisis de Shop Order
 
 
 
@@ -545,7 +544,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 			elif logtype == 'nok':
 				file_object.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
 			elif logtype == 'log':
-				file_object.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
+				file_object.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack}: {texto}")
 	else:
 		with open(ruta,"w+") as f:
 			if logtype == 'ok':
@@ -553,7 +552,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 			elif logtype == 'nok':
 				f.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
 			elif logtype == 'log':
-				file_object.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
+				file_object.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack}: {texto}")
 
 
 

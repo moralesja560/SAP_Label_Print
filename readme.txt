@@ -7,9 +7,10 @@ Finished Goods that are ready for shipment need a label that previously came fro
 This python interface will receive data from a serial connection and will click some stuff with pyautogui to get the label, leaving human error out of the process.
 
 Features:
--Serial port with pyserial to receive the needed info
--Tkinter GUI to inform the user what's going on and to set some parameters, such as com port selection
--pyautogui to click the membrain software to get the tag.
--CSV to log printed labels and errors
--Telegram automated notifications: 
-  -This is a big deal: The fact that the script can send Telegram messages in case of error, opens the door to very big developments.
+-It can detect the screen and act accordingly if an employee left Membrain in another screen (i.e he was cancelling an HU, or left an error message open)
+-Serial data pre processing to find corrupted or incomplete data.
+-It can try to print a second time if the error allows it (i.e if the error is caused by internet outage, etc)
+-console prints are optimized to identify the program sequence
+-Tesseract can read the error message and decide if send notification or to try again.
+-Telegram notifications serve as the point of contact with supervisors and management. 
+  -When something goes wrong or some data is changed (Container capacity suddenly changed), Telegram sends a message to the specied group.

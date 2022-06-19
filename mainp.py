@@ -144,7 +144,32 @@ def read_from_img(img):
 	pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
 	text = pytesseract.image_to_string(image, config=config)
 	# print text
-	#text = text.split('\n')
+	text = text.split('\n')
+	for letter in text:
+	#check for nonexistant HU
+		if len(letter)<3:
+			continue
+		elif "no existe" in letter:
+			print("HU no existente")
+		elif "OF" in letter:
+			print("Shop Order con OF") 
+		elif "tratando" in letter:
+			print("HU está siendo usada en otro lado")
+		elif "HU planificada" in letter:
+			print("Bug de misma Shop Order")
+		elif "ninguna orden para" in letter:
+			print("Configuración del Membrain equivocada")
+		elif "HTTP" in letter or "RTC" in letter:
+			print("No respondió el SAP")
+		elif "Entrada de mercancias" in letter:
+			print("Proceso terminó normal")
+		elif "eliminada" in letter:
+			print("HU ya fue eliminada")
+		elif "maestro de personal" in letter:
+			print("Numero de empleado no existe")
+		else:
+			print(f"El error tenía esto {letter}, pero no pude detectar caracteres")
+
 	return text
 
 

@@ -9,35 +9,42 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-# read image
-img = cv2.imread(resource_path(r"images/HUerror.png"))
 
-# configurations
-config = ('-l eng --oem 1 --psm 3')
-
-# pytessercat
-pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
+directory_list = os.listdir(resource_path(r'images\testimg'))
+print("Files and directories in  current working directory :") 
 
 
-text = pytesseract.image_to_string(img, config=config)
-text = text.split('\n')
-
-for letter in text:
-	#check for nonexistant HU
-	if len(letter)<2:
-		continue
-	if "no existe" in letter:
-		print("procesamiento de cadena por HU no existente")
-	if "OF" in letter:
-		print("procesamiento de cadena por OF")
-	if "tratando" in letter:
-		print("procesamiento de cadena por error de HU")
-	if "HU planificada" in letter:
-		print("Bug de misma Shop Order")
-
-
-#HU processing
-#x_pos= text.find('HU')
-#print(text[x_pos+3:x_pos+12])
-
-
+for image in directory_list:
+	# read image
+	img = cv2.imread(resource_path(r'images\testimg'+"\\"+image))
+	# configurations
+	config = ('-l eng --oem 1 --psm 1')
+	# pytessercat
+	pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
+	text = pytesseract.image_to_string(img, config=config)
+	text = text.split('\n')
+	print(f"se procesa la imagen {image} con el texto {text}")
+	for letter in text:
+		#check for nonexistant HU
+		if len(letter)<3:
+			continue
+		elif "no existe" in letter:
+			print("HU no existente")
+		elif "OF" in letter:
+			print("Shop Order con OF") 
+		elif "tratando" in letter:
+			print("HU está siendo usada en otro lado")
+		elif "HU planificada" in letter:
+			print("Bug de misma Shop Order")
+		elif "ninguna orden para" in letter:
+			print("Configuración del Membrain equivocada")
+		elif "HTTP" in letter or "RTC" in letter:
+			print("No respondió el SAP")
+		elif "Entrada de mercancias" in letter:
+			print("Proceso terminó normal")
+		elif "eliminada" in letter:
+			print("HU ya fue eliminada")
+		elif "maestro de personal" in letter:
+			print("Numero de empleado no existe")
+		else:
+			print(f"El error tenía esto {letter}, pero no pude detectar caracteres")

@@ -149,7 +149,7 @@ def read_from_img(img):
 	#check for nonexistant HU
 		if len(letter)<3:
 			continue
-		elif "no existe" in letter:
+		elif "no existe" in letter or "ya esta eliminada" in letter:
 			processed_text = "HU no existente"
 		elif "OF" in letter:
 			processed_text = "Shop Order con OF"

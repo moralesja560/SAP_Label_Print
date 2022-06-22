@@ -300,7 +300,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "No se puede identificar el punto de entrada")
-			return
+			#Add a 1 to try to print again
+			return_codename = 1
+			return return_codename
+
 
 ###############This is the procedure start
 
@@ -348,7 +351,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				run1.console.configure(text = "HU incorrecta")
 				return_codename = 1
 				return return_codename
-		for i in range(0,10):
+		for i in range(0,15):
 		# tries before failing
 		#error5 if to detect if script is going well.				
 			error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
@@ -367,7 +370,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.click(523,223)
 			pyautogui.press('enter')
 			pyautogui.click(435,142)
-			return
+			return_codename = 1
+			return return_codename
 		#no issue, continue
 		pyautogui.press('tab')
 		pyautogui.press('space')
@@ -384,14 +388,15 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			ruta_foto = take_screenshot("full")
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Estaba creando una etiqueta, pero el Membrain ya no respondió. ¿Se podrá intentar de nuevo?"),token_Tel)
-			write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
-			run1.console.configure(text = "No se encontró la secc de embalaje")
+			write_log("nok","No se encontró el PI",ShopOrder,BoxType,StandardPack)
+			run1.console.configure(text = "No se encontró la secc de PI")
 			pyautogui.click(50,50)
 			time.sleep(1)
 			pyautogui.click(523,223)
 			pyautogui.press('enter')
 			pyautogui.click(435,142)
-			return
+			return_codename = 1
+			return return_codename
 		#print(StandardPack)
 		pyautogui.write(f"{StandardPack}")
 		pyautogui.press('tab')
@@ -486,10 +491,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.click(435,142)
 			write_log("ok","No error",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "Impresión Terminada: Revise Log")
-			return 0
-	else:
-		write_log("nok","Shop Order con longitud incorrecta",ShopOrder,BoxType,StandardPack)
-		return
+			return_codename = 0
+			return return_codename
 
 
 #---------------------------------End of Main Function-------------------------------#
@@ -855,7 +858,7 @@ class Passwordchecker(tk.Frame):
 				nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 			#waiting time before restarting the process.
 			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 1 mins")
-			time.sleep(60)
+			time.sleep(30)
 			print("5.- Limpieza de variables")
 			ShopOrder = ""
 			BoxType = ""

@@ -414,19 +414,23 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(2)
 ###############---------------THIS ENTER IS TO STORE THE LABEL.
 		pyautogui.press('enter')
-		time.sleep(7)
+		time.sleep(2)
 ############################################
 		#Look for 2 scenarios: 
 		#After the label input, usually a Yes/no warning appears.
 		#let's look for a yes/no and an error label
 		#error
-		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
-		#yes no
-		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-		#puro ok
-		error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
-		#a little timer to ease the sea
-		time.sleep(2)
+		for i in range(0,10):
+			#error
+			error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+			#yes no
+			error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
+			#puro ok
+			error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+			if error2_btn is not None or error3_btn is not None or error6_btn is not None:
+				break
+			else:
+				time.sleep(5)
 		#a third event is missing: OK only
 		if error3_btn is not None:
 			#the usual Yes/No
@@ -434,8 +438,12 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			time.sleep(1)
 			pyautogui.press('enter')
 			#What if there's an error?
-			time.sleep(6)
-			error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)	
+			for i in range(0,10):
+				error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)	
+				if error35_btn is not None:
+					break
+				else:
+					time.sleep(3)
 			if error35_btn is not None:
 				#write the warning and return to HU input by using boton1.png
 				time.sleep(1)
@@ -454,6 +462,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.click(523,223)
 				pyautogui.press('enter')
 				pyautogui.click(435,142)
+				return_codename = 0
+				return return_codename
 			else:
 				#No error but a yes/no message: This is the good ending 1.
 				ruta_foto = take_screenshot("error")
@@ -463,6 +473,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.press('enter')
 				write_log("ok","No error",ShopOrder,BoxType,StandardPack)
 				run1.console.configure(text = "Impresión Terminada: Revise Log")
+				return_codename = 0
+				return return_codename
 		if error2_btn is not None:
 			#what if there was an error after the input (e.g. network, Shop Order Overfill)
 			#write the warning and return to HU input by using boton1.png
@@ -482,6 +494,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.click(523,223)
 			pyautogui.press('enter')
 			pyautogui.click(435,142)
+			return_codename = 0
+			return return_codename
 		if error6_btn is not None:
 			#Good ending 2: take note of the HU
 			ruta_foto = take_screenshot("error")

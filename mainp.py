@@ -881,9 +881,10 @@ class Passwordchecker(tk.Frame):
 				print("se intenta de nuevo la etiqueta")
 				nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 			#waiting time before restarting the process.
+			print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
 			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 1 mins")
 			time.sleep(30)
-			print("5.- Limpieza de variables")
+			print("6.- Limpieza de variables")
 			ShopOrder = ""
 			BoxType = ""
 			StandardPack = ""
@@ -891,7 +892,7 @@ class Passwordchecker(tk.Frame):
 			s = ""
 			#Open the port again.
 			self.ser.open()
-			print("6.- Reapertura de puerto")
+			print("7.- Reapertura de puerto")
 			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
 #################Threading area 
 class Process(threading.Thread):

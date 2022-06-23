@@ -9,7 +9,6 @@
 
 import subprocess
 import os
-import sys
 import time, threading
 from tkinter import *
 from tkinter import messagebox
@@ -414,34 +413,50 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(2)
 ###############---------------THIS ENTER IS TO STORE THE LABEL.
 		pyautogui.press('enter')
-		time.sleep(7)
+		time.sleep(2)
 ############################################
 		#Look for 2 scenarios: 
 		#After the label input, usually a Yes/no warning appears.
 		#let's look for a yes/no and an error label
 		#error
-		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
-		#yes no
-		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-		#puro ok
-		error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
-		#a little timer to ease the sea
-		time.sleep(2)
-		#a third event is missing: OK only
+		for i in range(0,10):
+			#error
+			error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+			#yes no
+			error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
+			#puro ok
+			error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+			if error2_btn is not None or error3_btn is not None or error6_btn is not None:
+				break
+			else:
+				time.sleep(5)
+
+		#YES/NO 
+		#This error3_btn appears when there is a warning that says " x pieces to fulfill the order"
+		#This is not relevant to read, but a necesary step.
 		if error3_btn is not None:
-			#the usual Yes/No
 			pyautogui.press('tab')
 			time.sleep(1)
 			pyautogui.press('enter')
-			#What if there's an error?
-			time.sleep(6)
-			error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)	
+			#What if there's an error? 
+			#check for error and for the label correct ending
+			for i in range(0,10):
+				error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+				error9_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+				if error35_btn is not None or error6_btn is not None :
+					break
+				else:
+					time.sleep(3)
 			if error35_btn is not None:
 				#write the warning and return to HU input by using boton1.png
 				time.sleep(1)
 				ruta_foto = take_screenshot("error")
 				texto_error = read_from_img(ruta_foto)
 				print (texto_error)
+				#####This area is to select what the error text will do. 
+					#What to do if there's an OF error (overfill)
+					#What to do if there's an HU in use error?
+				
 				write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
@@ -454,8 +469,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.click(523,223)
 				pyautogui.press('enter')
 				pyautogui.click(435,142)
-			else:
-				#No error but a yes/no message: This is the good ending 1.
+				return_codename = 0
+				return return_codename
+			if error9_btn is not None:
+				#No error after a yes/no message: This is the good ending 1.
 				ruta_foto = take_screenshot("error")
 				texto_error = read_from_img(ruta_foto)
 				print (texto_error)
@@ -463,9 +480,14 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.press('enter')
 				write_log("ok","No error",ShopOrder,BoxType,StandardPack)
 				run1.console.configure(text = "Impresión Terminada: Revise Log")
+				return_codename = 0
+				return return_codename
+		
+		#This error differs from error35 because the error triggers immediately after pressing enter.
+		#what if there was an error after the input (e.g. network, Shop Order Overfill)
+		#write the warning and return to HU input by using boton1.png
 		if error2_btn is not None:
-			#what if there was an error after the input (e.g. network, Shop Order Overfill)
-			#write the warning and return to HU input by using boton1.png
+
 			time.sleep(1)
 			ruta_foto = take_screenshot("error")
 			texto_error = read_from_img(ruta_foto)
@@ -482,6 +504,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.click(523,223)
 			pyautogui.press('enter')
 			pyautogui.click(435,142)
+			return_codename = 0
+			return return_codename
 		if error6_btn is not None:
 			#Good ending 2: take note of the HU
 			ruta_foto = take_screenshot("error")
@@ -857,9 +881,10 @@ class Passwordchecker(tk.Frame):
 				print("se intenta de nuevo la etiqueta")
 				nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 			#waiting time before restarting the process.
+			print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
 			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 1 mins")
 			time.sleep(30)
-			print("5.- Limpieza de variables")
+			print("6.- Limpieza de variables")
 			ShopOrder = ""
 			BoxType = ""
 			StandardPack = ""
@@ -867,7 +892,7 @@ class Passwordchecker(tk.Frame):
 			s = ""
 			#Open the port again.
 			self.ser.open()
-			print("6.- Reapertura de puerto")
+			print("7.- Reapertura de puerto")
 			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
 #################Threading area 
 class Process(threading.Thread):

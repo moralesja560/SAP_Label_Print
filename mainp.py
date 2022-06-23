@@ -9,7 +9,6 @@
 
 import subprocess
 import os
-import sys
 import time, threading
 from tkinter import *
 from tkinter import messagebox
@@ -431,16 +430,20 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				break
 			else:
 				time.sleep(5)
-		#a third event is missing: OK only
+
+		#YES/NO 
+		#This error3_btn appears when there is a warning that says " x pieces to fulfill the order"
+		#This is not relevant to read, but a necesary step.
 		if error3_btn is not None:
-			#the usual Yes/No
 			pyautogui.press('tab')
 			time.sleep(1)
 			pyautogui.press('enter')
-			#What if there's an error?
+			#What if there's an error? 
+			#check for error and for the label correct ending
 			for i in range(0,10):
-				error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)	
-				if error35_btn is not None:
+				error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+				error9_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+				if error35_btn is not None or error6_btn is not None :
 					break
 				else:
 					time.sleep(3)
@@ -450,6 +453,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				ruta_foto = take_screenshot("error")
 				texto_error = read_from_img(ruta_foto)
 				print (texto_error)
+				#####This area is to select what the error text will do. 
+					#What to do if there's an OF error (overfill)
+					#What to do if there's an HU in use error?
+				
 				write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
@@ -464,8 +471,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				pyautogui.click(435,142)
 				return_codename = 0
 				return return_codename
-			else:
-				#No error but a yes/no message: This is the good ending 1.
+			if error9_btn is not None:
+				#No error after a yes/no message: This is the good ending 1.
 				ruta_foto = take_screenshot("error")
 				texto_error = read_from_img(ruta_foto)
 				print (texto_error)
@@ -475,9 +482,12 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				run1.console.configure(text = "Impresión Terminada: Revise Log")
 				return_codename = 0
 				return return_codename
+		
+		#This error differs from error35 because the error triggers immediately after pressing enter.
+		#what if there was an error after the input (e.g. network, Shop Order Overfill)
+		#write the warning and return to HU input by using boton1.png
 		if error2_btn is not None:
-			#what if there was an error after the input (e.g. network, Shop Order Overfill)
-			#write the warning and return to HU input by using boton1.png
+
 			time.sleep(1)
 			ruta_foto = take_screenshot("error")
 			texto_error = read_from_img(ruta_foto)

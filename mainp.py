@@ -512,14 +512,19 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			print (texto_error)
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Si el error de HU en uso, se intentará de nuevo."),token_Tel)
 			write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 			time.sleep(4)
 			pyautogui.press('enter')
 			time.sleep(1)
 			main_menu()
-			return_codename = 0
-			return return_codename
+			if  texto_error == "no hay embalaje planeado" or texto_error == "Bug de misma Shop Order":
+				main_menu()
+				return_codename = 1
+				return return_codename
+			else:
+				return_codename = 0
+				return return_codename
 		if error6_btn is not None:
 			#Good ending 2: take note of the HU
 			ruta_foto = take_screenshot("error")

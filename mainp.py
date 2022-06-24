@@ -136,6 +136,7 @@ def take_screenshot(type):
 	return ruta_img
 
 def read_from_img(img):
+	processed_text = "cadena vacia"
 	#wait for branch merging then try to adjust screenshot area to allow tesseract to read accurately
 	#check if program is installed
 	file_exists2 = os.path.exists('C:/Program Files/Tesseract/tesseract.exe')
@@ -875,7 +876,7 @@ class Passwordchecker(tk.Frame):
 				StandardP_comp = StandardPack
 
 
-####################Launch label printing process..
+####################-----THE LABEL PRINTING PROCESS-----#
 			nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 			if nuevo_intento == 1:
 				print("se intenta de nuevo la etiqueta")

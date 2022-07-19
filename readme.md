@@ -15,6 +15,7 @@ Features:
 - Serial data pre processing to find corrupted or incomplete data and use previously stored data.
 - Console prints are optimized to identify the program sequence
 - Tesseract can read the error message and decide to send a notification or to print a second time if the error allows it (i.e if the error is caused by internet outage, etc)
+- Tesseract can also read the label Handling Unit number to keep a record of printed labels.
 - Telegram notifications serve as the point of contact with supervisors and management. 
   -When something goes wrong or some data is changed (Container capacity suddenly changed), Telegram sends a message to the specified group.
   

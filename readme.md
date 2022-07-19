@@ -8,7 +8,7 @@ A previously automated process now is performed by the area personnel.
 SAP inventory suffers grave damage when LT employees print wrong labels or discard already printed labels. The typical cardboard/plastic container can hold up to 120-140 pcs. Once i saw an employee print a 10,000 pieces container label and attach to the cardboard container without much care.
 
 
-This software will receive data from a serial connection and will click some stuff with pyautogui to get the label, effectively reducing human error.
+The station PLC sends a string over a serial connection. The string contains the SAP order, the type and capacity of the container. The software receives the string, pre-process it to ensure validity and completeness and then performs the necessary clicks to print the label. 
 
 Features:
 -It can detect the screen and act accordingly if an employee left Membrain in another screen (i.e he was cancelling an HU, or left an error message open)

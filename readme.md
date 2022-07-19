@@ -17,4 +17,17 @@ Features:
 -Telegram notifications serve as the point of contact with supervisors and management. 
   -When something goes wrong or some data is changed (Container capacity suddenly changed), Telegram sends a message to the specified group.
   
-  
+### File Descriptions:
+#### Images Folder
+1. Images folder contains all the pictures needed to deploy pyautogui locatescreen feature, the main UI picture and some CSV files that contain tkinter buttons
+### root
+
+1. listdir.py iterates trough a function to discover local paths such as My Documents, Program Files and many other relevant paths.
+
+2. locate_Test.py served as a training area to test the pyautogui.locatescreen "confidence" parameter. A very high setting in this parameter will prevent the software to see what's on the screen. And a low confidence parameter may wrongly select an incorrect screen area. 
+
+3. #### mainp.py  The main software file
+
+4. screenshot.py serves as the training area for Tesseract
+
+5. tkinter_template.py is the base file to develop new application that use hypertr 

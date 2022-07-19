@@ -11,11 +11,11 @@ SAP inventory suffers grave damage when LT employees print wrong labels or disca
 The station PLC sends a string over a serial connection. The string contains the SAP order, the type and capacity of the container. The software receives the string, pre-process it to ensure validity and completeness and then performs the necessary clicks to print the label. 
 
 Features:
--It can detect the screen and act accordingly if an employee left Membrain in another screen (i.e he was cancelling an HU, or left an error message open)
--Serial data pre processing to find corrupted or incomplete data and use previously stored data.
--console prints are optimized to identify the program sequence
--Tesseract can read the error message and decide to send a notification or to print a second time if the error allows it (i.e if the error is caused by internet outage, etc)
--Telegram notifications serve as the point of contact with supervisors and management. 
+- It can detect the screen and act accordingly if an employee left Membrain in another screen (i.e he was cancelling an HU, or left an error message open)
+- Serial data pre processing to find corrupted or incomplete data and use previously stored data.
+- Console prints are optimized to identify the program sequence
+- Tesseract can read the error message and decide to send a notification or to print a second time if the error allows it (i.e if the error is caused by internet outage, etc)
+- Telegram notifications serve as the point of contact with supervisors and management. 
   -When something goes wrong or some data is changed (Container capacity suddenly changed), Telegram sends a message to the specified group.
   
 ### File Descriptions:

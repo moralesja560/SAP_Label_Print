@@ -20,7 +20,7 @@ Features:
 ### File Descriptions:
 #### Images Folder
 1. Images folder contains all the pictures needed to deploy pyautogui locatescreen feature, the main UI picture and some CSV files that contain tkinter buttons
-### root
+#### root
 
 1. listdir.py iterates trough a function to discover local paths such as My Documents, Program Files and many other relevant paths.
 

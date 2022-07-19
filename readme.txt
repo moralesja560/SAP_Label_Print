@@ -1,4 +1,4 @@
-## The SAP Automatic Label Printing System
+# The SAP Automatic Label Printing System
 
 In February the company migrated to SAP, the famous Enterprise Resource Planning software. Practically every single corporate department now depends on that software.
 

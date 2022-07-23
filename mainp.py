@@ -109,7 +109,7 @@ def take_screenshot(type):
 	dt_string = now.strftime("%d%m%Y-%H%M%S")
 	mis_docs = My_Documents(5)
 	if type == "error":
-		im = pyautogui.screenshot(region=(500,350,510,190))
+		im = pyautogui.screenshot(region=(490,350,510,190)) #changed to 490 from 500
 	else:
 		im = pyautogui.screenshot(region=(0,0, 1200, 700))
 	#check if folder exists
@@ -145,7 +145,7 @@ def read_from_img(img):
 			continue
 		elif "no existe" in letter or "ya esta eliminada" in letter:
 			processed_text = "HU no existente"
-		elif "OF" in letter or :
+		elif "OF" in letter or "cerrada" in letter or "orden excedido" in letter :
 			processed_text = "Shop Order con OF"
 		elif "tratando" in letter:
 			processed_text = "HU está siendo usada en otro lado"
@@ -409,7 +409,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#After the label input, usually a Yes/no warning appears.
 		#let's look for a yes/no and an error label
 		#error
-		for i in range(0,10):
+		for i in range(0,20):
 			#error
 			error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			#yes no
@@ -450,7 +450,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
-				#write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 				time.sleep(4)
 				pyautogui.press('enter')
 				time.sleep(1)
@@ -458,7 +457,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				time.sleep(1)
 				pyautogui.click(523,223)
 				pyautogui.press('enter')
-				#pyautogui.click(435,142)
 				return_to_main()
 				return_codename = 0
 				return return_codename
@@ -482,10 +480,18 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			ruta_foto = take_screenshot("error")
 			texto_error = read_from_img(ruta_foto)
 			print (texto_error)
+			
+			if texto_error == "Shop Order con OF":
+				return_codename = 0
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
+			elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
+				return_codename = 1
+			else:
+				return_codename = 0
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo"),token_Tel)
+				write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
-			write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 			time.sleep(4)
 			pyautogui.press('enter')
 			time.sleep(1)
@@ -493,7 +499,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			time.sleep(1)
 			pyautogui.click(523,223)
 			pyautogui.press('enter')
-			#pyautogui.click(435,142)
 			return_to_main()
 			return_codename = 0
 			return return_codename
@@ -504,7 +509,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			pyautogui.press('enter')
 			return_to_main()
-			#pyautogui.click(435,142)
 			write_log("ok","No error",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "Impresión Terminada: Revise Log")
 			return_codename = 0

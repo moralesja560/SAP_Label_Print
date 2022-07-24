@@ -234,8 +234,6 @@ def main_menu():
 	pyautogui.click(435,142)
 
 
-
-
 ###################################This is the function that actually prints the labels.
 
 def label_print(ShopOrder,BoxType,StandardPack):

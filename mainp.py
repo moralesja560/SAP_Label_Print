@@ -171,6 +171,12 @@ def read_from_img(img):
 def return_to_main():
 	time.sleep(1)
 	pyautogui.click(435,142)
+
+def main_menu():
+	time.sleep(1)
+	pyautogui.click(50,50)
+	time.sleep(1)
+	pyautogui.click(523,223)
 #---------------------------------End of Auxiliary Functions-------------------------#
 
 #--------------------------------Telegram Messaging Management----------------------#
@@ -251,10 +257,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#main screen after all, click on the screen
 				time.sleep(4)
 				pyautogui.press('enter')
-				time.sleep(1)
-				pyautogui.click(50,50)
-				time.sleep(1)
-				pyautogui.click(523,223)
+				main_menu()
 				return_to_main()
 			ok_flag = True
 		#Yes/NO button wasn't? try with the main screen
@@ -272,19 +275,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#main screen then click on the screen
 			time.sleep(4)
 			pyautogui.press('enter')
-			time.sleep(1)
-			pyautogui.click(50,50)
-			time.sleep(1)
-			pyautogui.click(523,223)
+			main_menu()
 			return_to_main()
 			ok_flag = True
 		if error10_btn != None and ok_flag == False:
 			#somebody left an error message
 			pyautogui.press('enter')
-			time.sleep(1)
-			pyautogui.click(50,50)
-			time.sleep(1)
-			pyautogui.click(523,223)
+			main_menu()
 			return_to_main()
 
 
@@ -355,9 +352,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Estaba creando una etiqueta, pero el Membrain ya no respondió. ¿Se podrá intentar de nuevo?"),token_Tel)
 			write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "No se encontró la secc de embalaje")
-			pyautogui.click(50,50)
-			time.sleep(1)
-			pyautogui.click(523,223)
+			#pyautogui.click(50,50)
+			#time.sleep(1)
+			#pyautogui.click(523,223)
+			main_menu()
 			pyautogui.press('enter')
 			return_to_main()
 			return_codename = 1
@@ -380,9 +378,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Error de Standard Pack: Intentaré de nuevo."),token_Tel)
 			write_log("nok","No se encontró el PI",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "No se encontró la secc de PI")
-			pyautogui.click(50,50)
-			time.sleep(1)
-			pyautogui.click(523,223)
+			main_menu()
 			pyautogui.press('enter')
 			return_to_main()
 			return_codename = 1
@@ -452,10 +448,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 				time.sleep(4)
 				pyautogui.press('enter')
-				time.sleep(1)
-				pyautogui.click(50,50)
-				time.sleep(1)
-				pyautogui.click(523,223)
+				main_menu()
 				pyautogui.press('enter')
 				return_to_main()
 				return_codename = 0
@@ -494,10 +487,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			time.sleep(4)
 			pyautogui.press('enter')
-			time.sleep(1)
-			pyautogui.click(50,50)
-			time.sleep(1)
-			pyautogui.click(523,223)
+			main_menu()
 			pyautogui.press('enter')
 			return_to_main()
 			return_codename = 0

@@ -280,6 +280,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			ok_flag = True
 		if error10_btn != None and ok_flag == False:
 			#somebody left an error message
+			#########################
 			pyautogui.press('enter')
 			main_menu()
 			return_to_main()
@@ -473,7 +474,6 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			ruta_foto = take_screenshot("error")
 			texto_error = read_from_img(ruta_foto)
 			print (texto_error)
-			
 			if texto_error == "Shop Order con OF":
 				return_codename = 0
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)

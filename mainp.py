@@ -427,7 +427,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			pyautogui.press('enter')
 			#What if there's an error? 
 			#check for error and for the label correct ending
-			for i in range(0,10):
+			for i in range(0,20):
 				error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 				error9_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
 				if error35_btn is not None or error6_btn is not None :
@@ -455,7 +455,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				return_codename = 0
 				return return_codename
 			if error9_btn is not None:
-				#No error after a yes/no message: This is the good ending 1.
+##################No error after a yes/no message: This is the good ending 1.
 				ruta_foto = take_screenshot("error")
 				texto_error = read_from_img(ruta_foto)
 				print (texto_error)

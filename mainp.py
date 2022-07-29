@@ -44,6 +44,12 @@ import pytesseract
 # 5.- Seleccionar las notificaciones para recibir las mas importantes.
 # 6.- Subir el log a pastebin
 
+####Configurar el resto de errores para canalizarlas:
+	#canalizar hacia un segundo intento o notificación
+	#el error "HU planificada está en uso" sale cuando se presiona tabular, no cuando se guarda la etiqueta.
+	#Guardar la HU por motivos de registro
+	#asegurarse que todos los returns lleven un código 0 o 1.
+#Subir el log a pastebin
 #Killswitch para notificaciones
 #continuar en pruebas.
 
@@ -163,6 +169,8 @@ def read_from_img(img):
 			processed_text = "HU ya fue eliminada"
 		elif "maestro de personal" in letter:
 			processed_text = "Numero de empleado no existe"
+		elif "embalaje planificada" in letter:
+			processed_text = "no hay embalaje planeado"
 		else:
 			processed_text = f"El error tenía esto {letter}, pero no pude detectar caracteres"
 
@@ -215,6 +223,15 @@ def send_photo(user_id, image,token):
 
 #--------------------------------Telegram Messaging Management END----------------------#
 
+#-----------------------------AUXILIARY OPTIMIZATION FUNCTIONS------------------------#
+
+def main_menu():
+
+	pyautogui.click(50,50)
+	time.sleep(1)
+	pyautogui.click(523,223)
+	time.sleep(1)
+	pyautogui.click(435,142)
 
 
 ###################################This is the function that actually prints the labels.
@@ -364,15 +381,20 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#no issue, continue
 		pyautogui.press('tab')
 		pyautogui.press('space')
+		#after this space may errors can arise, including the HU is already in use.
 		time.sleep(2)
 		#This is where i can save some time by locating the screen.
 		for i in range(0,20):
 			#try locating the screen 10 times
 			error8_btn = pyautogui.locateOnScreen(resource_path(r"images/PI.png"),grayscale=False, confidence=.7)
+			error10_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			print(f"Intento de encontrar el PI {i}: status: {error5_btn}")
-			if error8_btn is not None:
+			print(f"Intento de encontrar algun error {i}: status: {error10_btn}")
+			if error8_btn is not None or error10_btn is not None:
 				break
 			time.sleep(3)
+		# Si no aparece la seccion 3 de la etiqueta, haz lo siguiente
+		# puede deberse a internet o a errores en la HU		
 		if error8_btn == None:
 			ruta_foto = take_screenshot("full")
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
@@ -380,10 +402,19 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			write_log("nok","No se encontró el PI",ShopOrder,BoxType,StandardPack)
 			run1.console.configure(text = "No se encontró la secc de PI")
 			main_menu()
-			pyautogui.press('enter')
-			return_to_main()
 			return_codename = 1
 			return return_codename
+		#si el error 10 no está vacio (=None), entonces encontró un error
+		if error10_btn is not None:
+			#encuentra el error y leelo
+			ruta_foto = take_screenshot("error")
+			texto_error = read_from_img(ruta_foto)
+			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
+			if  texto_error == "no hay embalaje planeado" or texto_error == "Bug de misma Shop Order":
+				main_menu()
+				return_codename = 1
+				return return_codename
+		#print(StandardPack)
 		pyautogui.write(f"{StandardPack}")
 		pyautogui.press('tab')
 		#numero de operario
@@ -449,9 +480,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 				time.sleep(4)
 				pyautogui.press('enter')
+				time.sleep(1)
 				main_menu()
-				pyautogui.press('enter')
-				return_to_main()
 				return_codename = 0
 				return return_codename
 			if error9_btn is not None:
@@ -485,13 +515,19 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Si el error de HU en uso, se intentará de nuevo."),token_Tel)
+			write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 			time.sleep(4)
 			pyautogui.press('enter')
+			time.sleep(1)
 			main_menu()
-			pyautogui.press('enter')
-			return_to_main()
-			return_codename = 0
-			return return_codename
+			if  texto_error == "no hay embalaje planeado" or texto_error == "Bug de misma Shop Order":
+				main_menu()
+				return_codename = 1
+				return return_codename
+			else:
+				return_codename = 0
+				return return_codename
 		if error6_btn is not None:
 			#Good ending 2: take note of the HU
 			ruta_foto = take_screenshot("error")
@@ -780,7 +816,7 @@ class Passwordchecker(tk.Frame):
 				#what if the string does not have X
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 				print(f"Se recibió esta cadena {label_data}, pero parece que no es válida")
-				write_log("nok","La información no es válida",{label_data},"BOX","SP")
+				write_log("nok","La información no es válida",label_data,"BOX","SP")
 				label_data = ""
 				s = ""
 				self.console.configure(text = "Puerto Abierto: Descarte de datos inválidos")

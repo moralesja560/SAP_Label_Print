@@ -33,26 +33,14 @@ import pytesseract
 ############progress check
 ######-------ENDED TASKS
 # 2.- aumentar el tiempo de espera para el embalaje y el PI
-
-
-######## ------------ PENDING TASKS for V15
-
 # 1.- aumentar el tiempo de espera para recolectar el HU
-
 # 3.- añade mas errores a la zona de lectura
 # 4.- pasa las notificaciones al grupo para que dejes de recibirlas
 # 5.- Seleccionar las notificaciones para recibir las mas importantes.
 # 6.- Subir el log a pastebin
 
-####Configurar el resto de errores para canalizarlas:
-	#canalizar hacia un segundo intento o notificación
-	#el error "HU planificada está en uso" sale cuando se presiona tabular, no cuando se guarda la etiqueta.
-	#Guardar la HU por motivos de registro
-	#asegurarse que todos los returns lleven un código 0 o 1.
+######## ------------ PENDING TASKS for V16
 #Subir el log a pastebin
-#Killswitch para notificaciones
-#continuar en pruebas.
-
 
 
 ######-----------------Sensitive Data Load-----------------####

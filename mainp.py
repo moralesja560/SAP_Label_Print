@@ -559,14 +559,7 @@ with open(resource_path(r'images/idline.txt'), 'r') as f:
 
 #Pandas DataFrame dictionaries
 
-pd_dict = {
-	'timestamp' : ['dummy'],
-	'logtype' : ['dummy'],
-	'texto' : ['dummy'],
-	'Shop Order' : ['dummy'],
-	'BoxType' : ['dummy'],
-	'SP' : ['dummy'],
-}
+pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 'Shop Order' : ['dummy'], 'BoxType' : ['dummy'], 'SP' : ['dummy']}
 
 
 def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
@@ -607,11 +600,12 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 		pd_log = pd.read_csv(pd_ruta)
 	else:
 		pd_log = pd.DataFrame(pd_dict)
-	
-	new_row = {	'timestamp' : dt_string, 'logtype' : logtype, 'texto' : texto, 'Shop Order' : ShopOrder, 'BoxType' : BoxType, 'SP' : StandardPack}
-	pd_log.append(new_row,ignore_index=True)
+
+	new_row = {'timestamp' : [dt_string], 'logtype' : [logtype], 'texto' : [texto], 'Shop Order' : [ShopOrder], 'BoxType' : [BoxType], 'SP' : [StandardPack]}
+	new_row_pd = pd.DataFrame(new_row)
+	pd_concat = pd.concat([pd_log,new_row_pd])
 	#store the info
-	pd_log.to_csv(pd_ruta)
+	pd_concat.to_csv(pd_ruta,index=False)
 
 
 

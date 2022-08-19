@@ -442,7 +442,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			if error35_btn is not None or error6_btn is not None :
 				break
 			else:
-				time.sleep(3)
+				time.sleep(2)
 		if error35_btn is not None:
 			#write the warning and return to HU input by using boton1.png
 			time.sleep(1)
@@ -452,15 +452,20 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#####This area is to select what the error text will do. 
 				#What to do if there's an OF error (overfill)
 				#What to do if there's an HU in use error?
-			
-			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
+			if texto_error == "Shop Order con OF":
+				return_codename = 0
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
+			elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
+				return_codename = 1
+			else:
+				return_codename = 0
+				write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
+				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
 			time.sleep(4)
 			pyautogui.press('enter')
 			time.sleep(1)
 			main_menu()
-			return_codename = 0
 			return return_codename
 		if error9_btn is not None:
 #################No error after a yes/no message: This is the good ending 1.

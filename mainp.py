@@ -7,6 +7,7 @@
 
 #----------------------import area
 
+from asyncio import new_event_loop
 import subprocess
 import os
 import time, threading
@@ -38,10 +39,12 @@ import math
 # 3.- añade mas errores a la zona de lectura
 # 4.- pasa las notificaciones al grupo para que dejes de recibirlas
 # 5.- Seleccionar las notificaciones para recibir las mas importantes.
-# 6.- Subir el log a pastebin
+
 
 ######## ------------ PENDING TASKS for V16
 #Subir el log a pastebin
+# Probar el proceso mejorado cuando sale el YES/NO
+# Create a dataframe to get sorted data. Easier to process
 
 
 
@@ -554,13 +557,27 @@ with open(resource_path("images/entry_btn_data.csv")) as file:
 with open(resource_path(r'images/idline.txt'), 'r') as f:
 	Line_ID = f.readline()
 
+#Pandas DataFrame dictionaries
+
+pd_dict = {
+	'timestamp' : ['dummy'],
+	'logtype' : ['dummy'],
+	'texto' : ['dummy'],
+	'Shop Order' : ['dummy'],
+	'BoxType' : ['dummy'],
+	'SP' : ['dummy'],
+}
+
+
 def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	now = datetime.now()
 	dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 	#print("date and time =", dt_string)	
 	mis_docs = My_Documents(5)
 	ruta = str(mis_docs)+ r"\registro_etiquetas.txt"
+	pd_ruta = str(mis_docs)+ r"\registro_etiquetas_df.csv"
 	file_exists = os.path.exists(ruta)
+	pd_file_exists = os.path.exists(pd_ruta)
 	if file_exists == True:
 		with open(ruta, "a+") as file_object:
 			# Move read cursor to the start of file.
@@ -583,7 +600,18 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 			elif logtype == 'nok':
 				f.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
 			elif logtype == 'log':
-				file_object.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack}: {texto}")
+				f.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack}: {texto}")
+
+	#check if pandas DataFrame exists to load the stuff or to create with dummy data.
+	if pd_file_exists:
+		pd_log = pd.read_csv(pd_ruta)
+	else:
+		pd_log = pd.DataFrame(pd_dict)
+	
+	new_row = {	'timestamp' : dt_string, 'logtype' : logtype, 'texto' : texto, 'Shop Order' : ShopOrder, 'BoxType' : BoxType, 'SP' : StandardPack}
+	pd_log.append(new_row,ignore_index=True)
+	#store the info
+	pd_log.to_csv(pd_ruta)
 
 
 
@@ -889,7 +917,7 @@ class Passwordchecker(tk.Frame):
 				nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 			#waiting time before restarting the process.
 			print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
-			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 1 mins")
+			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
 			time.sleep(30)
 			print("6.- Limpieza de variables")
 			ShopOrder = ""

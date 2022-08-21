@@ -32,19 +32,17 @@ import pandas as pd
 
 ############progress check
 ######-------ENDED TASKS
-# 2.- aumentar el tiempo de espera para el embalaje y el PI
-# 1.- aumentar el tiempo de espera para recolectar el HU
-# 3.- añade mas errores a la zona de lectura
-# 4.- pasa las notificaciones al grupo para que dejes de recibirlas
-# 5.- Seleccionar las notificaciones para recibir las mas importantes.
-
-
-######## ------------ PENDING TASKS for V16
-#Subir el log a pastebin
-# Probar el proceso mejorado cuando sale el YES/NO
 # Create a dataframe to get sorted data. Easier to process
+# Probar el proceso mejorado cuando sale el YES/NO
 
 
+######## ------------ PENDING TASKS for V17
+# notificación de arranque de programa
+# upload pandas Dataframe to SQL server
+# agrega protocolo de respuesta en error4 (orden cerrada o inexistente)
+
+##### DO NOT MODIFY THIS CODE. IT BELONGS TO V16 CURRENTLY IN PRODUCTION
+#### ONLY MODIFY TO CORRECT SEVERE BUGS
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()

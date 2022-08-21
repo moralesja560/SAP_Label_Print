@@ -7,7 +7,6 @@
 
 #----------------------import area
 
-from asyncio import new_event_loop
 import subprocess
 import os
 import time, threading
@@ -28,7 +27,6 @@ import requests
 import cv2
 import pytesseract
 import pandas as pd
-import math
 #---------------------------------...
 
 
@@ -227,7 +225,6 @@ def main_menu():
 def label_print(ShopOrder,BoxType,StandardPack):
 	global return_codename
 	#a protection to avoid printing empty labels
-
 ##########area to check if app is in position.
 	#check if Membrain is ready to take inputs
 	inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial2.png"),grayscale=False, confidence=.7)
@@ -303,11 +300,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 ##############This is the procedure start
 		#click on the HU field
+	pyautogui.click(523,223)
 	return_to_main()
 	time.sleep(2)
 	#write the shop order but before a healthy backspace
 	pyautogui.press('backspace')
 	pyautogui.write(f"{ShopOrder}")
+	print(f"escribí {ShopOrder} en el campo ShopOrder")
 	pyautogui.press('enter')
 	time.sleep(6)
 	#what if the HU is wrong. 

@@ -40,6 +40,8 @@ import pandas as pd
 # notificación de arranque de programa
 # upload pandas Dataframe to SQL server
 # agrega protocolo de respuesta en error4 (orden cerrada o inexistente)
+# Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
+
 
 ##### DO NOT MODIFY THIS CODE. IT BELONGS TO V16 CURRENTLY IN PRODUCTION
 #### ONLY MODIFY TO CORRECT SEVERE BUGS

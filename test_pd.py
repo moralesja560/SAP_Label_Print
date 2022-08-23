@@ -2,7 +2,16 @@ import pandas as pd
 from datetime import datetime
 import os
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+import pyodbc
+import pandas as pd
 
+
+engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
+
+Session = sessionmaker(bind=engine)
+session = Session()
 
 def My_Documents(location):
 	import ctypes.wintypes
@@ -18,9 +27,12 @@ def My_Documents(location):
 	return temp_docs
 
 
-pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 'Shop Order' : ['dummy'], 'BoxType' : ['dummy'], 'SP' : ['dummy']}
-
-
+pd_dict = {'timestamp' : ['dummy'], 
+			'logtype' : ['dummy'],
+			'texto' : ['dummy'],
+			'Shop Order' : ['dummy'],
+			'BoxType' : ['dummy'],
+			'SP' : ['dummy']}
 
 
 
@@ -65,6 +77,13 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 
 	new_row = {'timestamp' : [dt_string], 'logtype' : [logtype], 'texto' : [texto], 'Shop Order' : [ShopOrder], 'BoxType' : [BoxType], 'SP' : [StandardPack]}
 	new_row_pd = pd.DataFrame(new_row)
+	print(new_row_pd)
+	try:
+		new_row_pd.to_sql('Temp1_SAPLabel_LT1', con=engine, if_exists='append',index=False)
+	except:
+		print("no pude subir la info a sql")
+	finally: 
+		print("SQL exitoso")
 	pd_concat = pd.concat([pd_log,new_row_pd])
 	print(pd_concat.to_string())
 	#store the info
@@ -72,6 +91,8 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 
 
 
+
 if __name__ == '__main__':
-	write_log('ok',"falla de OT",'3568974',"BOX",'109')
+	write_log('ok',"falla de OT",'3568974',"BOX",'110')
+
 

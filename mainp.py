@@ -27,6 +27,8 @@ import requests
 import cv2
 import pytesseract
 import pandas as pd
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 #---------------------------------...
 
 
@@ -34,6 +36,7 @@ import pandas as pd
 ######-------ENDED TASKS
 # Create a dataframe to get sorted data. Easier to process
 # Probar el proceso mejorado cuando sale el YES/NO
+# rutina de notificaciones de OF mejorada
 
 
 ######## ------------ PENDING TASKS for V17
@@ -43,13 +46,19 @@ import pandas as pd
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
 
 
-##### DO NOT MODIFY THIS CODE. IT BELONGS TO V16 CURRENTLY IN PRODUCTION
-#### ONLY MODIFY TO CORRECT SEVERE BUGS
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
 Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
+
+
+#####--------------------SQL Session Management--------------####
+engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
+
+Session = sessionmaker(bind=engine)
+session = Session()
+
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -605,6 +614,12 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 
 	new_row = {'timestamp' : [dt_string], 'logtype' : [logtype], 'texto' : [texto], 'Shop Order' : [ShopOrder], 'BoxType' : [BoxType], 'SP' : [StandardPack]}
 	new_row_pd = pd.DataFrame(new_row)
+	try:
+		new_row_pd.to_sql('Temp1_SAPLabel_LT1', con=engine, if_exists='append',index=False)
+	except:
+		print("no pude subir la info a sql")
+	finally: 
+		print("SQL exitoso")
 	pd_concat = pd.concat([pd_log,new_row_pd])
 	#store the info
 	pd_concat.to_csv(pd_ruta,index=False)

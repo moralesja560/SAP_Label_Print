@@ -1,2 +1,3 @@
-Nombre,buttn_name,x_pos,y_pos,Width,Height,options
-dropdown1,self.ComList,418,620,10,2,PortList
+Nombre0,buttn_name1,set2,offset3,Dataframe4,Height5,options6
+dropdown1,self.ComList,Selecc Puerto,0,Port,2,portList
+dropdown2,self.baudRate1,9600,30,spds,2,speeds

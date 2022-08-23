@@ -27,23 +27,24 @@ import requests
 import cv2
 import pytesseract
 import pandas as pd
-import math
 #---------------------------------...
 
 
 ############progress check
 ######-------ENDED TASKS
-# 2.- aumentar el tiempo de espera para el embalaje y el PI
-# 1.- aumentar el tiempo de espera para recolectar el HU
-# 3.- añade mas errores a la zona de lectura
-# 4.- pasa las notificaciones al grupo para que dejes de recibirlas
-# 5.- Seleccionar las notificaciones para recibir las mas importantes.
-# 6.- Subir el log a pastebin
-
-######## ------------ PENDING TASKS for V16
-#Subir el log a pastebin
+# Create a dataframe to get sorted data. Easier to process
+# Probar el proceso mejorado cuando sale el YES/NO
 
 
+######## ------------ PENDING TASKS for V17
+# notificación de arranque de programa
+# upload pandas Dataframe to SQL server
+# agrega protocolo de respuesta en error4 (orden cerrada o inexistente)
+# Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
+
+
+##### DO NOT MODIFY THIS CODE. IT BELONGS TO V16 CURRENTLY IN PRODUCTION
+#### ONLY MODIFY TO CORRECT SEVERE BUGS
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
@@ -224,7 +225,6 @@ def main_menu():
 def label_print(ShopOrder,BoxType,StandardPack):
 	global return_codename
 	#a protection to avoid printing empty labels
-
 ##########area to check if app is in position.
 	#check if Membrain is ready to take inputs
 	inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial2.png"),grayscale=False, confidence=.7)
@@ -300,11 +300,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 ##############This is the procedure start
 		#click on the HU field
+	pyautogui.click(523,223)
 	return_to_main()
 	time.sleep(2)
 	#write the shop order but before a healthy backspace
 	pyautogui.press('backspace')
 	pyautogui.write(f"{ShopOrder}")
+	print(f"escribí {ShopOrder} en el campo ShopOrder")
 	pyautogui.press('enter')
 	time.sleep(6)
 	#what if the HU is wrong. 
@@ -452,16 +454,18 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#####This area is to select what the error text will do. 
 				#What to do if there's an OF error (overfill)
 				#What to do if there's an HU in use error?
+			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			if texto_error == "Shop Order con OF":
 				return_codename = 0
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
 			elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
 				return_codename = 1
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: La Hu ya esta siendo utilizada en otro lado"),token_Tel)
 			else:
 				return_codename = 0
-				write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
+
+			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			time.sleep(4)
 			pyautogui.press('enter')
 			time.sleep(1)
@@ -486,20 +490,21 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(1)
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
-		print (texto_error)
+		print(texto_error)
+		send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 		if texto_error == "Shop Order con OF":
 			return_codename = 0
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
 		elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
 			return_codename = 1
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: La HU ya está siendo utilizada en otro lado"),token_Tel)
 		else:
 			return_codename = 0
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo"),token_Tel)
-			write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
-		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-		send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-		send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Si el error de HU en uso, se intentará de nuevo."),token_Tel)
+		
+		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)		
 		write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
+
 		time.sleep(4)
 		pyautogui.press('enter')
 		time.sleep(1)
@@ -554,13 +559,20 @@ with open(resource_path("images/entry_btn_data.csv")) as file:
 with open(resource_path(r'images/idline.txt'), 'r') as f:
 	Line_ID = f.readline()
 
+#Pandas DataFrame dictionaries
+
+pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 'Shop Order' : ['dummy'], 'BoxType' : ['dummy'], 'SP' : ['dummy']}
+
+
 def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	now = datetime.now()
 	dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 	#print("date and time =", dt_string)	
 	mis_docs = My_Documents(5)
 	ruta = str(mis_docs)+ r"\registro_etiquetas.txt"
+	pd_ruta = str(mis_docs)+ r"\registro_etiquetas_df.csv"
 	file_exists = os.path.exists(ruta)
+	pd_file_exists = os.path.exists(pd_ruta)
 	if file_exists == True:
 		with open(ruta, "a+") as file_object:
 			# Move read cursor to the start of file.
@@ -583,7 +595,19 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 			elif logtype == 'nok':
 				f.write(f" Hubo un error durante impresión en {dt_string}, con datos {ShopOrder,BoxType,StandardPack} y con error: {texto}")
 			elif logtype == 'log':
-				file_object.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack}: {texto}")
+				f.write(f" Registro de Información para análisis en {dt_string}, con datos {ShopOrder,BoxType,StandardPack}: {texto}")
+
+	#check if pandas DataFrame exists to load the stuff or to create with dummy data.
+	if pd_file_exists:
+		pd_log = pd.read_csv(pd_ruta)
+	else:
+		pd_log = pd.DataFrame(pd_dict)
+
+	new_row = {'timestamp' : [dt_string], 'logtype' : [logtype], 'texto' : [texto], 'Shop Order' : [ShopOrder], 'BoxType' : [BoxType], 'SP' : [StandardPack]}
+	new_row_pd = pd.DataFrame(new_row)
+	pd_concat = pd.concat([pd_log,new_row_pd])
+	#store the info
+	pd_concat.to_csv(pd_ruta,index=False)
 
 
 
@@ -801,7 +825,7 @@ class Passwordchecker(tk.Frame):
 				#what if the string does not have X
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 				print(f"Se recibió esta cadena {label_data}, pero parece que no es válida")
-				write_log("nok","La información no es válida",label_data,"BOX","SP")
+				write_log("nok","La informacion no es valida",label_data,"BOX","0")
 				label_data = ""
 				s = ""
 				self.console.configure(text = "Puerto Abierto: Descarte de datos inválidos")
@@ -889,7 +913,7 @@ class Passwordchecker(tk.Frame):
 				nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 			#waiting time before restarting the process.
 			print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
-			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 1 mins")
+			run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
 			time.sleep(30)
 			print("6.- Limpieza de variables")
 			ShopOrder = ""

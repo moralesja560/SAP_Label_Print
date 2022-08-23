@@ -35,18 +35,18 @@ from sqlalchemy.orm import sessionmaker
 
 ############progress check
 ######-------ENDED TASKS
-# Create a dataframe to get sorted data. Easier to process
-# Probar el proceso mejorado cuando sale el YES/NO
-# rutina de notificaciones de OF mejorada
-
-
-######## ------------ PENDING TASKS for V17
-# notificación de arranque de programa
 # upload pandas Dataframe to SQL server
+
+
+
+######## ------------ PENDING TASKS for V18
+# notificación de arranque de programa
 # agrega protocolo de respuesta en error4 (orden cerrada o inexistente)
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
+# 
 
 
+#------------DO NOT ADD NEW CODE UNTIL MERGE. THIS BRANCH IS FOR SQL IMPLEMENTATION ONLY------------------#
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
@@ -56,7 +56,8 @@ Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
 
 #####--------------------SQL Session Management--------------####
 #engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
-engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server', echo=True)
+#WINDOWS + R >>> TYPE ODBC AND FIND THE INSTALLED SQL DRIVER.
+engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server', echo=False)
 
 Session = sessionmaker(bind=engine)
 session = Session()

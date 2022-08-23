@@ -454,16 +454,18 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#####This area is to select what the error text will do. 
 				#What to do if there's an OF error (overfill)
 				#What to do if there's an HU in use error?
+			send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 			if texto_error == "Shop Order con OF":
 				return_codename = 0
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
 			elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
 				return_codename = 1
+				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: La Hu ya esta siendo utilizada en otro lado"),token_Tel)
 			else:
 				return_codename = 0
-				write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-				send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 				send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo desde el touchpanel"),token_Tel)
+
+			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			time.sleep(4)
 			pyautogui.press('enter')
 			time.sleep(1)
@@ -488,20 +490,21 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(1)
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
-		print (texto_error)
+		print(texto_error)
+		send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
 		if texto_error == "Shop Order con OF":
 			return_codename = 0
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
 		elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
 			return_codename = 1
+			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: La HU ya está siendo utilizada en otro lado"),token_Tel)
 		else:
 			return_codename = 0
 			send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Intente imprimirla de nuevo"),token_Tel)
-			write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
-		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-		send_photo(Grupo_SAP_Label,ruta_foto,token_Tel)
-		send_message(Grupo_SAP_Label,quote(f" En {Line_ID}: Ya terminé de ingresar la etiqueta, pero me apareció este error. Si el error de HU en uso, se intentará de nuevo."),token_Tel)
+		
+		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)		
 		write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
+
 		time.sleep(4)
 		pyautogui.press('enter')
 		time.sleep(1)

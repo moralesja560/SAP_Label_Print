@@ -41,12 +41,12 @@ from sqlalchemy.orm import sessionmaker
 
 ######## ------------ PENDING TASKS for V18
 # notificación de arranque de programa
-# agrega protocolo de respuesta en error4 (orden cerrada o inexistente)
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
+# usar el IDline para identificar la DB para crear dos tablas en el servidor: Temp1_SAPLabel_LT1 y LT2
 # 
 
 
-#------------DO NOT ADD NEW CODE UNTIL MERGE. THIS BRANCH IS FOR SQL IMPLEMENTATION ONLY------------------#
+#------------V18------------------#
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()

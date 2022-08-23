@@ -825,7 +825,7 @@ class Passwordchecker(tk.Frame):
 				#what if the string does not have X
 				self.console.configure(text = "Datos No Válidos: " + label_data)
 				print(f"Se recibió esta cadena {label_data}, pero parece que no es válida")
-				write_log("nok","La información no es válida",label_data,"BOX","SP")
+				write_log("nok","La informacion no es valida",label_data,"BOX","0")
 				label_data = ""
 				s = ""
 				self.console.configure(text = "Puerto Abierto: Descarte de datos inválidos")

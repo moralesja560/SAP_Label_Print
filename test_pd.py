@@ -82,7 +82,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 		new_row_pd.to_sql('Temp1_SAPLabel_LT1', con=engine, if_exists='append',index=False)
 	except:
 		print("no pude subir la info a sql")
-	finally: 
+	else: 
 		print("SQL exitoso")
 	pd_concat = pd.concat([pd_log,new_row_pd])
 	print(pd_concat.to_string())
@@ -93,6 +93,4 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 
 
 if __name__ == '__main__':
-	write_log('ok',"falla de OT",'3568974',"BOX",'110')
-
-
+	write_log('ok', 'No error', '3067098', 'BOX', '140')

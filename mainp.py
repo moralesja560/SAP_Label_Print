@@ -28,6 +28,7 @@ import cv2
 import pytesseract
 import pandas as pd
 from sqlalchemy import create_engine
+import pyodbc
 from sqlalchemy.orm import sessionmaker
 #---------------------------------...
 
@@ -54,7 +55,8 @@ Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
 
 
 #####--------------------SQL Session Management--------------####
-engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
+#engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
+engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server', echo=True)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -618,7 +620,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 		new_row_pd.to_sql('Temp1_SAPLabel_LT1', con=engine, if_exists='append',index=False)
 	except:
 		print("no pude subir la info a sql")
-	finally: 
+	else: 
 		print("SQL exitoso")
 	pd_concat = pd.concat([pd_log,new_row_pd])
 	#store the info

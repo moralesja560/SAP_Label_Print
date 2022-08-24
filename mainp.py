@@ -46,9 +46,6 @@ from sqlalchemy.orm import sessionmaker
 ## branch diskette
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
 
-## branch:SQL divide
-	# usar el IDline para identificar la DB para crear dos tablas en el servidor: Temp1_SAPLabel_LT1 y LT2
-
 ## branch: parameter_txt
 	# sacar los parámetros como Line_ID, tiempos de espera y SQL_Server a un txt de configuración.
 

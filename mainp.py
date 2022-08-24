@@ -34,16 +34,15 @@ from sqlalchemy.orm import sessionmaker
 
 
 ############progress check
-######-------ENDED TASKS
-# upload pandas Dataframe to SQL server
-
-
-
-######## ------------ PENDING TASKS for V19
-## branch lote
+######-------ENDED TASKS V181
+## branch severe_lot_bug
 	# el lote se abre como un campo en lugar de ya estar diseñado.
 	# obten las coordenadas de lote, clickealo y luego metes 0123456700 (0+ShopOrder+00)
 	# luego click al campo de PI en lugar de tabularlo, es mas seguro.
+
+
+######## ------------ PENDING TASKS for V19
+
 
 ## branch diskette
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
@@ -173,7 +172,7 @@ def read_from_img(img):
 		elif "Entrada de mercancias" in letter:
 			HU_step1 = letter.find("HU")
 			print(f"Proceso terminó normal: {letter[HU_step1:HU_step1+12]}")
-			processed_text = f"Proceso termina normal {letter[HU_step1:HU_step1+12]}"
+			processed_text = f"Proceso normal {letter[HU_step1:HU_step1+12]}"
 		elif "eliminada" in letter:
 			processed_text = "HU ya fue eliminada"
 		elif "maestro de personal" in letter:

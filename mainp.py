@@ -40,8 +40,10 @@ from sqlalchemy.orm import sessionmaker
 
 
 ######## ------------ PENDING TASKS for V19
-## branch launch_notif
-	# notificación de arranque de programa
+## branch lote
+	# el lote se abre como un campo en lugar de ya estar diseñado.
+	# obten las coordenadas de lote, clickealo y luego metes 0123456700 (0+ShopOrder+00)
+	# luego click al campo de PI en lugar de tabularlo, es mas seguro.
 
 ## branch diskette
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
@@ -412,14 +414,22 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			return_codename = 1
 			return return_codename
 	#print(StandardPack)
+	# Integrar el error de Lote
+	pyautogui.click(747, 342)
+	time.sleep(1)
+	pyautogui.write(f"0{ShopOrder}00")
+	time.sleep(1)
+	#Click en el PI
+	pyautogui.click(451, 500)
+	time.sleep(1)
 	pyautogui.write(f"{StandardPack}")
 	pyautogui.press('tab')
 	#numero de operario
 	pyautogui.write("20010380")
-	time.sleep(2)
+	time.sleep(1)
 	#puesto de trabajo
 	pyautogui.press('tab')
-	time.sleep(2)
+	time.sleep(1)
 	pyautogui.press('tab')
 	#texto libre
 	pyautogui.write("Auto Print")

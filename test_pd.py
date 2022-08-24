@@ -1,7 +1,6 @@
 import pandas as pd
 from datetime import datetime
-import os
-
+import os,sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pyodbc
@@ -12,6 +11,13 @@ engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/s
 
 Session = sessionmaker(bind=engine)
 session = Session()
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+
 
 def My_Documents(location):
 	import ctypes.wintypes
@@ -34,6 +40,8 @@ pd_dict = {'timestamp' : ['dummy'],
 			'BoxType' : ['dummy'],
 			'SP' : ['dummy']}
 
+with open(resource_path(r'images/idline.txt'), 'r') as f:
+	Line_ID = f.readline()
 
 
 def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
@@ -79,7 +87,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	new_row_pd = pd.DataFrame(new_row)
 	print(new_row_pd)
 	try:
-		new_row_pd.to_sql('Temp1_SAPLabel_LT2', con=engine, if_exists='append',index=False)
+		new_row_pd.to_sql(f'Temp1_SAPLabel_{Line_ID}', con=engine, if_exists='append',index=False)
 	except:
 		print("no pude subir la info a sql")
 	else: 

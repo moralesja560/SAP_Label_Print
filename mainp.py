@@ -39,13 +39,21 @@ from sqlalchemy.orm import sessionmaker
 
 
 
-######## ------------ PENDING TASKS for V18
-# notificación de arranque de programa
+######## ------------ PENDING TASKS for V19
+## branch launch_notif
+	# notificación de arranque de programa
+
+## branch diskette
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
-# usar el IDline para identificar la DB para crear dos tablas en el servidor: Temp1_SAPLabel_LT1 y LT2
+
+## branch:SQL divide
+	# usar el IDline para identificar la DB para crear dos tablas en el servidor: Temp1_SAPLabel_LT1 y LT2
+
+## branch: parameter_txt
+	# sacar los parámetros como Line_ID, tiempos de espera y SQL_Server a un txt de configuración.
 
 
-#------------V18------------------#
+#------------V19 preprod branch------------------#
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
@@ -617,7 +625,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	new_row = {'timestamp' : [dt_string], 'logtype' : [logtype], 'texto' : [texto], 'Shop Order' : [ShopOrder], 'BoxType' : [BoxType], 'SP' : [StandardPack]}
 	new_row_pd = pd.DataFrame(new_row)
 	try:
-		new_row_pd.to_sql('Temp1_SAPLabel_LT2', con=engine, if_exists='append',index=False)
+		new_row_pd.to_sql(f'Temp1_SAPLabel_{Line_ID}', con=engine, if_exists='append',index=False)
 	except:
 		print("no pude subir la info a sql")
 	else: 

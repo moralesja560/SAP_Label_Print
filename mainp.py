@@ -43,7 +43,6 @@ from sqlalchemy.orm import sessionmaker
 # notificación de arranque de programa
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
 # usar el IDline para identificar la DB para crear dos tablas en el servidor: Temp1_SAPLabel_LT1 y LT2
-# 
 
 
 #------------V18------------------#
@@ -618,7 +617,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	new_row = {'timestamp' : [dt_string], 'logtype' : [logtype], 'texto' : [texto], 'Shop Order' : [ShopOrder], 'BoxType' : [BoxType], 'SP' : [StandardPack]}
 	new_row_pd = pd.DataFrame(new_row)
 	try:
-		new_row_pd.to_sql('Temp1_SAPLabel_LT1', con=engine, if_exists='append',index=False)
+		new_row_pd.to_sql('Temp1_SAPLabel_LT2', con=engine, if_exists='append',index=False)
 	except:
 		print("no pude subir la info a sql")
 	else: 

@@ -79,7 +79,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	new_row_pd = pd.DataFrame(new_row)
 	print(new_row_pd)
 	try:
-		new_row_pd.to_sql('Temp1_SAPLabel_LT1', con=engine, if_exists='append',index=False)
+		new_row_pd.to_sql('Temp1_SAPLabel_LT2', con=engine, if_exists='append',index=False)
 	except:
 		print("no pude subir la info a sql")
 	else: 

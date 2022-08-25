@@ -101,4 +101,4 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 
 
 if __name__ == '__main__':
-	write_log('ok', 'No error', '3067098', 'BOX', '140')
+	write_log('log', 'Proceso termina normal HU 160339884', '1005050', 'BOX', '010')

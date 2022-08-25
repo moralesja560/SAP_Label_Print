@@ -172,7 +172,7 @@ def read_from_img(img):
 		elif "Entrada de mercancias" in letter:
 			HU_step1 = letter.find("HU")
 			print(f"Proceso terminó normal: {letter[HU_step1:HU_step1+12]}")
-			processed_text = f"Proceso normal {letter[HU_step1:HU_step1+12]}"
+			processed_text = f"Proceso termina normal {letter[HU_step1:HU_step1+12]}"
 		elif "eliminada" in letter:
 			processed_text = "HU ya fue eliminada"
 		elif "maestro de personal" in letter:
@@ -432,9 +432,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	pyautogui.press('tab')
 	#texto libre
 	pyautogui.write("Auto Print")
-	time.sleep(2)
+	time.sleep(1)
 	pyautogui.press('tab')
-	time.sleep(2)
+	time.sleep(1)
 ##############---------------THIS ENTER IS TO STORE THE LABEL.
 	pyautogui.press('enter')
 	time.sleep(2)

@@ -796,6 +796,8 @@ class Passwordchecker(tk.Frame):
 					globals()[a_temp].configure(fg = self.fg_offset)
 				else:
 					self.console.configure(text = "Se ha cerrado el puerto")
+					SecondThread = Process()
+					SecondThread.stop()
 			except:
 				messagebox.showinfo('Puerto no abierto','Puerto no existe o no abierto.')
 				a_temp = 'Button1'

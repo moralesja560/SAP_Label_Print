@@ -42,13 +42,14 @@ from sqlalchemy.orm import sessionmaker
 
 
 ######## ------------ PENDING TASKS for V19
-
-
 ## branch diskette
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
 
 ## branch: parameter_txt
 	# sacar los parámetros como Line_ID, tiempos de espera y SQL_Server a un txt de configuración.
+
+## branch incorrect_data
+	# CUando llegan datos malos, llenar las variables con información anterior y mandar a imprimir.
 
 
 #------------V19 preprod branch------------------#
@@ -57,6 +58,7 @@ from sqlalchemy.orm import sessionmaker
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
 Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
+pyautogui.FAILSAFE = False
 
 
 #####--------------------SQL Session Management--------------####

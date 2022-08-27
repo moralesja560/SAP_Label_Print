@@ -42,6 +42,11 @@ from sqlalchemy.orm import sessionmaker
 
 
 ######## ------------ PENDING TASKS for V19
+
+## timestamp on console 
+
+## launch notification 
+
 ## branch diskette
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
 
@@ -796,7 +801,7 @@ class Passwordchecker(tk.Frame):
 					globals()[a_temp].configure(fg = self.fg_offset)
 				else:
 					self.console.configure(text = "Se ha cerrado el puerto")
-					SecondThread = Process()
+					#SecondThread = Process()
 					SecondThread.stop()
 			except:
 				messagebox.showinfo('Puerto no abierto','Puerto no existe o no abierto.')
@@ -987,6 +992,7 @@ class Process(threading.Thread):
 
 #stuff that 
 if __name__ == '__main__':
+
 	finish = False
 	root = tk.Tk()
 	SecondThread = Process()

@@ -57,6 +57,9 @@ from sqlalchemy.orm import sessionmaker
 
 ## launch notification 
 
+## branch COM open_close
+## mejoras a la gestión del puerto de comunicaciones para evitar cerrar la app en caso de falla.
+
 ## branch diskette## branch diskette
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
 
@@ -65,7 +68,6 @@ from sqlalchemy.orm import sessionmaker
 
 ## branch incorrect_data
 	# CUando llegan datos malos, llenar las variables con información anterior y mandar a imprimir.
-
 
 #------------V19 preprod branch------------------#
 

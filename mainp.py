@@ -76,6 +76,7 @@ from sqlalchemy.orm import sessionmaker
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
 Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
+Jorge_Morales = os.getenv('JORGE_MORALES')
 pyautogui.FAILSAFE = False
 
 
@@ -86,7 +87,19 @@ engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/s
 
 Session = sessionmaker(bind=engine)
 session = Session()
+####--------------------------------------------------------####
 
+
+
+####----------------Time Management--------------####
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+###---------------------------------------------####
+
+####----------------Time Management--------------####
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+###---------------------------------------------####
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -814,6 +827,8 @@ class Passwordchecker(tk.Frame):
 					globals()[a_temp].configure(fg = self.fg_offset)
 				else:
 					self.console.configure(text = "Se ha cerrado el puerto")
+					#SecondThread = Process()
+					SecondThread.stop()
 			except:
 				messagebox.showinfo('Puerto no abierto','Puerto no existe o no abierto.')
 				a_temp = 'Button1'
@@ -830,6 +845,12 @@ class Passwordchecker(tk.Frame):
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
+			try:
+				#SecondThread.stop()
+				finish = True
+			except:
+				pass
+			
 			self.parent.destroy()
 			self.parent.quit()
 
@@ -974,7 +995,7 @@ class Passwordchecker(tk.Frame):
 			s = ""
 			#Open the port again.
 			self.ser.open()
-			print("7.- Reapertura de puerto")
+			print(f"7.- Reapertura de puerto. timestamp: {dt_string}")
 			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
 #################Threading area 
 class Process(threading.Thread):
@@ -993,7 +1014,8 @@ class Process(threading.Thread):
 		#while not finish:
 			#do not start serial until com info is selected.
 		run1.method1(ComPort,baud_Rate,Parity_data,stop_bits,byte_size)
-		run1.console.configure(text = f"Proceso Terminado: Puerto Cerrado")
+		#V182 corrected bug: app crash when GUI is closed and COM is connected
+		#run1.console.configure(text = f"Proceso Terminado: Puerto Cerrado")
 
 		time.sleep(3)
 	
@@ -1003,6 +1025,7 @@ class Process(threading.Thread):
 
 #stuff that 
 if __name__ == '__main__':
+	send_message(Jorge_Morales,quote(f'Arranque de software {Line_ID}'), token_Tel)
 	finish = False
 	root = tk.Tk()
 	SecondThread = Process()

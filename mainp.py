@@ -89,13 +89,6 @@ Session = sessionmaker(bind=engine)
 session = Session()
 ####--------------------------------------------------------####
 
-
-
-####----------------Time Management--------------####
-now = datetime.now()
-dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-###---------------------------------------------####
-
 ####----------------Time Management--------------####
 now = datetime.now()
 dt_string = now.strftime("%d/%m/%Y %H:%M:%S")

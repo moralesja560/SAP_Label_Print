@@ -73,6 +73,7 @@ from sqlalchemy.orm import sessionmaker
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
 Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
+Jorge_Morales = os.getenv('JORGE_MORALES')
 pyautogui.FAILSAFE = False
 
 
@@ -834,6 +835,12 @@ class Passwordchecker(tk.Frame):
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
+			try:
+				#SecondThread.stop()
+				finish = True
+			except:
+				pass
+			
 			self.parent.destroy()
 			self.parent.quit()
 
@@ -997,7 +1004,8 @@ class Process(threading.Thread):
 		#while not finish:
 			#do not start serial until com info is selected.
 		run1.method1(ComPort,baud_Rate,Parity_data,stop_bits,byte_size)
-		run1.console.configure(text = f"Proceso Terminado: Puerto Cerrado")
+		#V182 corrected bug: app crash when GUI is closed and COM is connected
+		#run1.console.configure(text = f"Proceso Terminado: Puerto Cerrado")
 
 		time.sleep(3)
 	
@@ -1007,6 +1015,7 @@ class Process(threading.Thread):
 
 #stuff that 
 if __name__ == '__main__':
+	send_message(Jorge_Morales,quote(f'Arranque de software {Line_ID}'), token_Tel)
 	finish = False
 	root = tk.Tk()
 	SecondThread = Process()

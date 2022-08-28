@@ -83,7 +83,14 @@ engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/s
 
 Session = sessionmaker(bind=engine)
 session = Session()
+####--------------------------------------------------------####
 
+
+
+####----------------Time Management--------------####
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+###---------------------------------------------####
 
 #---------------------------------------Auxiliary Functions-------------------------#
 
@@ -971,7 +978,7 @@ class Passwordchecker(tk.Frame):
 			s = ""
 			#Open the port again.
 			self.ser.open()
-			print("7.- Reapertura de puerto")
+			print(f"7.- Reapertura de puerto. timestamp: {dt_string}")
 			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
 #################Threading area 
 class Process(threading.Thread):

@@ -42,7 +42,22 @@ from sqlalchemy.orm import sessionmaker
 
 
 ######## ------------ PENDING TASKS for V19
-## branch diskette
+
+## timestamp on console 
+
+## limpieza mensual del folder scfolder y del txt log
+
+## im alive notif.
+
+## print cuando arranque de funcion label_print. 
+
+## investigar porque el SQL falla a veces. activar el echo y lo dejamos unos días funcionando.
+
+## Log de consola >> txt
+
+## launch notification 
+
+## branch diskette## branch diskette
 # Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
 
 ## branch: parameter_txt

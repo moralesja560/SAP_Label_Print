@@ -69,6 +69,7 @@ from sqlalchemy.orm import sessionmaker
 ## branch incorrect_data
 	# CUando llegan datos malos, llenar las variables con información anterior y mandar a imprimir.
 
+
 #------------V19 preprod branch------------------#
 
 ######-----------------Sensitive Data Load-----------------####

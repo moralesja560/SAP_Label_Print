@@ -1016,13 +1016,19 @@ class Process(threading.Thread):
 		self._stop_event.set()
 		print("Thread Stopped")
 
-#stuff that 
+
 if __name__ == '__main__':
 	send_message(Jorge_Morales,quote(f'Arranque de software {Line_ID}'), token_Tel)
+	#SIGTERM signal
 	finish = False
+	#tkinter class assign
 	root = tk.Tk()
-	SecondThread = Process()
+## How to start a new thread? 
+	# Assign a name and pass a few variables to it.
+	# First thread 
 	run1 = Passwordchecker(root)
+	#Second thread handles COM Port
+	SecondThread = Process()
 	root.mainloop() #GUI.start()
 	#print("Exiting....")
 	finish = True

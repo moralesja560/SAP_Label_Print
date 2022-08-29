@@ -42,33 +42,44 @@ from sqlalchemy.orm import sessionmaker
 
 
 ######## ------------ PENDING TASKS for V19
+"""
+1.-timestamp on console 
+2.- limpieza mensual del folder scfolder y del txt log
+branch im_alive:
+	1.- notificación cada hora de que el software sigue funcionando
+	2.- en la noche que se me envie a mi nada mas
 
-## timestamp on console 
+4.- console print cuando arranque de funcion label_print. 
 
-## limpieza mensual del folder scfolder y del txt log
+5.- investigar porque el SQL falla a veces. activar el echo y lo dejamos unos días funcionando.
 
-## im alive notif.
+6.- Log de consola >> txt
+	¿Para que es necesario el log?
 
-## print cuando arranque de funcion label_print. 
+7.- launch and close notification:
+	1.- un thread que este vigilando los demas threads en caso de cierre.
 
-## investigar porque el SQL falla a veces. activar el echo y lo dejamos unos días funcionando.
 
-## Log de consola >> txt
+branch COM open_close
+	1.-mejoras a la gestión del puerto de comunicaciones para evitar cerrar la app en caso de falla.
+	2.-cierre del hilo con el sigterm aplicado correctamente
 
-## launch notification 
 
-## branch COM open_close
-## mejoras a la gestión del puerto de comunicaciones para evitar cerrar la app en caso de falla.
+branch: parameter_txt
+	sacar los parámetros como Line_ID, tiempos de espera y SQL_Server a un txt de configuración.
 
-## branch diskette## branch diskette
-# Durante el procedimiento de guardar etiqueta (enter al icono diskette) reemplaza el tabular por un locatescreen para clickear el boton
+branch incorrect_data
+	Cuando llegan datos malos, llenar las variables con información anterior y mandar a imprimir.
+	revisar si un evento de etiqueta mala es aislado o el puerto empieza a mandar basura muchas veces.
+	  
 
-## branch: parameter_txt
-	# sacar los parámetros como Line_ID, tiempos de espera y SQL_Server a un txt de configuración.
+branch code_improvement (continuous improvement)
+	reducir el código redundante en la sección de method1
+		hay que tratar de eliminar el código que no se usa y hacerlo mas sencillo
+	¿Se podrá trasladar todo a funciones?
+	
 
-## branch incorrect_data
-	# CUando llegan datos malos, llenar las variables con información anterior y mandar a imprimir.
-
+"""
 
 #------------V19 preprod branch------------------#
 
@@ -990,7 +1001,7 @@ class Passwordchecker(tk.Frame):
 			self.ser.open()
 			print(f"7.- Reapertura de puerto. timestamp: {dt_string}")
 			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
-			
+
 #################Threading area 
 class Process(threading.Thread):
 	def __init__(self):

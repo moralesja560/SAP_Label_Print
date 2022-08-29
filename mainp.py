@@ -990,6 +990,7 @@ class Passwordchecker(tk.Frame):
 			self.ser.open()
 			print(f"7.- Reapertura de puerto. timestamp: {dt_string}")
 			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
+			
 #################Threading area 
 class Process(threading.Thread):
 	def __init__(self):

@@ -45,18 +45,22 @@ from sqlalchemy.orm import sessionmaker
 5.- investigar porque el SQL falla a veces. activar el echo y lo dejamos unos días funcionando.
 1.-timestamp on console 
 6.- Log de consola >> txt  La consola se cancela y no se puede ver en vivo.
-"""
 
+
+branch internal_notifs:
+	4.- notificacion de cierre y arranque del software
+
+"""
 ######## ------------ PENDING TASKS for V19
 """
 
 2.- limpieza mensual del folder scfolder y del txt log
 
-branch internal_notifs:
+
 	1.- notificación cada hora de que el software sigue funcionando
 	2.- un thread que este vigilando los demas threads en caso de cierre.
 	3.- en la noche que se me envie a mi nada mas
-	4.- notificacion de cierre y arranque del software
+	
 	5.- console print cuando arranque de funcion label_print. 
 
 branch COM open_close
@@ -849,6 +853,7 @@ class Passwordchecker(tk.Frame):
 
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
+			send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha detenido'), token_Tel)
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
 			try:
 				#SecondThread.stop()
@@ -1031,7 +1036,7 @@ class Process(threading.Thread):
 
 
 if __name__ == '__main__':
-	send_message(Jorge_Morales,quote(f'Arranque de software {Line_ID}'), token_Tel)
+	send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha iniciado'), token_Tel)
 	#SIGTERM signal
 	finish = False
 	#tkinter class assign

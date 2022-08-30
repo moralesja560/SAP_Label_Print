@@ -1,6 +1,25 @@
 import threading
 import time
+import sys
 
+
+def My_Documents(location):
+	import ctypes.wintypes
+		#####-----This section discovers My Documents default path --------
+		#### loop the "location" variable to find many paths, including AppData and ProgramFiles
+	CSIDL_PERSONAL = location       # My Documents
+	SHGFP_TYPE_CURRENT = 0   # Get current, not default value
+	buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+	ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+	#####-------- please use buf.value to store the data in a variable ------- #####
+	#add the text filename at the end of the path
+	temp_docs = buf.value
+	return temp_docs
+
+
+mis_docs = My_Documents(5)
+ruta = str(mis_docs)+ r"\consola.txt"
+sys.stdout = open(ruta, 'w')
 ##--------------------the thread itself--------------#
 
 class hilo1(threading.Thread):
@@ -72,3 +91,5 @@ while (thread1.is_alive() or thread2.is_alive()):
 		thread1._stop_event.set()
 	if stop_signal == "S":
 		thread2._stop_event.set()
+
+sys.stdout.close()

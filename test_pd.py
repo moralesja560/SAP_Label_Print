@@ -87,11 +87,12 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 	new_row_pd = pd.DataFrame(new_row)
 	print(new_row_pd)
 	try:
-		new_row_pd.to_sql(f'Temp1_SAPLabel_{Line_ID}', con=engine, if_exists='append',index=False)
+		log_sql = new_row_pd.to_sql(f'Temp1_SAPLabel_{Line_ID}', con=engine, if_exists='append',index=False)
 	except:
 		print("no pude subir la info a sql")
 	else: 
 		print("SQL exitoso")
+	print(log_sql)
 	pd_concat = pd.concat([pd_log,new_row_pd])
 	print(pd_concat.to_string())
 	#store the info
@@ -101,4 +102,4 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 
 
 if __name__ == '__main__':
-	write_log('log', 'Proceso termina normal HU 160339884', '1005050', 'BOX', '010')
+	write_log('log', 'Proceso termina normal HU 1600000', '1005050', 'BOX', '000')

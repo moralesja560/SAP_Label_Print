@@ -40,21 +40,25 @@ from sqlalchemy.orm import sessionmaker
 	# obten las coordenadas de lote, clickealo y luego metes 0123456700 (0+ShopOrder+00)
 	# luego click al campo de PI en lugar de tabularlo, es mas seguro.
 
+####-------------Ended V19 tasks-----------------#
+"""
+5.- investigar porque el SQL falla a veces. activar el echo y lo dejamos unos días funcionando.
+1.-timestamp on console 
+6.- Log de consola >> txt  La consola se cancela y no se puede ver en vivo.
+"""
 
 ######## ------------ PENDING TASKS for V19
 """
-1.-timestamp on console 
+
 2.- limpieza mensual del folder scfolder y del txt log
+
 branch im_alive:
 	1.- notificación cada hora de que el software sigue funcionando
 	2.- en la noche que se me envie a mi nada mas
+	3.- thread extra
 
 4.- console print cuando arranque de funcion label_print. 
 
-5.- investigar porque el SQL falla a veces. activar el echo y lo dejamos unos días funcionando.
-
-6.- Log de consola >> txt
-	¿Para que es necesario el log?
 
 7.- launch and close notification:
 	1.- un thread que este vigilando los demas threads en caso de cierre.
@@ -75,9 +79,11 @@ branch incorrect_data
 
 branch code_improvement (continuous improvement)
 	reducir el código redundante en la sección de method1
-		hay que tratar de eliminar el código que no se usa y hacerlo mas sencillo
 	¿Se podrá trasladar todo a funciones?
-	
+	se podrá mejorar la gestión de los hilos
+
+branch code_killswitch
+	killswitch to disable Telegram notifications in case of an infinite loop.
 
 """
 
@@ -94,7 +100,7 @@ pyautogui.FAILSAFE = False
 #####--------------------SQL Session Management--------------####
 #engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
 #WINDOWS + R >>> TYPE ODBC AND FIND THE INSTALLED SQL DRIVER.
-engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server', echo=False)
+engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server', echo=True)
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -894,7 +900,7 @@ class Passwordchecker(tk.Frame):
 			#once its stored, destroy port
 			self.ser.close()
 			self.console.configure(text = " Puerto Cerrado. Datos Recibidos: " + label_data)
-			print(f"1.- Cadena Recibida: {label_data}")
+			print(f"1.- timestamp {dt_string}. Cadena Recibida: {label_data}")
 			#prevent data process if label_data is 0 characters long.
 			#find the X in box.
 			if label_data.find('X') == -1 or len(label_data) != 18:

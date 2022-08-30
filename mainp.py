@@ -52,17 +52,12 @@ from sqlalchemy.orm import sessionmaker
 
 2.- limpieza mensual del folder scfolder y del txt log
 
-branch im_alive:
+branch internal_notifs:
 	1.- notificación cada hora de que el software sigue funcionando
-	2.- en la noche que se me envie a mi nada mas
-	3.- thread extra
-
-4.- console print cuando arranque de funcion label_print. 
-
-
-7.- launch and close notification:
-	1.- un thread que este vigilando los demas threads en caso de cierre.
-
+	2.- un thread que este vigilando los demas threads en caso de cierre.
+	3.- en la noche que se me envie a mi nada mas
+	4.- notificacion de cierre y arranque del software
+	5.- console print cuando arranque de funcion label_print. 
 
 branch COM open_close
 	1.-mejoras a la gestión del puerto de comunicaciones para evitar cerrar la app en caso de falla.

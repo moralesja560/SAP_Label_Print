@@ -7,16 +7,15 @@ import pyodbc
 import pandas as pd
 
 
-engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
-
-Session = sessionmaker(bind=engine)
-session = Session()
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
+with open(resource_path(r'images/SQL.txt'), 'r') as f:
+	SQL_chain = f.readline()
+engine = create_engine(SQL_chain, echo=True)
 
 
 def My_Documents(location):

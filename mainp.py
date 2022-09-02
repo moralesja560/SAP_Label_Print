@@ -30,6 +30,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import pyodbc
 from sqlalchemy.orm import sessionmaker
+import csv
 #---------------------------------...
 
 
@@ -91,15 +92,6 @@ Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
 Jorge_Morales = os.getenv('JORGE_MORALES')
 pyautogui.FAILSAFE = False
 
-
-#####--------------------SQL Session Management--------------####
-#engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
-#WINDOWS + R >>> TYPE ODBC AND FIND THE INSTALLED SQL DRIVER.
-engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server', echo=True)
-
-Session = sessionmaker(bind=engine)
-session = Session()
-####--------------------------------------------------------####
 
 ####----------------Time Management--------------####
 now = datetime.now()
@@ -224,6 +216,17 @@ def read_from_img(img):
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
+
+#####--------------------SQL Session Management--------------####
+#engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
+#WINDOWS + R >>> TYPE ODBC AND FIND THE INSTALLED SQL DRIVER.
+with open(resource_path(r'images/SQL.txt'), 'r') as f:
+	SQL_chain = f.readline()
+engine = create_engine(SQL_chain, echo=True)
+
+Session = sessionmaker(bind=engine)
+session = Session()
+####--------------------------------------------------------####
 
 #--------------------------------Telegram Messaging Management----------------------#
 
@@ -597,7 +600,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 
 #This CSV is for button data. You can add a button if you modify this adequately.
-import csv
+
 
 with open(resource_path("images/basic_btn_data.csv")) as file:
 	type(file)

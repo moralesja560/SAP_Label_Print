@@ -46,19 +46,21 @@ import csv
 5.- investigar porque el SQL falla a veces. activar el echo y lo dejamos unos días funcionando.
 1.-timestamp on console 
 6.- Log de consola >> txt  La consola se cancela y no se puede ver en vivo.
-"""
 
+
+branch internal_notifs:
+	4.- notificacion de cierre y arranque del software
+	5.- console print cuando arranque de funcion label_print.
+	6.- notificación cada 2 horas de que el software sigue funcionando
+
+
+
+"""
 ######## ------------ PENDING TASKS for V19
 """
 
 2.- limpieza mensual del folder scfolder y del txt log
 
-branch internal_notifs:
-	1.- notificación cada hora de que el software sigue funcionando
-	2.- un thread que este vigilando los demas threads en caso de cierre.
-	3.- en la noche que se me envie a mi nada mas
-	4.- notificacion de cierre y arranque del software
-	5.- console print cuando arranque de funcion label_print. 
 
 branch COM open_close
 	1.-mejoras a la gestión del puerto de comunicaciones para evitar cerrar la app en caso de falla.
@@ -77,6 +79,7 @@ branch code_improvement (continuous improvement)
 	reducir el código redundante en la sección de method1
 	¿Se podrá trasladar todo a funciones?
 	se podrá mejorar la gestión de los hilos
+	un hilo para vigilar que no se puedan hacer etiquetas manuales.
 
 branch code_killswitch
 	killswitch to disable Telegram notifications in case of an infinite loop.
@@ -284,6 +287,7 @@ def main_menu():
 
 def label_print(ShopOrder,BoxType,StandardPack):
 	global return_codename
+	print("label printing started")
 	#a protection to avoid printing empty labels
 ##########area to check if app is in position.
 	#check if Membrain is ready to take inputs
@@ -406,6 +410,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
 		print(f"Intento de encontrar el embalaje {i}: status: {error5_btn}")
 		if error5_btn is not None:
+			print("Embalaje encontrado")
 			break
 		time.sleep(5)
 	if error5_btn == None:
@@ -432,6 +437,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		print(f"Intento de encontrar el PI {i}: status: {error5_btn}")
 		print(f"Intento de encontrar algun error {i}: status: {error10_btn}")
 		if error8_btn is not None or error10_btn is not None:
+			print(f"PI o error encontrado: PI:{error8_btn}, error:{error10_btn}")
 			break
 		time.sleep(3)
 	# Si no aparece la seccion 3 de la etiqueta, haz lo siguiente
@@ -816,10 +822,12 @@ class Passwordchecker(tk.Frame):
 					try:
 						#Try to start the Serial Process Thread
 						SecondThread.start()
+						print("Second Thread Inititiated")
 					except:
 						#It is well known that a finished process cannot be restarted, so a new process is started
 						SecondThread = Process()
 						SecondThread.start()
+						print("Second Thread Restarted")
 					finally:
 					#disable button 
 						a_temp = 'Button1'
@@ -837,7 +845,6 @@ class Passwordchecker(tk.Frame):
 					globals()[a_temp].configure(fg = self.fg_offset)
 				else:
 					self.console.configure(text = "Se ha cerrado el puerto")
-					#SecondThread = Process()
 					SecondThread.stop()
 			except:
 				messagebox.showinfo('Puerto no abierto','Puerto no existe o no abierto.')
@@ -854,13 +861,13 @@ class Passwordchecker(tk.Frame):
 
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
+			send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha detenido'), token_Tel)
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
 			try:
-				#SecondThread.stop()
-				finish = True
+				SecondThread.stop()
+				ThirdThread.stop()
 			except:
 				pass
-			
 			self.parent.destroy()
 			self.parent.quit()
 
@@ -1008,12 +1015,13 @@ class Passwordchecker(tk.Frame):
 			print(f"7.- Reapertura de puerto. timestamp: {dt_string}")
 			run1.console.configure(text = f"Puerto Abierto: Listo para Recibir")
 
-#################Threading area 
+##-----------------------------THREAD MANAGEMENT AREA-------------------------------#
 class Process(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
 		self.attrib2 = "Attrib from Process1 class"
 
+	##---------------THREAD 2: COM PORT--------------------#
 class Process(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -1032,11 +1040,38 @@ class Process(threading.Thread):
 	
 	def stop(self):
 		self._stop_event.set()
-		print("Thread Stopped")
+		print("Thread 2 Stopped")
+	##---------------THREAD 3: KEEP ALIVE--------------------#
+class KeepAlive(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+		self._stop_event = threading.Event()
+
+	def run(self):
+		now = datetime.now()
+		dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+		counter1 = 1
+		while self._stop_event.is_set()==False:
+			now = datetime.now()
+			dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+			#Regular updates every 3 hours.
+			if(counter1 % 720 == 0):
+				send_message(Jorge_Morales,quote(f'{Line_ID}: Todo en orden: {dt_string}'), token_Tel)
+			if self._stop_event.is_set() == True:
+				break
+			time.sleep(10)
+			counter1 +=1
+
+	
+	def stop(self):
+		self._stop_event.set()
+		print("Thread 3 Stopped")
+##-----------------------------THREAD MANAGEMENT AREA-------------------------------#
+
 
 
 if __name__ == '__main__':
-	send_message(Jorge_Morales,quote(f'Arranque de software {Line_ID}'), token_Tel)
+	send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha iniciado'), token_Tel)
 	#SIGTERM signal
 	finish = False
 	#tkinter class assign
@@ -1047,6 +1082,9 @@ if __name__ == '__main__':
 	run1 = Passwordchecker(root)
 	#Second thread handles COM Port
 	SecondThread = Process()
+	#Third thread handles keep alive
+	ThirdThread = KeepAlive()
+	ThirdThread.start()
 	root.mainloop() #GUI.start()
 	#print("Exiting....")
 	finish = True

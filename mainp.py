@@ -861,10 +861,8 @@ class Passwordchecker(tk.Frame):
 			try:
 				SecondThread.stop()
 				ThirdThread.stop()
-				finish = True
 			except:
 				pass
-			
 			self.parent.destroy()
 			self.parent.quit()
 

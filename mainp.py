@@ -92,6 +92,12 @@ Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
 Jorge_Morales = os.getenv('JORGE_MORALES')
 pyautogui.FAILSAFE = False
 
+
+####----------------Time Management--------------####
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+###---------------------------------------------####
+
 #---------------------------------------Auxiliary Functions-------------------------#
 
 #This function sets the absolute path for the app to access its resources

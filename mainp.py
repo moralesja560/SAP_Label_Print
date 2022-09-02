@@ -30,6 +30,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import pyodbc
 from sqlalchemy.orm import sessionmaker
+import csv
 #---------------------------------...
 
 
@@ -91,15 +92,6 @@ Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
 Jorge_Morales = os.getenv('JORGE_MORALES')
 pyautogui.FAILSAFE = False
 
-
-#####--------------------SQL Session Management--------------####
-#engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
-#WINDOWS + R >>> TYPE ODBC AND FIND THE INSTALLED SQL DRIVER.
-engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server', echo=True)
-
-Session = sessionmaker(bind=engine)
-session = Session()
-####--------------------------------------------------------####
 
 ####----------------Time Management--------------####
 now = datetime.now()
@@ -173,10 +165,12 @@ def take_screenshot(type):
 	return ruta_img
 
 def read_from_img(img):
+	with open(resource_path(r'images/tesseract.txt'), 'r') as f:
+		tesse_location = f.readline()
 	processed_text = "cadena vacia"
 	#wait for branch merging then try to adjust screenshot area to allow tesseract to read accurately
 	#check if program is installed
-	file_exists2 = os.path.exists('C:/Program Files/Tesseract/tesseract.exe')
+	file_exists2 = os.path.exists(tesse_location)
 	if file_exists2 == False:
 		#there's not Tesseract Installed
 		write_log("nok","Tesseract no está instalado",'0','0','0')
@@ -187,7 +181,7 @@ def read_from_img(img):
 	# configurations
 	config = ('-l eng --oem 1 --psm 3')
 	# pytessercat
-	pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
+	pytesseract.pytesseract.tesseract_cmd = tesse_location
 	text = pytesseract.image_to_string(image, config=config)
 	# print text
 	text = text.split('\n')
@@ -224,6 +218,17 @@ def read_from_img(img):
 
 
 #---------------------------------End of Auxiliary Functions-------------------------#
+
+#####--------------------SQL Session Management--------------####
+#engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
+#WINDOWS + R >>> TYPE ODBC AND FIND THE INSTALLED SQL DRIVER.
+with open(resource_path(r'images/SQL.txt'), 'r') as f:
+	SQL_chain = f.readline()
+engine = create_engine(SQL_chain, echo=True)
+
+Session = sessionmaker(bind=engine)
+session = Session()
+####--------------------------------------------------------####
 
 #--------------------------------Telegram Messaging Management----------------------#
 
@@ -597,7 +602,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 
 #This CSV is for button data. You can add a button if you modify this adequately.
-import csv
+
 
 with open(resource_path("images/basic_btn_data.csv")) as file:
 	type(file)

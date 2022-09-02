@@ -8,7 +8,8 @@ def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-
+with open(resource_path(r'images/tesseract.txt'), 'r') as f:
+	tesse_location = f.readline()
 
 directory_list = os.listdir(resource_path(r'images\testimg'))
 print("Files and directories in  current working directory :") 
@@ -20,7 +21,7 @@ for image in directory_list:
 	# configurations
 	config = ('-l eng --oem 1 --psm 1')
 	# pytessercat
-	pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract/tesseract.exe'
+	pytesseract.pytesseract.tesseract_cmd = tesse_location
 	text = pytesseract.image_to_string(img, config=config)
 	text = text.split('\n')
 	print(f"se procesa la imagen {image} con el texto {text}")

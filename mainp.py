@@ -50,18 +50,16 @@ from sqlalchemy.orm import sessionmaker
 branch internal_notifs:
 	4.- notificacion de cierre y arranque del software
 	5.- console print cuando arranque de funcion label_print.
+	6.- notificación cada 2 horas de que el software sigue funcionando
+
+
+
 """
 ######## ------------ PENDING TASKS for V19
 """
 
 2.- limpieza mensual del folder scfolder y del txt log
 
-
-	1.- notificación cada hora de que el software sigue funcionando
-	2.- un thread que este vigilando los demas threads en caso de cierre.
-	3.- en la noche que se me envie a mi nada mas
-	
-	 
 
 branch COM open_close
 	1.-mejoras a la gestión del puerto de comunicaciones para evitar cerrar la app en caso de falla.
@@ -80,6 +78,7 @@ branch code_improvement (continuous improvement)
 	reducir el código redundante en la sección de method1
 	¿Se podrá trasladar todo a funciones?
 	se podrá mejorar la gestión de los hilos
+	un hilo para vigilar que no se puedan hacer etiquetas manuales.
 
 branch code_killswitch
 	killswitch to disable Telegram notifications in case of an infinite loop.
@@ -818,10 +817,12 @@ class Passwordchecker(tk.Frame):
 					try:
 						#Try to start the Serial Process Thread
 						SecondThread.start()
+						print("Second Thread Inititiated")
 					except:
 						#It is well known that a finished process cannot be restarted, so a new process is started
 						SecondThread = Process()
 						SecondThread.start()
+						print("Second Thread Restarted")
 					finally:
 					#disable button 
 						a_temp = 'Button1'
@@ -839,7 +840,6 @@ class Passwordchecker(tk.Frame):
 					globals()[a_temp].configure(fg = self.fg_offset)
 				else:
 					self.console.configure(text = "Se ha cerrado el puerto")
-					#SecondThread = Process()
 					SecondThread.stop()
 			except:
 				messagebox.showinfo('Puerto no abierto','Puerto no existe o no abierto.')
@@ -1052,7 +1052,7 @@ class KeepAlive(threading.Thread):
 			now = datetime.now()
 			dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 			#Regular updates every 3 hours.
-			if(counter1 % 5 == 0):
+			if(counter1 % 720 == 0):
 				send_message(Jorge_Morales,quote(f'{Line_ID}: Todo en orden: {dt_string}'), token_Tel)
 			if self._stop_event.is_set() == True:
 				break

@@ -3,7 +3,7 @@ import time
 import sys
 import socket
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+HOST = "10.65.72.70"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 
 
@@ -43,6 +43,7 @@ class hilo1(threading.Thread):
 		#	time.sleep(2)
 		#	if self._stop_event.is_set() == True:
 		#		break
+		print(f"Thread1: connection started")
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			s.bind((HOST, PORT))
 			s.listen()
@@ -50,10 +51,16 @@ class hilo1(threading.Thread):
 			with conn:
 				print(f"Connected by {addr}")
 				while True:
+					
 					data = conn.recv(1024)
 					if not data:
+						print("connection closed")
 						break
 					conn.sendall(data)
+				conn.close()
+				s.close()
+				
+				
 
 	def stop(self):
 		self._stop_event.set()
@@ -81,10 +88,15 @@ class hilo2(threading.Thread):
 		
 		#check for thread1 to keep running
 		while True:
-			if thread1.is_alive() == False:
-				thread1.start()
+			time.sleep(3)
+			if [t for t in threading.enumerate() if isinstance(t, hilo1)]:
+				print("todo ok")
+			else:
 				print(f"A problem occurred... Restarting Thread 1")
-			time.sleep(10)			
+				time.sleep(10)
+				thread1 = hilo1(thread_name="Hilo1",opt_arg="h")
+				thread1.start()			
+			print("thread 2 monitoring...")			
 			if self._stop_event.is_set() == True:
 				break
 
@@ -106,9 +118,6 @@ thread2 = hilo2(thread_name="Hilo2",opt_arg="Z")
 thread1.start()
 thread2.start()
 
-
-print('Press T to stop hilo1 and S to stop hilo 2:')
-#stop_signal = input()
 
 while (thread1.is_alive() or thread2.is_alive()):
 	stop_signal = input()

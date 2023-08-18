@@ -7,7 +7,6 @@ HOST = "10.65.72.70"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 
 
-
 def My_Documents(location):
 	import ctypes.wintypes
 		#####-----This section discovers My Documents default path --------
@@ -104,10 +103,6 @@ class hilo2(threading.Thread):
 		self._stop_event.set()
 		print("Thread Stopped")
 #----------------------end of thread 2------------------#
-
-
-
-
 
 
 # Create new thread.

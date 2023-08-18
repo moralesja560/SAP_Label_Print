@@ -67,7 +67,7 @@ class hilo1(threading.Thread):
 #----------------------end of thread 1------------------#
 
 
-##--------------------thread 2--------------#
+##--------------------thread 2---------------#
 
 class hilo2(threading.Thread):
 	#thread init procedure

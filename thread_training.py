@@ -16,10 +16,11 @@ def My_Documents(location):
 	temp_docs = buf.value
 	return temp_docs
 
-
+"""
 mis_docs = My_Documents(5)
 ruta = str(mis_docs)+ r"\consola.txt"
 sys.stdout = open(ruta, 'w')
+"""
 ##--------------------the thread itself--------------#
 
 class hilo1(threading.Thread):
@@ -63,7 +64,7 @@ class hilo2(threading.Thread):
 	def stop(self):
 		self._stop_event.set()
 		print("Thread Stopped")
-#----------------------end of thread 1------------------#
+#----------------------end of thread 2------------------#
 
 
 
@@ -80,7 +81,7 @@ thread2.start()
 
 
 print('Press T to stop hilo1 and S to stop hilo 2:')
-stop_signal = input()
+#stop_signal = input()
 
 while (thread1.is_alive() or thread2.is_alive()):
 	stop_signal = input()
@@ -88,8 +89,23 @@ while (thread1.is_alive() or thread2.is_alive()):
 		# I made a function called stop to control an "Event", this event cleanly passes to the thread and i can use it to stop it from inside
 		# Please notice that this event do not stop the thread by itself. It only serves as a signal that i can use.
 		# two options I can use thread1.stop() or this below
-		thread1._stop_event.set()
+		#thread1._stop_event.set()
+		thread1.stop()
+		time.sleep(5)
+		if thread1.is_alive() == False:
+			print(f"Thread 1 has been successfully stopped")
+		if thread1.is_alive() == False and thread2.is_alive() == False:
+			print(f"Thread 1 & 2 have been successfully stopped")
+			break
 	if stop_signal == "S":
-		thread2._stop_event.set()
+		#thread2._stop_event.set()
+		thread2.stop()
+		time.sleep(5)
+		if thread2.is_alive() == False:
+			print(f"Thread 2 has been successfully stopped")
+		if thread1.is_alive() == False and thread2.is_alive() == False:
+			print(f"Thread 1 & 2 have been successfully stopped")
+			break
 
-sys.stdout.close()
+#sys.stdout.close()
+sys.exit()

@@ -1,6 +1,11 @@
 import threading
 import time
 import sys
+import socket
+
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
+
 
 
 def My_Documents(location):
@@ -33,11 +38,23 @@ class hilo1(threading.Thread):
 		self._stop_event = threading.Event()
 	#the actual thread function
 	def run(self):
-		for i in range(1,50):
-			print(f"thread 1 active: optional var passed is {self.opt_arg}")
-			time.sleep(2)
-			if self._stop_event.is_set() == True:
-				break
+		#for i in range(1,50):
+		#	print(f"thread 1 active: optional var passed is {self.opt_arg}")
+		#	time.sleep(2)
+		#	if self._stop_event.is_set() == True:
+		#		break
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+			s.bind((HOST, PORT))
+			s.listen()
+			conn, addr = s.accept()
+			with conn:
+				print(f"Connected by {addr}")
+				while True:
+					data = conn.recv(1024)
+					if not data:
+						break
+					conn.sendall(data)
+
 	def stop(self):
 		self._stop_event.set()
 		print("Thread Stopped")
@@ -56,11 +73,21 @@ class hilo2(threading.Thread):
 		self._stop_event = threading.Event()
 	#the actual thread function
 	def run(self):
-		for i in range(1,50):
-			print(f"thread 2 active: optional var passed is {self.opt_arg}")
-			time.sleep(2)
+		#for i in range(1,50):
+		#	print(f"thread 2 active: optional var passed is {self.opt_arg}")
+		#	time.sleep(2)
+		#	if self._stop_event.is_set() == True:
+		#		break
+		
+		#check for thread1 to keep running
+		while True:
+			if thread1.is_alive() == False:
+				thread1.start()
+				print(f"A problem occurred... Restarting Thread 1")
+			time.sleep(10)			
 			if self._stop_event.is_set() == True:
 				break
+
 	def stop(self):
 		self._stop_event.set()
 		print("Thread Stopped")

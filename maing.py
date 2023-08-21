@@ -70,13 +70,11 @@ def prepare_data(predata):
 	#remove the b stuff
 	if "\\" in str(predata):
 		predata = "0"
-	elif len(predata)>2:
+
+	if len(predata)>2:
 		#predata = str(predata)
 		predata = str(predata)[2:-1]
 	return predata
-
-
-
 
 #---------------Thread 1 Area----------------------#
 class hilo1(threading.Thread):

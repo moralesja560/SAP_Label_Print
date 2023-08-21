@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 import json
-
+import socket
+import netifaces
 
 
 load_dotenv()
@@ -29,8 +30,19 @@ def send_message(user_id, text,token):
 		json_respuesta = json.loads(cuerpo_respuesta.decode("utf-8"))
 		print("mensaje enviado exitosamente")
 
-
+def get_local_ip_addresses():
+	"""Get a list of non loopback IP addresses configured on the local host.
+	:rtype: list[str]
+	"""
+	addresses = []
+	for interface in netifaces.interfaces():
+		for address in netifaces.ifaddresses(interface).get(2, []):
+			if address["addr"] != "127.0.0.1":
+				addresses.append(address["addr"])
+	print(addresses)
+	return addresses
 
 while True:
-	send_message(Jorge_Morales,quote(f"hi"),token_Tel)
+	direc = get_local_ip_addresses()
+	send_message(Jorge_Morales,quote(f"hi {direc}"),token_Tel)
 	time.sleep(30)

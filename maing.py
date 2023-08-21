@@ -62,6 +62,21 @@ def send_message(user_id, text,token):
 		print("mensaje enviado exitosamente")
 #-------------------------- End of Telegram---------------------#
 
+#-------------------Ethernet String Management---------------------#
+""" This function removes unwanted string and prevents strange characters to reach
+	other parts of the code. For example, the 'enter' key is interpreted as '\r\n'
+"""
+def prepare_data(predata):
+	#remove the b stuff
+	if "\\" in str(predata):
+		predata = "0"
+	elif len(predata)>2:
+		#predata = str(predata)
+		predata = str(predata)[2:-1]
+	return predata
+
+
+
 
 #---------------Thread 1 Area----------------------#
 class hilo1(threading.Thread):
@@ -74,7 +89,8 @@ class hilo1(threading.Thread):
 		self._stop_event = threading.Event()
 	#the actual thread function
 	def run(self):
-		print(f"Thread1: connection started")
+		#print(f"Thread1: connection started")
+		send_message(Jorge_Morales,quote(f"CONEXIÓN ABIERTA"),token_Tel)
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			s.bind((HOST, PORT))
 			s.listen()
@@ -82,14 +98,15 @@ class hilo1(threading.Thread):
 			with conn:
 				print(f"Connected by {addr}")
 				while True:
-					
 					data = conn.recv(1024)
 					if not data:
-						print("connection closed")
+						#print("connection closed")
+						send_message(Jorge_Morales,quote(f"CONEXIÓN CERRADA"),token_Tel)
 						break
 					#conn.sendall(data)
 					posdata = prepare_data(data)
-					send_message(Jorge_Morales,quote(f"aquí está lo que enviaste: {data}"),token_Tel)
+					if posdata != "0":
+						send_message(Jorge_Morales,quote(f"aquí está lo que enviaste: {posdata}"),token_Tel)					
 				conn.close()
 				s.close()
 	def stop(self):

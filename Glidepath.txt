@@ -1,0 +1,5 @@
+Plan for 21/8
+1.- Assemble a PoC to test Telegram API bot and threading
+    Something that sends the ethernet data through Telegram
+
+2.- Add the essential defs to complete the program.

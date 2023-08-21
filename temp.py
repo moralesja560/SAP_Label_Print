@@ -1,53 +1,36 @@
-import threading
-import time
+import os
+import time, threading
+from datetime import datetime
+from dotenv import load_dotenv
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+import json
 
-exitFlag = 0
 
-class myThread (threading.Thread):
-   def __init__(self, threadID, name, counter):
-      threading.Thread.__init__(self)
-      self.threadID = threadID
-      self.name = name
-      self.counter = counter 
-   def run(self):
-      print ("Starting " + self.name)
-      print_time(self.name, self.counter, 5)
-      print ("Exiting " + self.name)
 
-def print_time(threadName, delay, counter):
-   while counter:
-      if exitFlag:
-         threadName.exit()
-      time.sleep(delay)
-      print ("%s: %s" % (threadName, time.ctime(time.time())))
-      counter -= 1
+load_dotenv()
+token_Tel = os.getenv('TOK_EN_BOT')
+Jorge_Morales = os.getenv('JORGE_MORALES')
 
-class myThread2 (threading.Thread):
-   def __init__(self, threadID, name, counter):
-      threading.Thread.__init__(self)
-      self.threadID = threadID
-      self.name = name
-      self.counter = counter
-   def run(self):
-      print ("Starting HI " + self.name)
-      print_time(self.name, self.counter, 50)
-      print ("Exiting " + self.name)
+def send_message(user_id, text,token):
+	global json_respuesta
+	url = f"https://api.telegram.org/{token}/sendMessage?chat_id={user_id}&text={text}"
+	#https://api.telegram.org/bot6392752900:AAGV5VWXxIjpbuyqyVWv6SmdheEPN4LzTV0/sendMessage?
+	#resp = requests.get(url)
+	#hacemos la petición
+	try:
+		respuesta  = urlopen(Request(url))
+	except Exception as e:
+		print(f"Ha ocurrido un error al enviar el mensaje: {e}")
+	else:
+		#recibimos la información
+		cuerpo_respuesta = respuesta.read()
+		# Procesamos la respuesta json
+		json_respuesta = json.loads(cuerpo_respuesta.decode("utf-8"))
+		print("mensaje enviado exitosamente")
 
-def print_time(threadName, delay, counter):
-   while counter:
-      if exitFlag:
-         threadName.exit()
-      time.sleep(delay)
-      print ("%s: %s" % (threadName, time.ctime(time.time())))
-      counter -= 1
 
-# Create new threads
-thread1 = myThread(1, "Thread-1", 5)
-thread2 = myThread2(2, "Thread-2", 1)
 
-# Start new Threads
-thread1.start()
-thread2.start()
-thread1.join()
-thread2.join()
-print ("Exiting Main Thread")
+while True:
+	send_message(Jorge_Morales,quote(f"hi"),token_Tel)
+	time.sleep(30)

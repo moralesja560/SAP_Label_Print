@@ -238,6 +238,7 @@ session = Session()
 def send_message(user_id, text,token):
 	global json_respuesta
 	url = f"https://api.telegram.org/{token}/sendMessage?chat_id={user_id}&text={text}"
+	#https://api.telegram.org/bot6392752900:AAGV5VWXxIjpbuyqyVWv6SmdheEPN4LzTV0/sendMessage?
 	#resp = requests.get(url)
 	#hacemos la petición
 	try:

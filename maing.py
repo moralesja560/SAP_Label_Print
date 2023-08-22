@@ -694,8 +694,8 @@ class hilo2(threading.Thread):
 			else:
 				print(f"A problem occurred... Restarting Thread 1")
 				time.sleep(10)
-				thread1 = hilo1(thread_name="Hilo1",opt_arg="",opt_arg2=65432)
-				thread1.start()			
+				#thread1 = hilo1(thread_name="Hilo1",opt_arg="",opt_arg2=65432)
+				#thread1.start()			
 			
 			if self._stop_event.is_set() == True:
 				print("Thread 2 Stopped")
@@ -819,8 +819,8 @@ class Passwordchecker(tk.Frame):
 			ComPort = self.ComList.get()
 			HOST = ComPort  # IP of local computer that
 			PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
-			thread1 = hilo1(thread_name="Hilo1",opt_arg=HOST,opt_arg2=PORT)
-			thread1.start()
+			#thread1 = hilo1(thread_name="Hilo1",opt_arg=HOST,opt_arg2=PORT)
+			#thread1.start()
 			thread2.start()
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):

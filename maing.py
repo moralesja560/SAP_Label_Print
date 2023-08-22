@@ -75,6 +75,28 @@ def get_local_ip_addresses():
 	return addresses
 
 
+def check_ping(linea):
+	if linea == "LT1":
+		hostname = "10.65.96.2"
+	elif linea == "LT2":
+		hostname = "10.65.96.129"
+	#response = os.system("ping -n 1 " + hostname)
+	proc = subprocess.Popen(['ping', '-n', '1', hostname],stdout=subprocess.PIPE)
+	stdout, stderr = proc.communicate()
+	if proc.returncode == 0 and "TTL" in str(stdout):
+		response = 0
+	elif "Unreachable" in str(stdout):
+		response = 1
+		
+    # and then check the response...
+	if response == 0:
+		pingstatus = 0
+	else:
+		pingstatus = 1
+	
+	return pingstatus
+	
+
 #-----------------Telegram Management Area------------------#
 
 def send_message(user_id, text,token):
@@ -749,7 +771,7 @@ class Passwordchecker(tk.Frame):
 			globals()[a_temp].configure(command=partial(self.Selector, int(rows[i-1][5])))
 
 			self.console = Label(self.parent,width = w_offset*15, height = h_offset)
-			self.console.place(x=475,y=695)
+			self.console.place(x=240,y=515)
 			self.console.configure(text = "")
 			self.console.configure(fg="white", bg="black", font=("Console",10))
 ######### Create Dropdown menus for COM options 
@@ -779,11 +801,35 @@ class Passwordchecker(tk.Frame):
 		#go to def run() in thread 2 and config it to pass these variables to the method1 second thread.	
 		#### area to check if the info coming from the optionmenu is valid and all the option menus were opened and selected.
 			
-		#button to Open COM
+		#button to Ping
 		if num == 10:
-			time.sleep(1)
+			a_temp = 'Button1'
+			
+			comms_LT1 = check_ping("LT1")
+			if comms_LT1 == 0:
+				globals()[a_temp].configure(state = "disabled")
+				self.console.configure(text = "Ping LT1 Exitoso")
+				globals()[a_temp].configure(bg = "#158f50")
+				globals()[a_temp].configure(fg = "#ffffff")
+			else:
+				self.console.configure(text = "Ping LT1 Fallido: Espere 5 segs")
+				globals()[a_temp].configure(bg = "#cc1205")
+				globals()[a_temp].configure(fg = "#ffffff")
+				time.sleep(5)
 		if num == 20:
-			time.sleep(1)
+			a_temp = 'Button2'
+			
+			comms_LT1 = check_ping("LT2")
+			if comms_LT1 == 0:
+				globals()[a_temp].configure(state = "disabled")
+				self.console.configure(text = "Ping LT2 Exitoso")
+				globals()[a_temp].configure(bg = "#158f50")
+				globals()[a_temp].configure(fg = "#ffffff")
+			else:
+				self.console.configure(text = "Ping LT2 Fallido: Espere 5 segs")
+				globals()[a_temp].configure(bg = "#cc1205")
+				globals()[a_temp].configure(fg = "#ffffff")
+				time.sleep(5)
 		if num == 30:
 			time.sleep(1)
 

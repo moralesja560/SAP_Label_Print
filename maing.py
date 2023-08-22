@@ -33,9 +33,8 @@ import pandas as pd
 import csv
 import socket
 import netifaces
+from random import randrange
 
-HOST = "127.0.0.1"  # IP of local computer that
-PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
@@ -77,9 +76,9 @@ def get_local_ip_addresses():
 
 def check_ping(linea):
 	if linea == "LT1":
-		hostname = "10.65.96.2"
+		hostname = ip_LT1
 	elif linea == "LT2":
-		hostname = "10.65.96.129"
+		hostname = ip_LT2
 	#response = os.system("ping -n 1 " + hostname)
 	proc = subprocess.Popen(['ping', '-n', '1', hostname],stdout=subprocess.PIPE)
 	stdout, stderr = proc.communicate()
@@ -153,46 +152,23 @@ def main_menu():
 """
 def prepare_data(predata):
 	#remove the b stuff
-	if "\\" in str(predata):
+	if "\\" in str(predata)or len(predata) != 13 :
 		predata = "0"
-
-	if len(predata)>2:
-		#predata = str(predata)
+		return predata
+	else:
 		predata = str(predata)[2:-1]
 	return predata
 
-#/////----------------------------Reading and Writing Files--------------------------#
-
-
-#This CSV is for button data. You can add a button if you modify this adequately.
-
-
-with open(resource_path("images/basic_btn_data.csv")) as file:
-	type(file)
-	csvreader = csv.reader(file)
-	header = []
-	header = next(csvreader)
-	header
-	rows = []
-	for row in csvreader:
-		rows.append(row)
-
-with open(resource_path("images/entry_btn_data.csv")) as file:
-	type(file)
-	csvreader = csv.reader(file)
-	header = []
-	header = next(csvreader)
-	header
-	rows2 = []
-	for row in csvreader:
-		rows2.append(row)
-
-with open(resource_path(r'images/idline.txt'), 'r') as f:
-	Line_ID = f.readline()
-
-#Pandas DataFrame dictionaries
-
-pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 'Shop Order' : ['dummy'], 'BoxType' : ['dummy'], 'SP' : ['dummy']}
+def unpack_datos(posdata):
+	x_pos=posdata.find("X")
+	print("2.- X encontrada") #b'1234567box140'
+	#we store Shop Order data in two separate vars,  but we do not clear one,
+	#no issue if it's the same data, but will send a notification if there's change.
+	ShopOrder = posdata[x_pos-9:x_pos-2]
+	BoxType = posdata[x_pos-2:x_pos+1]
+	#Standard Pack was changed due to serial data overflow. 
+	StandardPack =posdata[x_pos+1:x_pos+4]
+	return ShopOrder,BoxType,StandardPack
 
 
 def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
@@ -642,17 +618,18 @@ def label_print(ShopOrder,BoxType,StandardPack):
 class hilo1(threading.Thread):
 	#thread init procedure
 	# i think we pass optional variables to use them inside the thread
-	def __init__(self,thread_name,opt_arg):
+	def __init__(self,thread_name,opt_arg,opt_arg2):
 		threading.Thread.__init__(self)
 		self.thread_name = thread_name
-		self.opt_arg = opt_arg
+		self.HOST = opt_arg
+		self.PORT = opt_arg2
 		self._stop_event = threading.Event()
 	#the actual thread function
 	def run(self):
 		#print(f"Thread1: connection started")
 		send_message(Jorge_Morales,quote(f"CONEXIÓN ABIERTA"),token_Tel)
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-			s.bind((HOST, PORT))
+			s.bind((self.HOST, self.PORT))
 			s.listen()
 			conn, addr = s.accept()
 			with conn:
@@ -666,9 +643,10 @@ class hilo1(threading.Thread):
 					#conn.sendall(data)
 					posdata = prepare_data(data)
 					if posdata != "0":
-						send_message(Jorge_Morales,quote(f"aquí está lo que enviaste: {posdata}"),token_Tel)		
-
+						ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
 						####################-----THE LABEL PRINTING PROCESS-----#
+						send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
+						"""
 						nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 						if nuevo_intento == 1:
 							print("se intenta de nuevo la etiqueta")
@@ -681,13 +659,15 @@ class hilo1(threading.Thread):
 						ShopOrder = ""
 						BoxType = ""
 						StandardPack = ""
-						label_data = ""
-						s = ""
+						"""
+					if self._stop_event.is_set() == True:
+						print("Thread 1 Stopped")
+						break	
 				conn.close()
 				s.close()
 	def stop(self):
 		self._stop_event.set()
-		print("Thread Stopped")
+		
 		
 #-------------Thread 1 End------------------#
 
@@ -706,19 +686,24 @@ class hilo2(threading.Thread):
 		while True:
 			time.sleep(5)
 			if [t for t in threading.enumerate() if isinstance(t, hilo1)]:
-				print("todo ok")
+				try:
+					run1.console.configure(text = f"Monitor Activo {randrange(10)}")
+					print(f"Monitor Activo {randrange(10)}")
+				except:
+					self._stop_event.set()
 			else:
 				print(f"A problem occurred... Restarting Thread 1")
 				time.sleep(10)
-				thread1 = hilo1(thread_name="Hilo1",opt_arg="h")
+				thread1 = hilo1(thread_name="Hilo1",opt_arg="",opt_arg2=65432)
 				thread1.start()			
-			print("thread 2 monitoring...")			
+			
 			if self._stop_event.is_set() == True:
+				print("Thread 2 Stopped")
 				break
 
 	def stop(self):
 		self._stop_event.set()
-		print("Thread Stopped")
+		
 #----------------------end of thread 2------------------#
 
 
@@ -831,21 +816,63 @@ class Passwordchecker(tk.Frame):
 				globals()[a_temp].configure(fg = "#ffffff")
 				time.sleep(5)
 		if num == 30:
-			time.sleep(1)
-
+			ComPort = self.ComList.get()
+			HOST = ComPort  # IP of local computer that
+			PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
+			thread1 = hilo1(thread_name="Hilo1",opt_arg=HOST,opt_arg2=PORT)
+			thread1.start()
+			thread2.start()
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
-			send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha detenido'), token_Tel)
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 
-			try:
-				thread1.stop()
-				thread2.stop()
-			except:
-				pass
+			thread2.stop()
+			time.sleep(2)
+			thread1.stop()
 			self.parent.destroy()
 			self.parent.quit()
+			send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha detenido'), token_Tel)
 
 
+
+#/////----------------------------Reading and Writing Files--------------------------#
+
+#This CSV is for button data. You can add a button if you modify this adequately.
+
+
+with open(resource_path("images/basic_btn_data.csv")) as file:
+	type(file)
+	csvreader = csv.reader(file)
+	header = []
+	header = next(csvreader)
+	header
+	rows = []
+	for row in csvreader:
+		rows.append(row)
+
+with open(resource_path("images/entry_btn_data.csv")) as file:
+	type(file)
+	csvreader = csv.reader(file)
+	header = []
+	header = next(csvreader)
+	header
+	rows2 = []
+	for row in csvreader:
+		rows2.append(row)
+
+with open(resource_path(r'images/idline.txt'), 'r') as f:
+	Line_ID = f.readline()
+
+with open(resource_path(r'images/IP_LT1.txt'), 'r') as f:
+	ip_LT1 = f.readline()
+
+with open(resource_path(r'images/IP_LT2.txt'), 'r') as f:
+	ip_LT2 = f.readline()
+
+
+#------------------End of reading files--------------------------#
+
+#Pandas DataFrame dictionaries
+pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 'Shop Order' : ['dummy'], 'BoxType' : ['dummy'], 'SP' : ['dummy']}
 
 
 
@@ -860,17 +887,11 @@ if __name__ == '__main__':
 	# Assign a name and pass a few variables to it.
 	# First thread 
 	run1 = Passwordchecker(root)
-	#Second thread handles COM Port
-	#SecondThread = Process()
-	thread1 = hilo1(thread_name="Hilo1",opt_arg="h")
-	#thread1.start()
-	#Third thread handles keep alive
-	#ThirdThread = KeepAlive()
-	#ThirdThread.start()
+	thread1 = hilo1(thread_name="Hilo1",opt_arg="",opt_arg2=65432)
 	thread2 = hilo2(thread_name="Hilo2",opt_arg="Z")
-	#thread2.start()
 	root.mainloop() #GUI.start()
 	finish = True
+	sys.exit()
 	
 	
 

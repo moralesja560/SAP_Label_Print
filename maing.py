@@ -17,7 +17,6 @@ import tkinter as tk
 import pyautogui
 #import serial
 import sys
-import glob
 from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import quote
@@ -70,7 +69,6 @@ def get_local_ip_addresses():
 		for address in netifaces.ifaddresses(interface).get(2, []):
 			if address["addr"] != "127.0.0.1":
 				addresses.append(address["addr"])
-	print(addresses)
 	return addresses
 
 
@@ -116,17 +114,18 @@ def send_message(user_id, text,token):
 
 def send_photo(user_id, image,token):
 	img = open(image, 'rb')
-	CHAT_ID = user_id
-	url = f'https://api.telegram.org/{token}/sendPhoto?chat_id={CHAT_ID}'
+	url = f'http://api.telegram.org/{token}/sendPhoto?chat_id={user_id}'
 	#resp = requests.get(url)
 	#hacemos la petición
-
-	respuesta = requests.post(url, files={'photo': img})
-
-	if '200' in str(respuesta):
-		print(f"mensaje enviado exitosamente con código {respuesta}")
+	try:
+		respuesta = requests.post(url, files={'photo': img})
+	except:
+		run1.console2.configure(text = f"No se pudo enviar el mensaje")
 	else:
-		print(f"Ha ocurrido un error al enviar el mensaje: {respuesta}")
+		if '200' in str(respuesta):
+			print(f"mensaje enviado exitosamente con código {respuesta}")
+		else:
+			print(f"Ha ocurrido un error al enviar el mensaje: {respuesta}")
 
 
 #-------------------------- End of Telegram---------------------#
@@ -620,7 +619,7 @@ class hilo1(threading.Thread):
 	# i think we pass optional variables to use them inside the thread
 	def __init__(self,thread_name,opt_arg,opt_arg2):
 		threading.Thread.__init__(self)
-		self.setDaemon(True)
+		self.daemon = True
 		self.thread_name = thread_name
 		self.HOST = opt_arg
 		self.PORT = opt_arg2
@@ -628,6 +627,7 @@ class hilo1(threading.Thread):
 	#the actual thread function
 	def run(self):		
 		print(f"Thread1: connection started")
+		run1.console2.configure(text = f"Thread1: connection started")
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			s.bind((self.HOST, self.PORT))
 			s.settimeout(5)
@@ -641,16 +641,38 @@ class hilo1(threading.Thread):
 					conn, addr = s.accept()
 					print("Socket Connected: %s" % str(addr))
 				except socket.timeout:
-					print(f"socket timeout")
+					try:
+						run1.console2.configure(text = f"Nothing yet... {randrange(10)} ")
+					except:
+						s.close()
+						break
 				else:		
 					with conn:
-						print(f"Connected by {addr}")
+						run1.console2.configure(text = f"Conectado a {addr} ")
 						while True:
 							data = conn.recv(1024)
 							if not data:
 								print("connection closed")
 								break
-							conn.sendall(data)
+							#conn.sendall(data)
+							posdata = prepare_data(data)
+							if posdata != "0":
+								ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
+								####################-----THE LABEL PRINTING PROCESS-----#
+								send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
+								nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+								if nuevo_intento == 1:
+									print("se intenta de nuevo la etiqueta")
+									nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+								#waiting time before restarting the process.
+								print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
+								run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
+								time.sleep(30)
+								print("6.- Limpieza de variables")
+								ShopOrder = ""
+								BoxType = ""
+								StandardPack = ""
+								
 							if self.stopped() or finish:
 								conn.close()
 								s.close()
@@ -661,6 +683,7 @@ class hilo1(threading.Thread):
 		print("si entre a stopear")
 		self.stopped = True
 		self._stop_event.set()
+		finish = True
 
 
 	def stopped(self):
@@ -681,11 +704,10 @@ class hilo2(threading.Thread):
 	def run(self):
 		#check for thread1 to keep running
 		while True:
-			time.sleep(5)
 			if [t for t in threading.enumerate() if isinstance(t, hilo1)]:
 				try:
 					run1.console.configure(text = f"Monitor Activo {randrange(10)}")
-					print(f"Monitor Activo {randrange(10)}")
+					time.sleep(5)
 				except:
 					self._stop_event.set()
 			else:
@@ -756,6 +778,12 @@ class Passwordchecker(tk.Frame):
 			self.console.place(x=240,y=515)
 			self.console.configure(text = "")
 			self.console.configure(fg="white", bg="black", font=("Console",10))
+
+			self.console2 = Label(self.parent,width = w_offset*15, height = h_offset)
+			self.console2.place(x=240,y=630)
+			self.console2.configure(text = "")
+			self.console2.configure(fg="white", bg="black", font=("Console",10))
+
 ######### Create Dropdown menus for COM options 
 		#ComPort.
 		dropwidth = 15
@@ -876,6 +904,7 @@ pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 
 #-----------Area for main program--------------#
 
 if __name__ == '__main__':
+	global finish
 	#SIGTERM signal
 	finish = False
 	#tkinter class assign

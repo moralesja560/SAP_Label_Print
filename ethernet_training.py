@@ -26,6 +26,7 @@ class hilo1(threading.Thread):
 					if self.stopped():
 						s.close()
 						break
+
 					conn, addr = s.accept()
 					print("Socket Connected: %s" % str(addr))
 				except socket.timeout:
@@ -36,15 +37,15 @@ class hilo1(threading.Thread):
 				else:		
 					with conn:
 						print(f"Connected by {addr}")
-					while True:
-						data = conn.recv(1024)
-						if not data:
-							print("connection closed")
-							break
-						conn.sendall(data)
-					if self._stop_event.set == True:
-						conn.close()
-						s.close()				
+						while True:
+							data = conn.recv(1024)
+							if not data:
+								print("connection closed")
+								break
+							conn.sendall(data)
+						if self._stop_event.set == True:
+							conn.close()
+							s.close()				
 	def stop(self):
 		self._stop_event.set()
 

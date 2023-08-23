@@ -620,54 +620,51 @@ class hilo1(threading.Thread):
 	# i think we pass optional variables to use them inside the thread
 	def __init__(self,thread_name,opt_arg,opt_arg2):
 		threading.Thread.__init__(self)
+		self.setDaemon(True)
 		self.thread_name = thread_name
 		self.HOST = opt_arg
 		self.PORT = opt_arg2
 		self._stop_event = threading.Event()
 	#the actual thread function
-	def run(self):
-		#print(f"Thread1: connection started")
-		send_message(Jorge_Morales,quote(f"CONEXIÓN ABIERTA"),token_Tel)
+	def run(self):		
+		print(f"Thread1: connection started")
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			s.bind((self.HOST, self.PORT))
+			s.settimeout(5)
 			s.listen()
-			conn, addr = s.accept()
-			with conn:
-				print(f"Connected by {addr}")
-				while True:
-					data = conn.recv(1024)
-					if not data:
-						#print("connection closed")
-						send_message(Jorge_Morales,quote(f"CONEXIÓN CERRADA"),token_Tel)
+			while True:
+				try:
+					if self.stopped() or finish:
+						s.close()
+						print(f"socket closed")
 						break
-					#conn.sendall(data)
-					posdata = prepare_data(data)
-					if posdata != "0":
-						ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
-						####################-----THE LABEL PRINTING PROCESS-----#
-						send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
-						"""
-						nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
-						if nuevo_intento == 1:
-							print("se intenta de nuevo la etiqueta")
-							nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
-						#waiting time before restarting the process.
-						print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
-						run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
-						time.sleep(30)
-						print("6.- Limpieza de variables")
-						ShopOrder = ""
-						BoxType = ""
-						StandardPack = ""
-						"""
-					if self._stop_event.is_set() == True:
-						print("Thread 1 Stopped")
-						break	
-				conn.close()
-				s.close()
+					conn, addr = s.accept()
+					print("Socket Connected: %s" % str(addr))
+				except socket.timeout:
+					print(f"socket timeout")
+				else:		
+					with conn:
+						print(f"Connected by {addr}")
+						while True:
+							data = conn.recv(1024)
+							if not data:
+								print("connection closed")
+								break
+							conn.sendall(data)
+							if self.stopped() or finish:
+								conn.close()
+								s.close()
+								break
+		print("ya se finalizó esto")
+
 	def stop(self):
+		print("si entre a stopear")
+		self.stopped = True
 		self._stop_event.set()
-		
+
+
+	def stopped(self):
+		return self._stop_event.is_set()
 		
 #-------------Thread 1 End------------------#
 
@@ -819,8 +816,8 @@ class Passwordchecker(tk.Frame):
 			ComPort = self.ComList.get()
 			HOST = ComPort  # IP of local computer that
 			PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
-			#thread1 = hilo1(thread_name="Hilo1",opt_arg=HOST,opt_arg2=PORT)
-			#thread1.start()
+			thread1 = hilo1(thread_name="Hilo1",opt_arg=HOST,opt_arg2=PORT)
+			thread1.start()
 			thread2.start()
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):

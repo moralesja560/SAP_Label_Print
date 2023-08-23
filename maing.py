@@ -481,7 +481,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	pyautogui.write(f"{StandardPack}")
 	pyautogui.press('tab')
 	#numero de operario
-	pyautogui.write("20010380")
+	pyautogui.write(Operator)
 	time.sleep(1)
 	#puesto de trabajo
 	pyautogui.press('tab')
@@ -651,6 +651,7 @@ class hilo1(threading.Thread):
 						run1.console2.configure(text = f"Conectado a {addr} ")
 						while True:
 							data = conn.recv(1024)
+							print(f"original data {data}")
 							if not data:
 								print("connection closed")
 								break
@@ -784,6 +785,9 @@ class Passwordchecker(tk.Frame):
 			self.console2.configure(text = "")
 			self.console2.configure(fg="white", bg="black", font=("Console",10))
 
+			# operator num show
+			operatorlabel=Label(self.parent,text = Operator).place(x = 40, y = 60) 
+
 ######### Create Dropdown menus for COM options 
 		#ComPort.
 		dropwidth = 15
@@ -892,6 +896,9 @@ with open(resource_path(r'images/IP_LT1.txt'), 'r') as f:
 
 with open(resource_path(r'images/IP_LT2.txt'), 'r') as f:
 	ip_LT2 = f.readline()
+
+with open(resource_path(r'images/Operator.txt'), 'r') as f:
+	Operator = f.readline()
 
 
 #------------------End of reading files--------------------------#

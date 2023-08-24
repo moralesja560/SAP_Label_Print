@@ -847,6 +847,7 @@ class Passwordchecker(tk.Frame):
 		if num == 30:
 			ComPort = self.ComList.get()
 			HOST = ComPort  # IP of local computer that
+			print(HOST)
 			PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 			thread1 = hilo1(thread_name="Hilo1",opt_arg=HOST,opt_arg2=PORT)
 			thread1.start()

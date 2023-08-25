@@ -2,7 +2,7 @@ import pyads
 
 
 # connect to the PLC
-plc = pyads.Connection('10.65.96.129.1.1', 801)
+plc = pyads.Connection('10.65.96.43.1.1', 801)
 
 # open the connection
 plc.open()

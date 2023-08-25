@@ -33,3 +33,10 @@ Features:
 4. screenshot.py serves as the training area for Tesseract
 
 5. tkinter_template.py is the base file to develop new applications based on this threading technique.
+
+## Updates
+There have been many updates over the years, mostly to adjust some functions and to fix some bugs with threading system and stuff.
+Our biggest change is that we use now Pyads instead of serial port. A more reliable connection to the PLC using Twincat ADS.
+
+### Twincat ADS
+The ADS protocol (ADS: Automation Device Specification) is a transport layer within the TwinCAT system. It was developed for data exchange between the different software modules, for instance the communication between the NC and the PLC. This protocol enables communication with other tools from any point within the TwinCAT. If communication with other PCs or devices is required, the ADS protocol can use TCP/IP as a basis. Within a networked system it is thus possible to reach all data from any point

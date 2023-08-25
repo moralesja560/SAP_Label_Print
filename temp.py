@@ -27,7 +27,9 @@ real_number = plc.read_by_name('Ethernet.fMyRealNumber', pyads.PLCTYPE_REAL)
 print(real_number)
 """
 #read string
-message_from_twincat = plc.read_by_name('PB_Stueckzahl.ADS_Communication_Test_STRING', pyads.PLCTYPE_STRING)
+plc.write_by_name('PB_Stueckzahl.ADS_Label_Incoming_Ping',101,pyads.PLCTYPE_INT)
+message_from_twincat = plc.read_by_name('PB_Stueckzahl.ADS_Label_Outgoing_Ping', pyads.PLCTYPE_INT)
+
 print(message_from_twincat)
 """
 #write string

@@ -56,13 +56,14 @@ class hilo1(threading.Thread):
 		#symbol = plc.get_symbol("Ethernet.SD_Online_Printer_Send_String_Ethernet")
 		#symbol.auto_update = True
 		while True:
-			time.sleep(0.2)
-			data = plc.read_by_name("PB_Stueckzahl.ADS_Communication_Test_STRING", plc_datatype=pyads.PLCTYPE_STRING)
+			time.sleep(0.5)
+			data = plc.read_by_name("PB_Stueckzahl.ADS_Label_Printer_Data_STRING", plc_datatype=pyads.PLCTYPE_STRING)
 			if "s"  in data:
 				pass
 			else:
-				print(f"ya recibi la información, vamos a def {data}")
+				print(data)
 				otra_cosa(data)
+			
 			if self._stop_event.is_set():
 				# close connection
 				print("saliendo")

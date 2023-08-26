@@ -33,6 +33,21 @@ import csv
 import socket
 import netifaces
 from random import randrange
+import pyads
+
+###-------------------------------V1 Launch Progress-------------------------#
+"""
+	1.-Cambia la GUI para que primero se habilite la conexión y 
+		luego se prueben las variables de incoming
+	2.-Escribe el código para sustituir el ping por el incoming y outgoing
+		y coloca las ventanas correspondientes
+	3.-agrega los try except para mejorar el programa y ayudar al usuario a los errores.
+	4.-Investigar el programa de local route para agregar los remotos via python
+	5.-Coloca una rutina para buscar Twincat en la computadora
+	6.-Revisar la estabilidad del código compilando y corriendolo todo el día
+	7.-
+"""
+
 
 
 ######-----------------Sensitive Data Load-----------------####
@@ -625,61 +640,39 @@ class hilo1(threading.Thread):
 		self.PORT = opt_arg2
 		self._stop_event = threading.Event()
 	#the actual thread function
-	def run(self):		
-		print(f"Thread1: connection started")
-		run1.console2.configure(text = f"Thread1: connection started")
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-			s.bind((self.HOST, self.PORT))
-			s.settimeout(5)
-			s.listen()
+	def run(self):
+		try:
+			plc = pyads.Connection(self.HOST, self.PORT)	
+		except Exception as e:
+			print(f"No se pudo conectar con el puerto. Error {e}")
+		else:
+			plc.open()		
 			while True:
-				try:
-					if self.stopped() or finish:
-						s.close()
-						print(f"socket closed")
-						break
-					conn, addr = s.accept()
-					print("Socket Connected: %s" % str(addr))
-				except socket.timeout:
-					try:
-						run1.console2.configure(text = f"Nothing yet... {randrange(10)} ")
-					except:
-						s.close()
-						break
-				else:		
-					with conn:
-						run1.console2.configure(text = f"Conectado a {addr} ")
-						while True:
-							data = conn.recv(1024)
-							print(f"original data {data}")
-							if not data:
-								print("connection closed")
-								break
-							#conn.sendall(data)
-							posdata = prepare_data(data)
-							if posdata != "0":
-								ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
-								####################-----THE LABEL PRINTING PROCESS-----#
-								send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
-								nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
-								if nuevo_intento == 1:
-									print("se intenta de nuevo la etiqueta")
-									nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
-								#waiting time before restarting the process.
-								print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
-								run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
-								time.sleep(30)
-								print("6.- Limpieza de variables")
-								ShopOrder = ""
-								BoxType = ""
-								StandardPack = ""
-								
-							if self.stopped() or finish:
-								conn.close()
-								s.close()
-								break
-		print("ya se finalizó esto")
-
+				time.sleep(0.5)
+				data = plc.read_by_name("PB_Stueckzahl.ADS_Label_Printer_Data_STRING", plc_datatype=pyads.PLCTYPE_STRING)
+				if "s"  in data:
+					pass
+				else:
+					posdata = prepare_data(data)
+					if posdata != "0":
+						ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
+						####################-----THE LABEL PRINTING PROCESS-----#
+						send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
+						nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+						if nuevo_intento == 1:
+							print("se intenta de nuevo la etiqueta")
+							nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+							#waiting time before restarting the process.
+							print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
+							run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
+							time.sleep(30)
+							print("6.- Limpieza de variables")
+							ShopOrder = ""
+							BoxType = ""
+							StandardPack = ""
+				if self.stopped() or finish:
+					plc.close()
+					break
 	def stop(self):
 		print("si entre a stopear")
 		self.stopped = True
@@ -790,17 +783,17 @@ class Passwordchecker(tk.Frame):
 
 ######### Create Dropdown menus for COM options 
 		#ComPort.
-		dropwidth = 15
+		dropwidth = 20
 		dropfront = "white"
 		dropbg = '#314a94'
 		dropfont = ("Sans-serif",10)
 		dropx = 550
 		dropy = 308
 		
-		portList = get_local_ip_addresses()
+		portList = ['10.65.96.129.1.1','10.65.96.2.1.1']
 
 		self.ComList = StringVar()
-		self.ComList.set("Seleccionar IP")
+		self.ComList.set("Seleccionar AMS NetID")
 		dropdown1 = OptionMenu(self.parent,self.ComList,*portList)
 		dropdown1.place(x=int(dropx),y=int(dropy))
 		dropdown1.configure( fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont )
@@ -808,10 +801,6 @@ class Passwordchecker(tk.Frame):
 ##########Selector is the function that commands buttons actions
 	def Selector(self,num):
 		global ComPort
-		global baud_Rate
-		global Parity_data
-		global stop_bits
-		global byte_size
 		#go to def run() in thread 2 and config it to pass these variables to the method1 second thread.	
 		#### area to check if the info coming from the optionmenu is valid and all the option menus were opened and selected.
 			
@@ -846,12 +835,20 @@ class Passwordchecker(tk.Frame):
 				time.sleep(5)
 		if num == 30:
 			ComPort = self.ComList.get()
-			HOST = ComPort  # IP of local computer that
-			print(HOST)
-			PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
-			thread1 = hilo1(thread_name="Hilo1",opt_arg=HOST,opt_arg2=PORT)
-			thread1.start()
-			thread2.start()
+			try:
+				pyads.open_port()
+				ams_net_id = pyads.get_local_address().netid
+				print(ams_net_id)
+				pyads.close_port()
+			except Exception as e:
+				print("No se pudo abrir la conexión: Error {e}")
+				# open the connection
+			else:
+				thread1 = hilo1()
+				thread1.start()
+				thread1 = hilo1(thread_name="Hilo1",opt_arg=ComPort,opt_arg2=801)
+				thread1.start()
+				thread2.start()
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 

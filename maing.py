@@ -866,13 +866,13 @@ class Passwordchecker(tk.Frame):
 			ComPort = self.ComList.get()
 			try:
 				plc = pyads.Connection(ComPort,801)	
-			except Exception as e:
-				print(f"No se pudo conectar con el puerto. Error {e}")
-			else:
 				plc.open()
 				plc.write_by_name('PB_Stueckzahl.ADS_Label_Incoming_Ping',int(Nummer),pyads.PLCTYPE_INT)
 				message_from_twincat = plc.read_by_name('PB_Stueckzahl.ADS_Label_Outgoing_Ping', pyads.PLCTYPE_INT)
 				run1.console.configure(text=f"Recepción de PLC {message_from_twincat}")
+			except Exception as e:
+				print(f"No se pudo conectar con el puerto. Error {e}")
+			
 
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):

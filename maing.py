@@ -37,25 +37,33 @@ import pyads
 
 ###-------------------------------V1 Launch Progress-------------------------#
 """
+	FINISHED:
 	1.-Cambia la GUI para que primero se habilite la conexión y 
 		luego se prueben las variables de incoming
 	2.-Escribe el código para sustituir el ping por el incoming y outgoing
 		y coloca las ventanas correspondientes
 	3.-agrega los try except para mejorar el programa y ayudar al usuario a los errores.
+	6.-Revisar la estabilidad del código compilando y corriendolo todo el día
+	7.-Elimina código que no se usa.
+	
+	ONGOING:
 	4.-Investigar el programa de local route para agregar los remotos via python
 	5.-Coloca una rutina para buscar Twincat en la computadora
-	6.-Revisar la estabilidad del código compilando y corriendolo todo el día
-	7.-
+
 """
+
+
 
 ###-------------- Algunas notas sobre Twincat ADS y Python----------------#
 """
 	-Es fundamental que se instale el ambiente Twincat, hasta ahorita el que ha funcionado es el R3_2.11.2301
 	-Despues se mueve la libreria TCAdsDll.dll (se encuentra en C:/Twincat) a System32
 	-Esa librería se tiene que registrar usando el CMD de Windows con el comando regsvr32 TcAdsDll.dll y debe dar OK
-	-Una vez que se haya registrado la librería, se procede a usar el Twincar System Manager para hacer la conexión.
+	-Una vez que se haya registrado la librería, se procede a usar el Twincat System Manager para hacer la conexión.
 	-Esta conexion es la usual que se hace antes de conectarse al PLC.
 	-Una vez que se haya hecho esta conexion, se va a poder usar la app en una nueva compu.
+	-Casi cualquier error del ADS es por el remote route. Es necesario usar el System Manager para "que se conozcan" y luego ya pueda aceptar conexiones vía ADS
+	-Cabe destacar que el PLC se conecta vía protocolo físico ethernet, pero protocolo virtual es Twincat ADS.
 """
 
 ######-----------------Sensitive Data Load-----------------####
@@ -82,40 +90,6 @@ def My_Documents(location):
 	#add the text filename at the end of the path
 	temp_docs = buf.value
 	return temp_docs
-
-def get_local_ip_addresses():
-	"""Get a list of non loopback IP addresses configured on the local host.
-	:rtype: list[str]
-	"""
-	addresses = []
-	for interface in netifaces.interfaces():
-		for address in netifaces.ifaddresses(interface).get(2, []):
-			if address["addr"] != "127.0.0.1":
-				addresses.append(address["addr"])
-	return addresses
-
-
-def check_ping(linea):
-	if linea == "LT1":
-		hostname = ip_LT1
-	elif linea == "LT2":
-		hostname = ip_LT2
-	#response = os.system("ping -n 1 " + hostname)
-	proc = subprocess.Popen(['ping', '-n', '1', hostname],stdout=subprocess.PIPE)
-	stdout, stderr = proc.communicate()
-	if proc.returncode == 0 and "TTL" in str(stdout):
-		response = 0
-	elif "Unreachable" in str(stdout):
-		response = 1
-		
-    # and then check the response...
-	if response == 0:
-		pingstatus = 0
-	else:
-		pingstatus = 1
-	
-	return pingstatus
-	
 
 #-----------------Telegram Management Area------------------#
 
@@ -168,9 +142,9 @@ def main_menu():
 
 
 
-#-------------------Ethernet String Management---------------------#
+#-------------------Twincat String Management---------------------#
 """ This function removes unwanted string and prevents strange characters to reach
-	other parts of the code. For example, the 'enter' key is interpreted as '\r\n'
+	other parts of the code. It is not tha neccesary since the string comes clean from PLC, but who knows?
 """
 def prepare_data(predata):
 	#remove the b stuff
@@ -678,7 +652,6 @@ class hilo1(threading.Thread):
 							####################-----THE LABEL PRINTING PROCESS-----#
 							send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
 							time.sleep(4)
-						"""
 							nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 							if nuevo_intento == 1:
 								print("se intenta de nuevo la etiqueta")
@@ -691,7 +664,6 @@ class hilo1(threading.Thread):
 								ShopOrder = ""
 								BoxType = ""
 								StandardPack = ""
-						"""
 				if self.stopped() or finish:
 					plc.close()
 					break
@@ -949,12 +921,3 @@ if __name__ == '__main__':
 	finish = True
 	sys.exit()
 	
-	
-
-#while True:
-#	if [t for t in threading.enumerate() if isinstance(t, hilo1)] and [t for t in threading.enumerate() if isinstance(t, hilo2)] :
-#		time.sleep(10)
-#	else:
-#		break
-#sys.exit()
-        

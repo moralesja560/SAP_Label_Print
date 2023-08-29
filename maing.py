@@ -296,6 +296,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	#a protection to avoid printing empty labels
 ##########area to check if app is in position.
 	#check if Membrain is ready to take inputs
+	
 	inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial2.png"),grayscale=False, confidence=.7)
 	#check if Membrain is the main screen
 	inbox_btn = pyautogui.locateOnScreen(resource_path(r"images/boton1.png"),grayscale=False, confidence=.7)
@@ -379,7 +380,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	pyautogui.press('enter')
 	time.sleep(6)
 	#what if the HU is wrong. 
-	error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+
+	error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.6)
+	time.sleep(1)
+	print(f"{error4_btn} es el resultado de la HU equivocada")
 	if error4_btn is not None:
 		#error in HU
 		ruta_foto = take_screenshot("error")
@@ -409,6 +413,15 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			run1.console.configure(text = "HU incorrecta")
 			return_codename = 1
 			return return_codename
+		else:
+			#Something standard
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
+			pyautogui.press('enter')
+			return_to_main()
+			time.sleep(1)
+			return_codename = 1
+			return return_codename
+	
 	for i in range(0,15):
 	# tries before failing
 	#error5 if to detect if script is going well.				
@@ -462,10 +475,11 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-		if  texto_error == "no hay embalaje planeado" or texto_error == "Bug de misma Shop Order":
-			main_menu()
-			return_codename = 1
-			return return_codename
+		main_menu()
+		return_codename = 1
+		return return_codename
+
+
 	#print(StandardPack)
 	# Integrar el error de Lote
 	pyautogui.click(747, 342)

@@ -815,12 +815,23 @@ class Passwordchecker(tk.Frame):
 		
 		portList = ['10.65.96.129.1.1','10.65.96.2.1.1']
 
+		intlist = [1,2,3,4,5,6,7]
+
 		self.ComList = StringVar()
 		self.ComList.set("Seleccionar AMS NetID")
 		dropdown1 = OptionMenu(self.parent,self.ComList,*portList)
 		dropdown1.place(x=int(dropx),y=int(dropy))
 		dropdown1.configure( fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont )
 
+		self.IntSending = StringVar()
+		self.IntSending.set("Envia algo al PLC")
+		dropdown1 = OptionMenu(self.parent,self.IntSending,*intlist)
+		dropdown1.place(x=int(dropx+500),y=int(dropy))
+		dropdown1.configure( fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont )
+
+		#Button disable until AMS NetID connection is successful
+		a_temp = 'Button1'
+		globals()[a_temp].configure(state = "disabled")
 ##########Selector is the function that commands buttons actions
 	def Selector(self,num):
 		global ComPort
@@ -829,33 +840,9 @@ class Passwordchecker(tk.Frame):
 			
 		#button to Ping
 		if num == 10:
-			a_temp = 'Button1'
-			
-			comms_LT1 = check_ping("LT1")
-			if comms_LT1 == 0:
-				globals()[a_temp].configure(state = "disabled")
-				self.console.configure(text = "Ping LT1 Exitoso")
-				globals()[a_temp].configure(bg = "#158f50")
-				globals()[a_temp].configure(fg = "#ffffff")
-			else:
-				self.console.configure(text = "Ping LT1 Fallido: Espere 5 segs")
-				globals()[a_temp].configure(bg = "#cc1205")
-				globals()[a_temp].configure(fg = "#ffffff")
-				time.sleep(5)
+			pass
 		if num == 20:
-			a_temp = 'Button2'
-			
-			comms_LT1 = check_ping("LT2")
-			if comms_LT1 == 0:
-				globals()[a_temp].configure(state = "disabled")
-				self.console.configure(text = "Ping LT2 Exitoso")
-				globals()[a_temp].configure(bg = "#158f50")
-				globals()[a_temp].configure(fg = "#ffffff")
-			else:
-				self.console.configure(text = "Ping LT2 Fallido: Espere 5 segs")
-				globals()[a_temp].configure(bg = "#cc1205")
-				globals()[a_temp].configure(fg = "#ffffff")
-				time.sleep(5)
+			pass
 		if num == 30:
 			ComPort = self.ComList.get()
 			try:
@@ -871,6 +858,22 @@ class Passwordchecker(tk.Frame):
 				thread1.start()
 				print(f"se arranca hilo")
 				thread2.start()
+				a_temp = 'Button1'
+				globals()[a_temp].configure(state = "active")
+				
+		if num == 40:
+			Nummer = self.IntSending.get()
+			ComPort = self.ComList.get()
+			try:
+				plc = pyads.Connection(ComPort,801)	
+			except Exception as e:
+				print(f"No se pudo conectar con el puerto. Error {e}")
+			else:
+				plc.open()
+				plc.write_by_name('PB_Stueckzahl.ADS_Label_Incoming_Ping',int(Nummer),pyads.PLCTYPE_INT)
+				message_from_twincat = plc.read_by_name('PB_Stueckzahl.ADS_Label_Outgoing_Ping', pyads.PLCTYPE_INT)
+				run1.console.configure(text=f"Recepción de PLC {message_from_twincat}")
+
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 

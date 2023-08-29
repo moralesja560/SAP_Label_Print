@@ -1,4 +1,3 @@
 Nombre,buttn_name,x_pos,y_pos,text,command,Width,2
-Ping_LT1,Button1,600,305,Ping LT1,10,12,2
-Ping_LT2,Button2,800,305,Ping LT2,20,12,2
+Ping_LT1,Button1,800,305,Enviar a PLC,40,14,2
 Start_Comm,Button3,320,305,Abre Conexion,30,12,2

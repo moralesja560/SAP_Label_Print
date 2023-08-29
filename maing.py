@@ -48,7 +48,15 @@ import pyads
 	7.-
 """
 
-
+###-------------- Algunas notas sobre Twincat ADS y Python----------------#
+"""
+	-Es fundamental que se instale el ambiente Twincat, hasta ahorita el que ha funcionado es el R3_2.11.2301
+	-Despues se mueve la libreria TCAdsDll.dll (se encuentra en C:/Twincat) a System32
+	-Esa librería se tiene que registrar usando el CMD de Windows con el comando regsvr32 TcAdsDll.dll y debe dar OK
+	-Una vez que se haya registrado la librería, se procede a usar el Twincar System Manager para hacer la conexión.
+	-Esta conexion es la usual que se hace antes de conectarse al PLC.
+	-Una vez que se haya hecho esta conexion, se va a poder usar la app en una nueva compu.
+"""
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
@@ -166,11 +174,11 @@ def main_menu():
 """
 def prepare_data(predata):
 	#remove the b stuff
-	if "\\" in str(predata)or len(predata) != 13 :
+	if len(predata) != 15 :
 		predata = "0"
 		return predata
 	else:
-		predata = str(predata)[2:-1]
+		predata = str(predata)
 	return predata
 
 def unpack_datos(posdata):
@@ -649,27 +657,41 @@ class hilo1(threading.Thread):
 			plc.open()		
 			while True:
 				time.sleep(0.5)
-				data = plc.read_by_name("PB_Stueckzahl.ADS_Label_Printer_Data_STRING", plc_datatype=pyads.PLCTYPE_STRING)
-				if "s"  in data:
-					pass
+				#print(f"se lee etiqueta {randrange(1,5000)}")
+				# agrega aqui un try except para los timeout.
+				try:
+					data = plc.read_by_name("PB_Stueckzahl.ADS_Label_Printer_Data_STRING", plc_datatype=pyads.PLCTYPE_STRING)
+				except Exception as e:
+					print(f"Falla al leer la variable: error {e}")
+					thread1.stop()
+					break
 				else:
-					posdata = prepare_data(data)
-					if posdata != "0":
-						ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
-						####################-----THE LABEL PRINTING PROCESS-----#
-						send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
-						nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
-						if nuevo_intento == 1:
-							print("se intenta de nuevo la etiqueta")
+					
+					if len(data)<3:
+						#print(f"running {randrange(1,5000)}")
+						pass
+					else:
+						#print("inicia proceso")
+						posdata = prepare_data(data)
+						if posdata != "0":
+							ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
+							####################-----THE LABEL PRINTING PROCESS-----#
+							send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
+							time.sleep(4)
+						"""
 							nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
-							#waiting time before restarting the process.
-							print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
-							run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
-							time.sleep(30)
-							print("6.- Limpieza de variables")
-							ShopOrder = ""
-							BoxType = ""
-							StandardPack = ""
+							if nuevo_intento == 1:
+								print("se intenta de nuevo la etiqueta")
+								nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+								#waiting time before restarting the process.
+								print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
+								run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
+								time.sleep(30)
+								print("6.- Limpieza de variables")
+								ShopOrder = ""
+								BoxType = ""
+								StandardPack = ""
+						"""
 				if self.stopped() or finish:
 					plc.close()
 					break
@@ -707,8 +729,9 @@ class hilo2(threading.Thread):
 			else:
 				print(f"A problem occurred... Restarting Thread 1")
 				time.sleep(10)
-				#thread1 = hilo1(thread_name="Hilo1",opt_arg="",opt_arg2=65432)
-				#thread1.start()			
+				thread1 = hilo1(thread_name="Hilo1",opt_arg=run1.ComList.get(),opt_arg2=801)
+				thread1.start()
+				print(f"Thread 1 Started")
 			
 			if self._stop_event.is_set() == True:
 				print("Thread 2 Stopped")
@@ -787,7 +810,7 @@ class Passwordchecker(tk.Frame):
 		dropfront = "white"
 		dropbg = '#314a94'
 		dropfont = ("Sans-serif",10)
-		dropx = 550
+		dropx = 100
 		dropy = 308
 		
 		portList = ['10.65.96.129.1.1','10.65.96.2.1.1']
@@ -844,10 +867,9 @@ class Passwordchecker(tk.Frame):
 				print("No se pudo abrir la conexión: Error {e}")
 				# open the connection
 			else:
-				thread1 = hilo1()
-				thread1.start()
 				thread1 = hilo1(thread_name="Hilo1",opt_arg=ComPort,opt_arg2=801)
 				thread1.start()
+				print(f"se arranca hilo")
 				thread2.start()
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):

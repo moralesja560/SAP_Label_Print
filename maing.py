@@ -57,7 +57,7 @@ import pyads
 ###-------------- Algunas notas sobre Twincat ADS y Python----------------#
 """
 	-Es fundamental que se instale el ambiente Twincat, hasta ahorita el que ha funcionado es el R3_2.11.2301
-	-Despues se mueve la libreria TCAdsDll.dll (se encuentra en C:/Twincat) a System32
+	-Despues se mueve la libreria TCAdsDll.dll (se encuentra en C:\TwinCAT\AdsApi\TcAdsDll\x64) a System32
 	-Esa librería se tiene que registrar usando el CMD de Windows con el comando regsvr32 TcAdsDll.dll y debe dar OK
 	-Una vez que se haya registrado la librería, se procede a usar el Twincat System Manager para hacer la conexión.
 	-Esta conexion es la usual que se hace antes de conectarse al PLC.
@@ -473,7 +473,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	pyautogui.write(f"0{ShopOrder}00")
 	time.sleep(1)
 	#Click en el PI
-	pyautogui.click(451, 500)
+	pyautogui.click(451, 474)
 	time.sleep(1)
 	pyautogui.write(f"{StandardPack}")
 	pyautogui.press('tab')
@@ -656,14 +656,15 @@ class hilo1(threading.Thread):
 							if nuevo_intento == 1:
 								print("se intenta de nuevo la etiqueta")
 								nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
-								#waiting time before restarting the process.
-								print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
-								run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
-								time.sleep(30)
-								print("6.- Limpieza de variables")
-								ShopOrder = ""
-								BoxType = ""
-								StandardPack = ""
+							#waiting time before restarting the process.
+							print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
+							run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
+							time.sleep(30)
+							print("6.- Limpieza de variables")
+							ShopOrder = ""
+							BoxType = ""
+							StandardPack = ""
+							
 				if self.stopped() or finish:
 					plc.close()
 					break

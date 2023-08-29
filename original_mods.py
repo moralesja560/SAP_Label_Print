@@ -1,11 +1,11 @@
-#----------------------------------Author Info---------------------------------#
+#------------------Author Info----------------------#
 #			The SAP Automatic Labeling System
 # Designed and developed by: Ing Jorge Alberto Morales, MBA
 # Controls Engineer for Mubea Coil Springs Mexico
 # JorgeAlberto.Morales@mubea.com
-#------------------------------------------------------------------------------#
+#---------------------------------------------------#
 
-#----------------------------------Import area---------------------------------#
+#----------------------import area
 
 import subprocess # arranca ejecutables de windows
 import os
@@ -31,18 +31,17 @@ from sqlalchemy import create_engine, false #
 import pyodbc
 from sqlalchemy.orm import sessionmaker
 import csv
-#------------------------------------------------------------------------------#
+#---------------------------------...
 
 
-#---------------------------------Progress check-------------------------------#
-
-#---------------------------------Ended tasks v18------------------------------#
+############progress check
+######-------ENDED TASKS V181
 ## branch severe_lot_bug
 	# el lote se abre como un campo en lugar de ya estar diseñado.
 	# obten las coordenadas de lote, clickealo y luego metes 0123456700 (0+ShopOrder+00)
 	# luego click al campo de PI en lugar de tabularlo, es mas seguro.
 
-#---------------------------------Ended tasks v19------------------------------#
+####-------------Ended V19 tasks-----------------#
 """
 5.- investigar porque el SQL falla a veces. activar el echo y lo dejamos unos días funcionando.
 1.-timestamp on console 
@@ -57,7 +56,7 @@ branch internal_notifs:
 
 
 """
-#---------------------------------Pending tasks for v19------------------------#
+######## ------------ PENDING TASKS for V19
 """
 
 2.- limpieza mensual del folder scfolder y del txt log
@@ -87,9 +86,9 @@ branch code_killswitch
 
 """
 
-#------------------------------v19 Prepod branch------------------------------#
+#------------V19 preprod branch------------------#
 
-#-----------------------------Sensitive Data Load-----------------------------#
+######-----------------Sensitive Data Load-----------------####
 load_dotenv()
 token_Tel = os.getenv('TOK_EN_BOT')
 Grupo_SAP_Label = os.getenv('SAP_LT_GROUP')
@@ -104,7 +103,7 @@ now = datetime.now()
 dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 ###---------------------------------------------####
 
-#------------------------------Auxiliary Functions----------------------------#
+#---------------------------------------Auxiliary Functions-------------------------#
 
 #This function sets the absolute path for the app to access its resources
 def resource_path(relative_path):
@@ -135,8 +134,7 @@ def serial_ports():
             A list of the serial ports available on the system
     """
     if sys.platform.startswith('win'):
-       ports = ['COM%s' % (i + 1) for i in range(256)]
-      # ports = ['COM3']
+        ports = ['COM%s' % (i + 1) for i in range(256)]
     elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
         # this excludes your current terminal "/dev/tty"
         ports = glob.glob('/dev/tty[A-Za-z]*')
@@ -148,7 +146,6 @@ def serial_ports():
     result = []
     for port in ports:
         try:
-            #print(port)
             s = serial.Serial(port)
             s.close()
             result.append(port)
@@ -225,7 +222,7 @@ def read_from_img(img):
 	return processed_text
 
 
-#--------------------------------End of Auxiliary Functions-------------------------#
+#---------------------------------End of Auxiliary Functions-------------------------#
 
 #####--------------------SQL Session Management--------------####
 #engine = create_engine('mssql+pyodbc://scadamex:scadamex@SAL-W12E-SQL\MSSQLMEX/scadadata?driver=SQL+Server+Native+Client+11.0', echo=True)
@@ -236,7 +233,7 @@ engine = create_engine(SQL_chain, echo=False)
 
 Session = sessionmaker(bind=engine)
 session = Session()
-####-----------------------------------------------------------------------------####
+####--------------------------------------------------------####
 
 #--------------------------------Telegram Messaging Management----------------------#
 
@@ -473,7 +470,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	pyautogui.write(f"0{ShopOrder}00")
 	time.sleep(1)
 	#Click en el PI
-	pyautogui.click(451, 500)
+	pyautogui.click(451, 474)
 	time.sleep(1)
 	pyautogui.write(f"{StandardPack}")
 	pyautogui.press('tab')

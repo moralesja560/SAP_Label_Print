@@ -33,7 +33,30 @@ import csv
 import socket
 import netifaces
 from random import randrange
+import pyads
 
+###-------------------------------V1 Launch Progress-------------------------#
+"""
+	1.-Cambia la GUI para que primero se habilite la conexión y 
+		luego se prueben las variables de incoming
+	2.-Escribe el código para sustituir el ping por el incoming y outgoing
+		y coloca las ventanas correspondientes
+	3.-agrega los try except para mejorar el programa y ayudar al usuario a los errores.
+	4.-Investigar el programa de local route para agregar los remotos via python
+	5.-Coloca una rutina para buscar Twincat en la computadora
+	6.-Revisar la estabilidad del código compilando y corriendolo todo el día
+	7.-
+"""
+
+###-------------- Algunas notas sobre Twincat ADS y Python----------------#
+"""
+	-Es fundamental que se instale el ambiente Twincat, hasta ahorita el que ha funcionado es el R3_2.11.2301
+	-Despues se mueve la libreria TCAdsDll.dll (se encuentra en C:/Twincat) a System32
+	-Esa librería se tiene que registrar usando el CMD de Windows con el comando regsvr32 TcAdsDll.dll y debe dar OK
+	-Una vez que se haya registrado la librería, se procede a usar el Twincar System Manager para hacer la conexión.
+	-Esta conexion es la usual que se hace antes de conectarse al PLC.
+	-Una vez que se haya hecho esta conexion, se va a poder usar la app en una nueva compu.
+"""
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
@@ -151,11 +174,11 @@ def main_menu():
 """
 def prepare_data(predata):
 	#remove the b stuff
-	if "\\" in str(predata)or len(predata) != 13 :
+	if len(predata) != 15 :
 		predata = "0"
 		return predata
 	else:
-		predata = str(predata)[2:-1]
+		predata = str(predata)
 	return predata
 
 def unpack_datos(posdata):
@@ -625,46 +648,41 @@ class hilo1(threading.Thread):
 		self.PORT = opt_arg2
 		self._stop_event = threading.Event()
 	#the actual thread function
-	def run(self):		
-		print(f"Thread1: connection started")
-		run1.console2.configure(text = f"Thread1: connection started")
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-			s.bind((self.HOST, self.PORT))
-			s.settimeout(5)
-			s.listen()
+	def run(self):
+		try:
+			plc = pyads.Connection(self.HOST, self.PORT)	
+		except Exception as e:
+			print(f"No se pudo conectar con el puerto. Error {e}")
+		else:
+			plc.open()		
 			while True:
+				time.sleep(0.5)
+				#print(f"se lee etiqueta {randrange(1,5000)}")
+				# agrega aqui un try except para los timeout.
 				try:
-					if self.stopped() or finish:
-						s.close()
-						print(f"socket closed")
-						break
-					conn, addr = s.accept()
-					print("Socket Connected: %s" % str(addr))
-				except socket.timeout:
-					try:
-						run1.console2.configure(text = f"Nothing yet... {randrange(10)} ")
-					except:
-						s.close()
-						break
-				else:		
-					with conn:
-						run1.console2.configure(text = f"Conectado a {addr} ")
-						while True:
-							data = conn.recv(1024)
-							print(f"original data {data}")
-							if not data:
-								print("connection closed")
-								break
-							#conn.sendall(data)
-							posdata = prepare_data(data)
-							if posdata != "0":
-								ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
-								####################-----THE LABEL PRINTING PROCESS-----#
-								send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
+					data = plc.read_by_name("PB_Stueckzahl.ADS_Label_Printer_Data_STRING", plc_datatype=pyads.PLCTYPE_STRING)
+				except Exception as e:
+					print(f"Falla al leer la variable: error {e}")
+					thread1.stop()
+					break
+				else:
+					
+					if len(data)<3:
+						#print(f"running {randrange(1,5000)}")
+						pass
+					else:
+						#print("inicia proceso")
+						posdata = prepare_data(data)
+						if posdata != "0":
+							ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
+							####################-----THE LABEL PRINTING PROCESS-----#
+							send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
+							time.sleep(4)
+						"""
+							nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+							if nuevo_intento == 1:
+								print("se intenta de nuevo la etiqueta")
 								nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
-								if nuevo_intento == 1:
-									print("se intenta de nuevo la etiqueta")
-									nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 								#waiting time before restarting the process.
 								print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
 								run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 30s")
@@ -673,13 +691,10 @@ class hilo1(threading.Thread):
 								ShopOrder = ""
 								BoxType = ""
 								StandardPack = ""
-								
-							if self.stopped() or finish:
-								conn.close()
-								s.close()
-								break
-		print("ya se finalizó esto")
-
+						"""
+				if self.stopped() or finish:
+					plc.close()
+					break
 	def stop(self):
 		print("si entre a stopear")
 		self.stopped = True
@@ -714,8 +729,9 @@ class hilo2(threading.Thread):
 			else:
 				print(f"A problem occurred... Restarting Thread 1")
 				time.sleep(10)
-				#thread1 = hilo1(thread_name="Hilo1",opt_arg="",opt_arg2=65432)
-				#thread1.start()			
+				thread1 = hilo1(thread_name="Hilo1",opt_arg=run1.ComList.get(),opt_arg2=801)
+				thread1.start()
+				print(f"Thread 1 Started")
 			
 			if self._stop_event.is_set() == True:
 				print("Thread 2 Stopped")
@@ -790,68 +806,74 @@ class Passwordchecker(tk.Frame):
 
 ######### Create Dropdown menus for COM options 
 		#ComPort.
-		dropwidth = 15
+		dropwidth = 20
 		dropfront = "white"
 		dropbg = '#314a94'
 		dropfont = ("Sans-serif",10)
-		dropx = 550
+		dropx = 100
 		dropy = 308
 		
-		portList = get_local_ip_addresses()
+		portList = ['10.65.96.129.1.1','10.65.96.2.1.1']
+
+		intlist = [1,2,3,4,5,6,7]
 
 		self.ComList = StringVar()
-		self.ComList.set("Seleccionar IP")
+		self.ComList.set("Seleccionar AMS NetID")
 		dropdown1 = OptionMenu(self.parent,self.ComList,*portList)
 		dropdown1.place(x=int(dropx),y=int(dropy))
 		dropdown1.configure( fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont )
 
+		self.IntSending = StringVar()
+		self.IntSending.set("Envia algo al PLC")
+		dropdown1 = OptionMenu(self.parent,self.IntSending,*intlist)
+		dropdown1.place(x=int(dropx+500),y=int(dropy))
+		dropdown1.configure( fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont )
+
+		#Button disable until AMS NetID connection is successful
+		a_temp = 'Button1'
+		globals()[a_temp].configure(state = "disabled")
 ##########Selector is the function that commands buttons actions
 	def Selector(self,num):
 		global ComPort
-		global baud_Rate
-		global Parity_data
-		global stop_bits
-		global byte_size
 		#go to def run() in thread 2 and config it to pass these variables to the method1 second thread.	
 		#### area to check if the info coming from the optionmenu is valid and all the option menus were opened and selected.
 			
 		#button to Ping
 		if num == 10:
-			a_temp = 'Button1'
-			
-			comms_LT1 = check_ping("LT1")
-			if comms_LT1 == 0:
-				globals()[a_temp].configure(state = "disabled")
-				self.console.configure(text = "Ping LT1 Exitoso")
-				globals()[a_temp].configure(bg = "#158f50")
-				globals()[a_temp].configure(fg = "#ffffff")
-			else:
-				self.console.configure(text = "Ping LT1 Fallido: Espere 5 segs")
-				globals()[a_temp].configure(bg = "#cc1205")
-				globals()[a_temp].configure(fg = "#ffffff")
-				time.sleep(5)
+			pass
 		if num == 20:
-			a_temp = 'Button2'
-			
-			comms_LT1 = check_ping("LT2")
-			if comms_LT1 == 0:
-				globals()[a_temp].configure(state = "disabled")
-				self.console.configure(text = "Ping LT2 Exitoso")
-				globals()[a_temp].configure(bg = "#158f50")
-				globals()[a_temp].configure(fg = "#ffffff")
-			else:
-				self.console.configure(text = "Ping LT2 Fallido: Espere 5 segs")
-				globals()[a_temp].configure(bg = "#cc1205")
-				globals()[a_temp].configure(fg = "#ffffff")
-				time.sleep(5)
+			pass
 		if num == 30:
 			ComPort = self.ComList.get()
-			HOST = ComPort  # IP of local computer that
-			print(HOST)
-			PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
-			thread1 = hilo1(thread_name="Hilo1",opt_arg=HOST,opt_arg2=PORT)
-			thread1.start()
-			thread2.start()
+			try:
+				pyads.open_port()
+				ams_net_id = pyads.get_local_address().netid
+				print(ams_net_id)
+				pyads.close_port()
+			except Exception as e:
+				print("No se pudo abrir la conexión: Error {e}")
+				# open the connection
+			else:
+				thread1 = hilo1(thread_name="Hilo1",opt_arg=ComPort,opt_arg2=801)
+				thread1.start()
+				print(f"se arranca hilo")
+				thread2.start()
+				a_temp = 'Button1'
+				globals()[a_temp].configure(state = "active")
+				
+		if num == 40:
+			Nummer = self.IntSending.get()
+			ComPort = self.ComList.get()
+			try:
+				plc = pyads.Connection(ComPort,801)	
+				plc.open()
+				plc.write_by_name('PB_Stueckzahl.ADS_Label_Incoming_Ping',int(Nummer),pyads.PLCTYPE_INT)
+				message_from_twincat = plc.read_by_name('PB_Stueckzahl.ADS_Label_Outgoing_Ping', pyads.PLCTYPE_INT)
+				run1.console.configure(text=f"Recepción de PLC {message_from_twincat}")
+			except Exception as e:
+				print(f"No se pudo conectar con el puerto. Error {e}")
+			
+
 	def quit(self):
 		if messagebox.askyesno('Salida','¿Seguro que quiere salir?'):
             #In order to use quit function, mainWindow MUST BE an attribute of Interface. 

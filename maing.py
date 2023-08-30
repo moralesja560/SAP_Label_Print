@@ -654,7 +654,6 @@ class hilo1(threading.Thread):
 					thread1.stop()
 					break
 				else:
-					
 					if len(data)<3:
 						#print(f"running {randrange(1,5000)}")
 						pass
@@ -715,10 +714,15 @@ class hilo2(threading.Thread):
 					self._stop_event.set()
 			else:
 				print(f"A problem occurred... Restarting Thread 1")
-				time.sleep(10)
-				thread1 = hilo1(thread_name="Hilo1",opt_arg=run1.ComList.get(),opt_arg2=801)
-				thread1.start()
-				print(f"Thread 1 Started")
+				time.sleep(5)
+				try:
+					thread1 = hilo1(thread_name="Hilo1",opt_arg=run1.ComList.get(),opt_arg2=801)
+					thread1.start()
+					print(f"Thread 1 Started")
+				except:
+					print(f"ya se cerró la app")
+					sys.exit()
+				
 			
 			if self._stop_event.is_set() == True:
 				print("Thread 2 Stopped")
@@ -805,13 +809,13 @@ class Passwordchecker(tk.Frame):
 		intlist = [1,2,3,4,5,6,7]
 
 		self.ComList = StringVar()
-		self.ComList.set("Seleccionar AMS NetID")
+		self.ComList.set('10.65.96.129.1.1')
 		dropdown1 = OptionMenu(self.parent,self.ComList,*portList)
-		dropdown1.place(x=int(dropx),y=int(dropy))
+		dropdown1.place(x=int(dropx)-50,y=int(dropy))
 		dropdown1.configure( fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont )
 
 		self.IntSending = StringVar()
-		self.IntSending.set("Envia algo al PLC")
+		self.IntSending.set(int(1))
 		dropdown1 = OptionMenu(self.parent,self.IntSending,*intlist)
 		dropdown1.place(x=int(dropx+500),y=int(dropy))
 		dropdown1.configure( fg=dropfront, bg=dropbg, width=dropwidth, font=dropfont )
@@ -829,23 +833,43 @@ class Passwordchecker(tk.Frame):
 		if num == 10:
 			pass
 		if num == 20:
-			pass
+			try:
+				thread1 = hilo1(thread_name="Hilo1",opt_arg=ComPort,opt_arg2=801)
+				thread2 = hilo2(thread_name="Hilo2",opt_arg="Z")
+				thread2.stop()
+				time.sleep(2)
+				thread1.stop()
+				messagebox.showinfo('Terminar Proceso','Conexión Cerrada')
+			except Exception as e:
+				print(f"error de cierre es: {e}")
+			finally:
+				a_temp = 'Button1'
+				globals()[a_temp].configure(state = "disabled")
+				a_temp = 'Button4'
+				globals()[a_temp].configure(state = "disabled")
+				a_temp = 'Button3'
+				globals()[a_temp].configure(state = "active")
 		if num == 30:
 			ComPort = self.ComList.get()
 			try:
 				pyads.open_port()
 				ams_net_id = pyads.get_local_address().netid
-				print(ams_net_id)
+				#print(ams_net_id)
 				pyads.close_port()
 			except Exception as e:
 				print("No se pudo abrir la conexión: Error {e}")
 				# open the connection
 			else:
 				thread1 = hilo1(thread_name="Hilo1",opt_arg=ComPort,opt_arg2=801)
+				thread2 = hilo2(thread_name="Hilo2",opt_arg="Z")
 				thread1.start()
 				print(f"se arranca hilo")
 				thread2.start()
 				a_temp = 'Button1'
+				globals()[a_temp].configure(state = "active")
+				a_temp = 'Button3'
+				globals()[a_temp].configure(state = "disabled")
+				a_temp = 'Button4'
 				globals()[a_temp].configure(state = "active")
 				
 		if num == 40:

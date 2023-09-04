@@ -45,10 +45,12 @@ import pyads
 	3.-agrega los try except para mejorar el programa y ayudar al usuario a los errores.
 	6.-Revisar la estabilidad del código compilando y corriendolo todo el día
 	7.-Elimina código que no se usa.
+	9.- Se minimiza la interfaz cuando llega una etiqueta.
+	8.-Elimina tanto mensaje del bot para centrarse en los errores.
 	
 	ONGOING:
 	5.-Coloca una rutina para buscar Twincat en la computadora
-	8.-Elimina tanto mensaje del bot para centrarse en los errores.
+	
 
 """
 
@@ -663,7 +665,8 @@ class hilo1(threading.Thread):
 						if posdata != "0":
 							ShopOrder,BoxType,StandardPack = unpack_datos(posdata)
 							####################-----THE LABEL PRINTING PROCESS-----#
-							send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
+							#send_message(Jorge_Morales,quote(f" La Shop Order es {ShopOrder}, el box es {BoxType} y el SPack es {StandardPack}"),token_Tel)
+							root.wm_state('iconic')
 							time.sleep(4)
 							nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 							if nuevo_intento == 1:
@@ -856,6 +859,7 @@ class Passwordchecker(tk.Frame):
 				ams_net_id = pyads.get_local_address().netid
 				#print(ams_net_id)
 				pyads.close_port()
+				
 			except Exception as e:
 				print("No se pudo abrir la conexión: Error {e}")
 				# open the connection

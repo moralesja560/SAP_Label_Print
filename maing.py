@@ -47,8 +47,8 @@ import pyads
 	7.-Elimina código que no se usa.
 	
 	ONGOING:
-	4.-Investigar el programa de local route para agregar los remotos via python
 	5.-Coloca una rutina para buscar Twincat en la computadora
+	8.-Elimina tanto mensaje del bot para centrarse en los errores.
 
 """
 

@@ -656,10 +656,7 @@ class hilo1(threading.Thread):
 					thread1.stop()
 					break
 				else:
-					if len(data)<3:
-						#print(f"running {randrange(1,5000)}")
-						pass
-					else:
+					if len(data)>10:
 						#print("inicia proceso")
 						posdata = prepare_data(data)
 						if posdata != "0":
@@ -682,6 +679,7 @@ class hilo1(threading.Thread):
 							StandardPack = ""
 							
 				if self.stopped() or finish:
+					thread1.stop()
 					plc.close()
 					break
 	def stop(self):
@@ -848,8 +846,8 @@ class Passwordchecker(tk.Frame):
 			finally:
 				a_temp = 'Button1'
 				globals()[a_temp].configure(state = "disabled")
-				a_temp = 'Button4'
-				globals()[a_temp].configure(state = "disabled")
+				#a_temp = 'Button4'
+				#globals()[a_temp].configure(state = "disabled")
 				a_temp = 'Button3'
 				globals()[a_temp].configure(state = "active")
 		if num == 30:
@@ -866,15 +864,17 @@ class Passwordchecker(tk.Frame):
 			else:
 				thread1 = hilo1(thread_name="Hilo1",opt_arg=ComPort,opt_arg2=801)
 				thread2 = hilo2(thread_name="Hilo2",opt_arg="Z")
+				thread1.daemon =  True
 				thread1.start()
 				print(f"se arranca hilo")
+				thread2.daemon = True
 				thread2.start()
 				a_temp = 'Button1'
 				globals()[a_temp].configure(state = "active")
 				a_temp = 'Button3'
 				globals()[a_temp].configure(state = "disabled")
-				a_temp = 'Button4'
-				globals()[a_temp].configure(state = "active")
+				#a_temp = 'Button4'
+				#globals()[a_temp].configure(state = "active")
 				
 		if num == 40:
 			Nummer = self.IntSending.get()
@@ -898,6 +898,7 @@ class Passwordchecker(tk.Frame):
 			self.parent.destroy()
 			self.parent.quit()
 			send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha detenido'), token_Tel)
+			sys.exit()
 
 
 

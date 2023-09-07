@@ -922,6 +922,7 @@ pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 
 #-----------Area for main program--------------#
 
 if __name__ == '__main__':
+	send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha iniciado'), token_Tel)
 	#tkinter class assign
 	root = tk.Tk()
 ## How to start a new thread? 

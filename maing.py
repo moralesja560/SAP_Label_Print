@@ -38,6 +38,7 @@ import pyads
 		3.-trabajar con tesseract para mejorar la detección de texto
 		4.-hacer popups con mensajes para que los operadores entiendan
 		5.-Usar PLC para indicar errores en el HMI.	
+		
 
 """
 

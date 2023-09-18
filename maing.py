@@ -676,10 +676,9 @@ class hilo1(threading.Thread):
 class hilo2(threading.Thread):
 	#thread init procedure
 	# i think we pass optional variables to use them inside the thread
-	def __init__(self,thread_name,opt_arg):
+	def __init__(self,thread_name):
 		threading.Thread.__init__(self)
 		self.thread_name = thread_name
-		self.opt_arg = opt_arg
 		self._stop_event = threading.Event()
 	#the actual thread function
 	def run(self):

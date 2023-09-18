@@ -2,12 +2,11 @@
 #			The SAP Automatic Labeling System
 # Designed and developed by: Ing Jorge Alberto Morales, MBA
 # Automation Project Sr Engineer for Mubea Coil Springs Mexico
-# JorgeAlberto.Morales@mubea.com
+# Jorge.Morales@mubea.com
 #---------------------------------------------------#
 
 #----------------------import area
 
-import subprocess
 import os
 import time, threading
 from tkinter import *
@@ -15,42 +14,31 @@ from tkinter import messagebox
 from functools import partial
 import tkinter as tk
 import pyautogui
-#import serial
 import sys
 from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 import json
-import requests
 import cv2
 import pytesseract
 import pandas as pd
-#from sqlalchemy import create_engine
-#import pyodbc
-#from sqlalchemy.orm import sessionmaker
 import csv
-import socket
-import netifaces
 from random import randrange
 import pyads
 
 ###-------------------------------V1 Launch Progress-------------------------#
 """
 	FINISHED:
-	1.-Cambia la GUI para que primero se habilite la conexión y 
-		luego se prueben las variables de incoming
-	2.-Escribe el código para sustituir el ping por el incoming y outgoing
-		y coloca las ventanas correspondientes
-	3.-agrega los try except para mejorar el programa y ayudar al usuario a los errores.
-	6.-Revisar la estabilidad del código compilando y corriendolo todo el día
-	7.-Elimina código que no se usa.
-	9.- Se minimiza la interfaz cuando llega una etiqueta.
-	8.-Elimina tanto mensaje del bot para centrarse en los errores.
+
 	
 	ONGOING:
-	5.-Coloca una rutina para buscar Twincat en la computadora
-	
+		1.-Eliminar el código que no se usa en una nueva branch
+		2.-Hacer mas rapido el código de detección de mensajes
+		3.-trabajar con tesseract para mejorar la detección de texto
+		4.-hacer popups con mensajes para que los operadores entiendan
+		5.-Usar PLC para indicar errores en el HMI.	
+		
 
 """
 
@@ -66,6 +54,7 @@ import pyads
 	-Una vez que se haya hecho esta conexion, se va a poder usar la app en una nueva compu.
 	-Casi cualquier error del ADS es por el remote route. Es necesario usar el System Manager para "que se conozcan" y luego ya pueda aceptar conexiones vía ADS
 	-Cabe destacar que el PLC se conecta vía protocolo físico ethernet, pero protocolo virtual es Twincat ADS.
+	pyads se baja y se instala desde 
 """
 
 ######-----------------Sensitive Data Load-----------------####
@@ -110,7 +99,7 @@ def send_message(user_id, text,token):
 		# Procesamos la respuesta json
 		json_respuesta = json.loads(cuerpo_respuesta.decode("utf-8"))
 		print("mensaje enviado exitosamente")
-
+"""
 def send_photo(user_id, image,token):
 	img = open(image, 'rb')
 	url = f'http://api.telegram.org/{token}/sendPhoto?chat_id={user_id}'
@@ -125,7 +114,7 @@ def send_photo(user_id, image,token):
 			print(f"mensaje enviado exitosamente con código {respuesta}")
 		else:
 			print(f"Ha ocurrido un error al enviar el mensaje: {respuesta}")
-
+"""
 
 #-------------------------- End of Telegram---------------------#
 
@@ -160,11 +149,8 @@ def prepare_data(predata):
 def unpack_datos(posdata):
 	x_pos=posdata.find("X")
 	print("2.- X encontrada") #b'1234567box140'
-	#we store Shop Order data in two separate vars,  but we do not clear one,
-	#no issue if it's the same data, but will send a notification if there's change.
 	ShopOrder = posdata[x_pos-9:x_pos-2]
 	BoxType = posdata[x_pos-2:x_pos+1]
-	#Standard Pack was changed due to serial data overflow. 
 	StandardPack =posdata[x_pos+1:x_pos+4]
 	return ShopOrder,BoxType,StandardPack
 
@@ -210,14 +196,7 @@ def write_log(logtype,texto,ShopOrder,BoxType,StandardPack):
 
 	new_row = {'timestamp' : [dt_string], 'logtype' : [logtype], 'texto' : [texto], 'Shop Order' : [ShopOrder], 'BoxType' : [BoxType], 'SP' : [StandardPack]}
 	new_row_pd = pd.DataFrame(new_row)
-	#try:
-	#	new_row_pd.to_sql(f'Temp1_SAPLabel_{Line_ID}', con=engine, if_exists='append',index=False)
-	#except:
-	#	print("no pude subir la info a sql")
-	#else: 
-	#	print("SQL exitoso")
 	pd_concat = pd.concat([pd_log,new_row_pd])
-	#store the info
 	pd_concat.to_csv(pd_ruta,index=False)
 
 def take_screenshot(type):
@@ -363,7 +342,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	if ok_flag == False:
 		ruta_foto = take_screenshot("full")
 		send_message(Jorge_Morales,quote(f" En {Line_ID} Intenté imprimir una etiqueta pero no veo el Membrain, intentaré de nuevo"),token_Tel)
-		send_photo(Jorge_Morales,ruta_foto,token_Tel)
+		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
 		write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
 		run1.console.configure(text = "No se puede identificar el punto de entrada")
 		#Add a 1 to try to print again
@@ -405,7 +384,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			return_codename = 1
 			return return_codename
 		elif "HU no existente" in texto_error:			
-			send_photo(Jorge_Morales,ruta_foto,token_Tel)
+			#send_photo(Jorge_Morales,ruta_foto,token_Tel)
 			send_message(Jorge_Morales,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
 			pyautogui.press('enter')
 			return_to_main()
@@ -435,7 +414,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(5)
 	if error5_btn == None:
 		ruta_foto = take_screenshot("full")
-		send_photo(Jorge_Morales,ruta_foto,token_Tel)
+		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: Estaba creando una etiqueta, pero el Membrain ya no respondió. ¿Se podrá intentar de nuevo?"),token_Tel)
 		write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 		run1.console.configure(text = "No se encontró la secc de embalaje")
@@ -464,7 +443,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	# puede deberse a internet o a errores en la HU		
 	if error8_btn == None:
 		ruta_foto = take_screenshot("full")
-		send_photo(Jorge_Morales,ruta_foto,token_Tel)
+		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: Error de Standard Pack: Intentaré de nuevo."),token_Tel)
 		write_log("nok","No se encontró el PI",ShopOrder,BoxType,StandardPack)
 		run1.console.configure(text = "No se encontró la secc de PI")
@@ -549,7 +528,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#####This area is to select what the error text will do. 
 				#What to do if there's an OF error (overfill)
 				#What to do if there's an HU in use error?
-			send_photo(Jorge_Morales,ruta_foto,token_Tel)
+			#send_photo(Jorge_Morales,ruta_foto,token_Tel)
 			if texto_error == "Shop Order con OF":
 				return_codename = 0
 				send_message(Jorge_Morales,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
@@ -586,7 +565,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
 		print(texto_error)
-		send_photo(Jorge_Morales,ruta_foto,token_Tel)
+		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
 		if texto_error == "Shop Order con OF":
 			return_codename = 0
 			send_message(Jorge_Morales,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
@@ -678,7 +657,7 @@ class hilo1(threading.Thread):
 							BoxType = ""
 							StandardPack = ""
 							
-				if self.stopped() or finish:
+				if self.stopped():
 					thread1.stop()
 					plc.close()
 					break
@@ -686,7 +665,6 @@ class hilo1(threading.Thread):
 		print("si entre a stopear")
 		self.stopped = True
 		self._stop_event.set()
-		finish = True
 
 
 	def stopped(self):
@@ -698,10 +676,9 @@ class hilo1(threading.Thread):
 class hilo2(threading.Thread):
 	#thread init procedure
 	# i think we pass optional variables to use them inside the thread
-	def __init__(self,thread_name,opt_arg):
+	def __init__(self,thread_name):
 		threading.Thread.__init__(self)
 		self.thread_name = thread_name
-		self.opt_arg = opt_arg
 		self._stop_event = threading.Event()
 	#the actual thread function
 	def run(self):
@@ -836,7 +813,7 @@ class Passwordchecker(tk.Frame):
 		if num == 20:
 			try:
 				thread1 = hilo1(thread_name="Hilo1",opt_arg=ComPort,opt_arg2=801)
-				thread2 = hilo2(thread_name="Hilo2",opt_arg="Z")
+				thread2 = hilo2(thread_name="Hilo2")
 				thread2.stop()
 				time.sleep(2)
 				thread1.stop()
@@ -863,7 +840,7 @@ class Passwordchecker(tk.Frame):
 				# open the connection
 			else:
 				thread1 = hilo1(thread_name="Hilo1",opt_arg=ComPort,opt_arg2=801)
-				thread2 = hilo2(thread_name="Hilo2",opt_arg="Z")
+				thread2 = hilo2(thread_name="Hilo2")
 				thread1.daemon =  True
 				thread1.start()
 				print(f"se arranca hilo")
@@ -930,11 +907,6 @@ with open(resource_path("images/entry_btn_data.csv")) as file:
 with open(resource_path(r'images/idline.txt'), 'r') as f:
 	Line_ID = f.readline()
 
-with open(resource_path(r'images/IP_LT1.txt'), 'r') as f:
-	ip_LT1 = f.readline()
-
-with open(resource_path(r'images/IP_LT2.txt'), 'r') as f:
-	ip_LT2 = f.readline()
 
 with open(resource_path(r'images/Operator.txt'), 'r') as f:
 	Operator = f.readline()
@@ -950,9 +922,7 @@ pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 
 #-----------Area for main program--------------#
 
 if __name__ == '__main__':
-	global finish
-	#SIGTERM signal
-	finish = False
+	send_message(Jorge_Morales,quote(f'{Line_ID}: El sistema se ha iniciado'), token_Tel)
 	#tkinter class assign
 	root = tk.Tk()
 ## How to start a new thread? 
@@ -960,8 +930,7 @@ if __name__ == '__main__':
 	# First thread 
 	run1 = Passwordchecker(root)
 	thread1 = hilo1(thread_name="Hilo1",opt_arg="",opt_arg2=65432)
-	thread2 = hilo2(thread_name="Hilo2",opt_arg="Z")
+	thread2 = hilo2(thread_name="Hilo2")
 	root.mainloop() #GUI.start()
-	finish = True
 	sys.exit()
 	

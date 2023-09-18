@@ -2,7 +2,7 @@
 #			The SAP Automatic Labeling System
 # Designed and developed by: Ing Jorge Alberto Morales, MBA
 # Automation Project Sr Engineer for Mubea Coil Springs Mexico
-# JorgeAlberto.Morales@mubea.com
+# Jorge.Morales@mubea.com
 #---------------------------------------------------#
 
 #----------------------import area

@@ -54,7 +54,7 @@ import pyads
 	-Una vez que se haya hecho esta conexion, se va a poder usar la app en una nueva compu.
 	-Casi cualquier error del ADS es por el remote route. Es necesario usar el System Manager para "que se conozcan" y luego ya pueda aceptar conexiones vía ADS
 	-Cabe destacar que el PLC se conecta vía protocolo físico ethernet, pero protocolo virtual es Twincat ADS.
-	pyads se baja y se instala desde 
+	-
 """
 
 ######-----------------Sensitive Data Load-----------------####

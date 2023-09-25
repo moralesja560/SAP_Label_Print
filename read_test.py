@@ -42,14 +42,14 @@ def write_log(image,text):
 with open(resource_path(r'images/tesseract.txt'), 'r') as f:
 	tesse_location = f.readline()
 
-directory_list = os.listdir(r'C:\Users\moralesjo\OneDrive - Mubea\Pictures\testimg')
+directory_list = os.listdir(r'C:\Users\moralesjo\OneDrive - Mubea\Pictures\testimg\error')
 #Pandas DataFrame dictionaries
 pd_dict = {'filename' : ['dummy'], 'texto' : ['dummy']}
 
 
 for image in directory_list:
 	# read image
-	img = cv2.imread(resource_path(r'C:\Users\moralesjo\OneDrive - Mubea\Pictures\testimg'+"\\"+image))
+	img = cv2.imread(resource_path(r'C:\Users\moralesjo\OneDrive - Mubea\Pictures\testimg\error'+"\\"+image))
 	# configurations
 	config = ('-l spa --oem 1 --psm 1')
 	# pytessercat
@@ -57,7 +57,7 @@ for image in directory_list:
 	text = pytesseract.image_to_string(img, config=config)
 	text = text.split('\n')
 	#print(f"se procesa la imagen {image} con el texto {text}")
-	write_log(image=resource_path(r'C:\Users\moralesjo\OneDrive - Mubea\Pictures\testimg'+"\\"+image),text=text)
+	write_log(image=resource_path(r'C:\Users\moralesjo\OneDrive - Mubea\Pictures\testimg\error'+"\\"+image),text=text)
 """	
 	for letter in text:
 		#check for nonexistant HU

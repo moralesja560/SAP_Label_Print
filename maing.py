@@ -29,17 +29,16 @@ import pyads
 
 ###-------------------------------V2.6 Launched-------------------------#
 
+###-------------------------------V2.7 Progress-------------------------#
 """
 	FINISHED:
-		1.-Eliminar el código que no se usa en una nueva branch
-		2.-Hacer mas rapido el código de detección de mensajes
+
 	ONGOING:
 		3.-trabajar con tesseract para mejorar la detección de texto
-		4.-hacer popups con mensajes para que los operadores entiendan
 		5.-Usar PLC para indicar errores en el HMI.	
 		6.-Usar el código de salida para parar la línea
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
-		8.- Version 2.6 con mejoras en el sistema de label_print
+		8.- Delay enorme despues de enviar la etiqueta, revisar ese procedimiento.
 		
 
 """
@@ -126,10 +125,13 @@ def return_to_main():
 	pyautogui.click(435,142)
 
 def main_menu():
+	#flecha de regresar
 	pyautogui.click(50,50)
-	time.sleep(1)
+	time.sleep(0.5)
+	#boton de ingreso del menu principal
 	pyautogui.click(523,223)
-	time.sleep(1)
+	time.sleep(0.5)
+	# orden de fabricación
 	pyautogui.click(435,142)
 
 
@@ -218,6 +220,24 @@ def take_screenshot(type):
 	return ruta_img
 
 def read_from_img(img):
+	"""
+	La idea de leer estos letreros es tratar de ajustar acciones (como reintentar o no) acorde al texto.
+	Se van a dividir en 2 categorías
+
+	Los que paran línea por error de información ingresada o que no tiene caso reintentar.
+		-error OF: La shop order ya está llena
+		-RTC / Network: error de la aplicación del SAP
+	
+	Los que ocurren porque hubo un error en la secuencia que podría reintentarse.
+		-embalaje
+		-HU en uso
+		-Objeto bloqueado
+		-tratando
+	
+	Para el primero, implementaremos un código de retorno de 2, si se recibe un 2 en el main thread, entonces hablamos de parar la linea
+	Todos los demas código (0 y 1), implican un reintente genérico.
+	"""
+
 	with open(resource_path(r'images/tesseract.txt'), 'r') as f:
 		tesse_location = f.readline()
 	processed_text = "cadena vacia"
@@ -242,6 +262,22 @@ def read_from_img(img):
 	#check for nonexistant HU
 		if len(letter)<3:
 			continue
+		#Codigo OF para Shop Order llena
+		elif "OF" in letter or "cerrada" in letter or "orden excedido" in letter :
+			processed_text = "OF error"
+		
+		elif "Entrada de mercancias" in letter:
+			HU_step1 = letter.find("HU")
+			print(f"Proceso terminó normal: {letter[HU_step1:HU_step1+12]}")
+			processed_text = f"Proceso termina normal {letter[HU_step1:HU_step1+12]}"
+		
+		elif "no existe" in letter or "ya esta eliminada" in letter or "entrada" in letter:
+			processed_text = "SHO error"
+		elif "HTTP" in letter or "RTC" in letter or "network" in letter:
+			processed_text = "SAP error"
+		else:
+			processed_text = f"Error: {letter}"
+		"""
 		elif "no existe" in letter or "ya esta eliminada" in letter:
 			processed_text = "HU no existente"
 		elif "OF" in letter or "cerrada" in letter or "orden excedido" in letter :
@@ -266,6 +302,7 @@ def read_from_img(img):
 			processed_text = "no hay embalaje planeado"
 		else:
 			processed_text = f"El error tenía esto {letter}, pero no pude detectar caracteres"
+		"""
 
 	return processed_text
 
@@ -386,41 +423,33 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(3)
 	
 	if error4_btn is not None:
-		#error in HU
+		#error4 es cuando ingresas una Shop Order mal y te envia a falla
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
-		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-		if "Membrain equivocada" in texto_error:
+		write_log("log",texto_error,ShopOrder,BoxType,StandardPack) 
+		if "SHO error" in texto_error or "SAP error" in texto_error or "OF error" in texto_error :			
 			pyautogui.press('enter')
-			return_to_main()
-			time.sleep(1)
-			pyautogui.press('tab')
-			time.sleep(1)
-			pyautogui.press('tab')
-			time.sleep(1)
-			pyautogui.press('space')
-			return_to_main()
+			main_menu()
 			pyautogui.press('backspace')
-		elif "HU no existente" in texto_error:			
-			#send_photo(Jorge_Morales,ruta_foto,token_Tel)
-			pyautogui.press('enter')
-			return_to_main()
-			time.sleep(1)
-			pyautogui.press('backspace')
-			write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
-			run1.console.configure(text = "HU incorrecta")
+			write_log("nok","SHO incorrecta",ShopOrder,BoxType,StandardPack)
+			run1.console.configure(text = "Shop Order incorrecta")
+			# Paro de Línea TBD aqui
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error 4: {texto_error} Se ejecuta paro de línea"),token_Tel)
+			return_codename = 2
+			return return_codename
 		else:
 			#Something standard
 			pyautogui.press('enter')
-			return_to_main()
-			time.sleep(1)
-		send_message(Jorge_Morales,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
-		return_codename = 1
-		return return_codename
+			main_menu()
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error 4: {texto_error}"),token_Tel)
+			return_codename = 1
+			return return_codename
+		
+
 	
 	if error5_btn == None:
-		ruta_foto = take_screenshot("full")
-		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
+		#el error5 es cuando no responde el SAP
+		ruta_foto = take_screenshot("error") # cambiado desde full
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: No encontré el embalaje"),token_Tel)
 		write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 		run1.console.configure(text = "No se encontró la secc de embalaje")
@@ -429,6 +458,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		return_to_main()
 		return_codename = 1
 		return return_codename
+	
+	
+	
 	#no issue, continue
 	pyautogui.press('tab')
 	pyautogui.press('space')
@@ -461,6 +493,8 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#encuentra el error y leelo
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
+		# Aqui se puede ejecutar otro paro de linea 
+		send_message(Jorge_Morales,quote(f" En {Line_ID}: error10btn: {texto_error}."),token_Tel)
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 		main_menu()
 		return_codename = 1
@@ -535,7 +569,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				#What to do if there's an OF error (overfill)
 				#What to do if there's an HU in use error?
 			#send_photo(Jorge_Morales,ruta_foto,token_Tel)
-			if texto_error == "Shop Order con OF":
+			
+			if texto_error == "OF":
+				## Código OF ##
 				return_codename = 0
 				send_message(Jorge_Morales,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
 			elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
@@ -572,7 +608,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		texto_error = read_from_img(ruta_foto)
 		print(texto_error)
 		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
-		if texto_error == "Shop Order con OF":
+		if texto_error == "OF":
 			return_codename = 0
 			send_message(Jorge_Morales,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
 		elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":

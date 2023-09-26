@@ -27,25 +27,26 @@ import csv
 from random import randrange
 import pyads
 
-###-------------------------------V2.7 Launched-------------------------#
+###-------------------------------V2.70 Launched-------------------------#
 
 """
 	MONITOR:
-		1.-Tratar de que se usen los errores
-		2.-Verificar que los errores sean realmente los que dice
-	Error:
-		1.-No puedo parar la línea por error del SAP. Error al juntar los 3 en uno solo. Corregido en la misma version
+		continuar monitoreando los errores
+
 
 """
 
 
-###-------------------------------V2.8 Progress-------------------------#
+###-------------------------------V2.70 Progress-------------------------#
 """
 	FINISHED:
 		8.- Delay enorme despues de enviar la etiqueta, revisar ese procedimiento.
 	ONGOING:
 		5.-Programar PLC para en caso de un OF, 
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
+		9.-Timestamp en "Limpieza de variables"
+		10.-Seguir investigando lo del foco en la pantalla.
+
 		
 
 """
@@ -484,9 +485,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			print(f"PI o error encontrado: PI:{error8_btn}, error:{error10_btn}")
 			break
 		time.sleep(3)
-	# Si no aparece la seccion 3 de la etiqueta, haz lo siguiente
-	# puede deberse a internet o a errores en la HU		
-	if error8_btn == None:
+	# Si al terminar el ciclo de deteccion de error8 y erro10 no hay nada, (ambos errores = None)
+	# entonces se ejecuta el error8 donde NO respondió el SAP
+	if error8_btn == None and error10_btn == None :
 		ruta_foto = take_screenshot("full")
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: No se pudo abrir el PI."),token_Tel)
 		write_log("nok","No se encontró el PI",ShopOrder,BoxType,StandardPack)
@@ -494,7 +495,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		main_menu()
 		return_codename = 1
 		return return_codename
-	#si el error 10 no está vacio (<>None), entonces hubo error al desplegar el embalajr.
+	#si el error 10 no está vacio (<>None), entonces hubo error al desplegar el embalaje.
 	if error10_btn is not None:
 		#encuentra el error y leelo
 		ruta_foto = take_screenshot("error")
@@ -502,6 +503,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		# Aqui se puede ejecutar otro paro de linea 
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: error10btn: {texto_error}."),token_Tel)
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
+		pyautogui.press('enter')
 		main_menu()
 		return_codename = 1
 		return return_codename
@@ -584,7 +586,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 				send_message(Jorge_Morales,quote(f" En {Line_ID}: Error35 despues de Enter: {texto_error} "),token_Tel)
 
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-			time.sleep(2)
+			time.sleep(1)
 			pyautogui.press('enter')
 			time.sleep(1)
 			main_menu()
@@ -611,13 +613,14 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		print(texto_error)
 		if texto_error == "OF error" or texto_error == "SHO error" :
 			## Códigos de paro de línea ##
+
 			return_codename = 2
 			send_message(Jorge_Morales,quote(f" En {Line_ID}: error2_btn {texto_error}. Se ejecuta paro de línea."),token_Tel)
 		else:
+
 			return_codename = 1
 			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error2_btn despues de Enter: {texto_error} "),token_Tel)
 
-		
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)		
 		write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 

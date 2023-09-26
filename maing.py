@@ -621,21 +621,11 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)		
 		write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 
-		time.sleep(1)
+		time.sleep(0.5)
 		pyautogui.press('enter')
-		time.sleep(1)
+		time.sleep(0.5)
 		main_menu()
 		return return_codename
-		"""
-		This code is very suspicious. Didn't have it.
-		if  texto_error == "no hay embalaje planeado" or texto_error == "Bug de misma Shop Order":
-			main_menu()
-			return_codename = 1
-			return return_codename
-		else:
-			return_codename = 0
-			return return_codename
-		"""
 	if error6_btn is not None:
 		#Good ending 2: take note of the HU
 		ruta_foto = take_screenshot("error")
@@ -730,6 +720,8 @@ class hilo2(threading.Thread):
 	def run(self):
 		#check for thread1 to keep running
 		while True:
+			now = datetime.now()
+			hora_fecha = now.strftime("%d/%m/%Y %H:%M:%S")
 			if [t for t in threading.enumerate() if isinstance(t, hilo1)]:
 				try:
 					run1.console.configure(text = f"Monitor Activo {randrange(10)}")
@@ -737,12 +729,12 @@ class hilo2(threading.Thread):
 				except:
 					self._stop_event.set()
 			else:
-				print(f"A problem occurred... Restarting Thread 1")
+				print(f"A problem occurred... Restarting Thread 1 {hora_fecha}")
 				time.sleep(5)
 				try:
 					thread1 = hilo1(thread_name="Hilo1",opt_arg=run1.ComList.get(),opt_arg2=801)
 					thread1.start()
-					print(f"Thread 1 Started")
+					print(f"Thread 1 Started {hora_fecha}")
 				except:
 					print(f"ya se cerró la app")
 					sys.exit()

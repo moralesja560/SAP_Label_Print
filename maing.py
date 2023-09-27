@@ -35,22 +35,16 @@ import pyads
 """
 
 
-###-------------------------------V2.90 Progress-------------------------#
+###-------------------------------V2.81 Progress-------------------------#
 """
 	FINISHED:
 		10.-Timestamp en "Limpieza de variables"
 		15.- Instrucción de click donde no debería de ir.
+		12.- Reparado el sistema de PI, habia un error de programación
 	ONGOING:
 		5.-Programar PLC para en caso de un OF, 
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
 		11.- Prevenir multiples instancias de la app
-		12.- ¿Porque el PI se espera dos ciclos? 
-			(...) PI 0: status: Box(left=196, top=322, width=403, height=139)
-			(...)  error 0: status: None
-			AQUI YA DEBERIA PASAR A LA SIGUIENTE
-			(...)  PI 1: status: Box(left=196, top=322, width=403, height=139)
-			(...)  error 1: status: None
-			PI o error encontrado: PI:Box(left=188, top=435, width=1058, height=146), error:None
 		
 		13. El lote es muy lento.
 		14.- Convertir en loop el punto de entrada y poner al inicio los mas populares.
@@ -488,7 +482,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#try locating the screen 10 times
 		error8_btn = pyautogui.locateOnScreen(resource_path(r"images/PI.png"),grayscale=False, confidence=.7)
 		error10_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
-		print(f"Intento de encontrar el PI {i}: status: {error5_btn}")
+		print(f"Intento de encontrar el PI {i}: status: {error8_btn}")
 		print(f"Intento de encontrar algun error {i}: status: {error10_btn}")
 		if error8_btn is not None or error10_btn is not None:
 			print(f"PI o error encontrado: PI:{error8_btn}, error:{error10_btn}")
@@ -518,8 +512,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		return return_codename
 
 
-	#print(StandardPack)
-	# Integrar el error de Lote
+	#Click en el Lote
 	pyautogui.click(747, 360)
 	time.sleep(0.5)
 	pyautogui.write(f"0{ShopOrder}00")

@@ -38,8 +38,6 @@ import pyads
 ###-------------------------------V2.90 Progress-------------------------#
 """
 	FINISHED:
-		8.- Delay enorme despues de enviar la etiqueta, revisar ese procedimiento.
-		9.-Timestamp en "Limpieza de variables"
 		10.-Timestamp en "Limpieza de variables"
 	ONGOING:
 		5.-Programar PLC para en caso de un OF, 
@@ -670,8 +668,6 @@ class hilo1(threading.Thread):
 			plc.open()		
 			while True:
 				time.sleep(0.5)
-				#print(f"se lee etiqueta {randrange(1,5000)}")
-				# agrega aqui un try except para los timeout.
 				try:
 					data = plc.read_by_name("PB_Stueckzahl.ADS_Label_Printer_Data_STRING", plc_datatype=pyads.PLCTYPE_STRING)
 				except Exception as e:
@@ -701,8 +697,10 @@ class hilo1(threading.Thread):
 							#waiting time before restarting the process.
 							print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
 							run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 10s")
-							time.sleep(10)
-							print("6.- Limpieza de variables")
+							now = datetime.now()
+							hora_fecha = now.strftime("%d/%m/%Y %H:%M:%S")
+							time.sleep(5)
+							print(f"6.- Limpieza de variables {hora_fecha}")
 							ShopOrder = ""
 							BoxType = ""
 							StandardPack = ""

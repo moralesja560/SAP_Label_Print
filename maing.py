@@ -39,10 +39,21 @@ import pyads
 """
 	FINISHED:
 		10.-Timestamp en "Limpieza de variables"
+		15.- Instrucción de click donde no debería de ir.
 	ONGOING:
 		5.-Programar PLC para en caso de un OF, 
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
 		11.- Prevenir multiples instancias de la app
+		12.- ¿Porque el PI se espera dos ciclos? 
+			(...) PI 0: status: Box(left=196, top=322, width=403, height=139)
+			(...)  error 0: status: None
+			AQUI YA DEBERIA PASAR A LA SIGUIENTE
+			(...)  PI 1: status: Box(left=196, top=322, width=403, height=139)
+			(...)  error 1: status: None
+			PI o error encontrado: PI:Box(left=188, top=435, width=1058, height=146), error:None
+		
+		13. El lote es muy lento.
+		14.- Convertir en loop el punto de entrada y poner al inicio los mas populares.
 
 
 		
@@ -127,7 +138,7 @@ def send_photo(user_id, image,token):
 
 #-----------------------------AUXILIARY OPTIMIZATION FUNCTIONS------------------------#
 def return_to_main():
-	time.sleep(1)
+	time.sleep(0.5)
 	pyautogui.click(435,163)
 
 def main_menu():
@@ -336,13 +347,13 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	error10_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 	ok_flag = False
 	#Test every scenario to look for possible entry points.
-	# test for ok_flag to avoid double_checking
+
 	#there was a ok button left
 	if error2_btn != None and ok_flag == False:
 		pyautogui.press('enter')
 		return_to_main()
 		ok_flag = True
-		#no ok button was left, try with yesno
+	#no ok button was left, try with yesno
 	if error3_btn != None and ok_flag == False:
 		#if button left open, click 
 		pyautogui.press('tab')
@@ -395,10 +406,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		return return_codename
 
 ##############This is the procedure start
-		#click on the HU field
-	pyautogui.click(500,200)
+		#click on the Shop Order field
+	#pyautogui.click(500,200)
 	return_to_main()
-	time.sleep(2)
+	time.sleep(1)
 	#write the shop order but before a healthy backspace
 	pyautogui.press('backspace')
 	pyautogui.write(f"{ShopOrder}")

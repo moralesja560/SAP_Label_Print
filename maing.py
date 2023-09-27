@@ -27,25 +27,25 @@ import csv
 from random import randrange
 import pyads
 
-###-------------------------------V2.70 Launched-------------------------#
+###-------------------------------V2.8 Launched-------------------------#
 
 """
-	MONITOR:
-		continuar monitoreando los errores
-
+	sospecho que las etiquetas no las está intentando de nuevo.
 
 """
 
 
-###-------------------------------V2.70 Progress-------------------------#
+###-------------------------------V2.90 Progress-------------------------#
 """
 	FINISHED:
 		8.- Delay enorme despues de enviar la etiqueta, revisar ese procedimiento.
+		9.-Timestamp en "Limpieza de variables"
+		10.-Timestamp en "Limpieza de variables"
 	ONGOING:
 		5.-Programar PLC para en caso de un OF, 
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
-		9.-Timestamp en "Limpieza de variables"
-		10.-Seguir investigando lo del foco en la pantalla.
+		11.- Prevenir multiples instancias de la app
+
 
 		
 
@@ -130,17 +130,17 @@ def send_photo(user_id, image,token):
 #-----------------------------AUXILIARY OPTIMIZATION FUNCTIONS------------------------#
 def return_to_main():
 	time.sleep(1)
-	pyautogui.click(435,142)
+	pyautogui.click(435,163)
 
 def main_menu():
 	#flecha de regresar
-	pyautogui.click(50,50)
+	pyautogui.click(50,70)
 	time.sleep(0.5)
 	#boton de ingreso del menu principal
-	pyautogui.click(523,223)
+	pyautogui.click(500,200)
 	time.sleep(0.5)
 	# orden de fabricación
-	pyautogui.click(435,142)
+	pyautogui.click(435,163)
 
 
 
@@ -363,7 +363,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	#Yes/NO button wasn't? try with the main screen
 	if inbox_btn != None and ok_flag == False:
 	#if main screen was found:
-		pyautogui.click(523,223)
+		pyautogui.click(500,200)
 		ok_flag = True
 	#¿Still no? Maybe it was ok after all this time
 	if inicial_btn != None and ok_flag == False:
@@ -398,7 +398,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 ##############This is the procedure start
 		#click on the HU field
-	pyautogui.click(523,223)
+	pyautogui.click(500,200)
 	return_to_main()
 	time.sleep(2)
 	#write the shop order but before a healthy backspace
@@ -420,7 +420,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	#error5 if to detect if script is going well.				
 		error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
 		print(f"Intento de encontrar el embalaje {i}: status: {error5_btn}")
-		error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.6)
+		error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 		print(f"Intento de encontrar error en Shop Order {i}: status: {error4_btn}")
 		if error5_btn is not None:
 			print("Embalaje encontrado")
@@ -430,7 +430,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			break			
 		time.sleep(3)
 	
-	if error4_btn is not None:
+	if error4_btn is not None and error5_btn is None:
 		#error4 es cuando ingresas una Shop Order mal y te envia a falla
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
@@ -511,12 +511,12 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 	#print(StandardPack)
 	# Integrar el error de Lote
-	pyautogui.click(747, 342)
+	pyautogui.click(747, 360)
 	time.sleep(0.5)
 	pyautogui.write(f"0{ShopOrder}00")
 	time.sleep(0.5)
 	#Click en el PI
-	pyautogui.click(451, 474)
+	pyautogui.click(451, 480)
 	time.sleep(0.5)
 	pyautogui.write(f"{StandardPack}")
 	pyautogui.press('tab')
@@ -547,6 +547,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
 		#puro ok
 		error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+		print(f"Intento de encontrar el guardar {i}: error: {error2_btn}")
+		print(f"Intento de encontrar el guardar {i}: si/no: {error3_btn}")
+		print(f"Intento de encontrar el guardar {i}: puro_ok: {error6_btn}")
 		if error2_btn is not None or error3_btn is not None or error6_btn is not None:
 			break
 		else:
@@ -563,7 +566,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		for i in range(0,20):
 			error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			error9_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
-			if error35_btn is not None or error6_btn is not None :
+			print(f"Intento de encontrar el guardar 2da etapa {i}: error: {error35_btn}")
+			print(f"Intento de encontrar el guardar 2da etapa {i}: puro_ok: {error9_btn}")
+			if error35_btn is not None or error9_btn is not None :
 				break
 			else:
 				time.sleep(2)

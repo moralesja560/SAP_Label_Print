@@ -27,7 +27,7 @@ import csv
 from random import randrange
 import pyads
 
-###-------------------------------V2.8 Launched-------------------------#
+###-------------------------------V2.82 Launched-------------------------#
 
 """
 	sospecho que las etiquetas no las está intentando de nuevo.
@@ -35,7 +35,7 @@ import pyads
 """
 
 
-###-------------------------------V2.81 Progress-------------------------#
+###-------------------------------V2.9 Progress-------------------------#
 """
 	FINISHED:
 		10.-Timestamp en "Limpieza de variables"

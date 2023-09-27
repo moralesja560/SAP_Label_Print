@@ -27,19 +27,24 @@ import csv
 from random import randrange
 import pyads
 
-###-------------------------------V2.6 Launched-------------------------#
+###-------------------------------V2.8 Launched-------------------------#
 
 """
+	sospecho que las etiquetas no las está intentando de nuevo.
+
+"""
+
+
+###-------------------------------V2.90 Progress-------------------------#
+"""
 	FINISHED:
-		1.-Eliminar el código que no se usa en una nueva branch
-		2.-Hacer mas rapido el código de detección de mensajes
+		10.-Timestamp en "Limpieza de variables"
 	ONGOING:
-		3.-trabajar con tesseract para mejorar la detección de texto
-		4.-hacer popups con mensajes para que los operadores entiendan
-		5.-Usar PLC para indicar errores en el HMI.	
-		6.-Usar el código de salida para parar la línea
+		5.-Programar PLC para en caso de un OF, 
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
-		8.- Version 2.6 con mejoras en el sistema de label_print
+		11.- Prevenir multiples instancias de la app
+
+
 		
 
 """
@@ -123,14 +128,17 @@ def send_photo(user_id, image,token):
 #-----------------------------AUXILIARY OPTIMIZATION FUNCTIONS------------------------#
 def return_to_main():
 	time.sleep(1)
-	pyautogui.click(435,142)
+	pyautogui.click(435,163)
 
 def main_menu():
-	pyautogui.click(50,50)
-	time.sleep(1)
-	pyautogui.click(523,223)
-	time.sleep(1)
-	pyautogui.click(435,142)
+	#flecha de regresar
+	pyautogui.click(50,70)
+	time.sleep(0.5)
+	#boton de ingreso del menu principal
+	pyautogui.click(500,200)
+	time.sleep(0.5)
+	# orden de fabricación
+	pyautogui.click(435,163)
 
 
 
@@ -218,6 +226,24 @@ def take_screenshot(type):
 	return ruta_img
 
 def read_from_img(img):
+	"""
+	La idea de leer estos letreros es tratar de ajustar acciones (como reintentar o no) acorde al texto.
+	Se van a dividir en 2 categorías
+
+	Los que paran línea por error de información ingresada o que no tiene caso reintentar.
+		-error OF: La shop order ya está llena
+		-RTC / Network: error de la aplicación del SAP
+	
+	Los que ocurren porque hubo un error en la secuencia que podría reintentarse.
+		-embalaje
+		-HU en uso
+		-Objeto bloqueado
+		-tratando
+	
+	Para el primero, implementaremos un código de retorno de 2, si se recibe un 2 en el main thread, entonces hablamos de parar la linea
+	Todos los demas código (0 y 1), implican un reintente genérico.
+	"""
+
 	with open(resource_path(r'images/tesseract.txt'), 'r') as f:
 		tesse_location = f.readline()
 	processed_text = "cadena vacia"
@@ -242,6 +268,22 @@ def read_from_img(img):
 	#check for nonexistant HU
 		if len(letter)<3:
 			continue
+		#Codigo OF para Shop Order llena
+		elif "OF" in letter or "cerrada" in letter or "orden excedido" in letter :
+			processed_text = "OF error"
+		
+		elif "Entrada de mercancias" in letter:
+			HU_step1 = letter.find("HU")
+			print(f"Proceso terminó normal: {letter[HU_step1:HU_step1+12]}")
+			processed_text = f"Proceso termina normal {letter[HU_step1:HU_step1+12]}"
+		
+		elif "no existe" in letter or "ya esta eliminada" in letter or "entrada" in letter:
+			processed_text = "SHO error"
+		elif "HTTP" in letter or "RTC" in letter or "network" in letter:
+			processed_text = "SAP error"
+		else:
+			processed_text = f"Error: {letter}"
+		"""
 		elif "no existe" in letter or "ya esta eliminada" in letter:
 			processed_text = "HU no existente"
 		elif "OF" in letter or "cerrada" in letter or "orden excedido" in letter :
@@ -266,6 +308,7 @@ def read_from_img(img):
 			processed_text = "no hay embalaje planeado"
 		else:
 			processed_text = f"El error tenía esto {letter}, pero no pude detectar caracteres"
+		"""
 
 	return processed_text
 
@@ -318,7 +361,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	#Yes/NO button wasn't? try with the main screen
 	if inbox_btn != None and ok_flag == False:
 	#if main screen was found:
-		pyautogui.click(523,223)
+		pyautogui.click(500,200)
 		ok_flag = True
 	#¿Still no? Maybe it was ok after all this time
 	if inicial_btn != None and ok_flag == False:
@@ -353,7 +396,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 ##############This is the procedure start
 		#click on the HU field
-	pyautogui.click(523,223)
+	pyautogui.click(500,200)
 	return_to_main()
 	time.sleep(2)
 	#write the shop order but before a healthy backspace
@@ -375,7 +418,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	#error5 if to detect if script is going well.				
 		error5_btn = pyautogui.locateOnScreen(resource_path(r"images/embalaje.png"),grayscale=False, confidence=.7)
 		print(f"Intento de encontrar el embalaje {i}: status: {error5_btn}")
-		error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.6)
+		error4_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 		print(f"Intento de encontrar error en Shop Order {i}: status: {error4_btn}")
 		if error5_btn is not None:
 			print("Embalaje encontrado")
@@ -385,42 +428,34 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			break			
 		time.sleep(3)
 	
-	if error4_btn is not None:
-		#error in HU
+	if error4_btn is not None and error5_btn is None:
+		#error4 es cuando ingresas una Shop Order mal y te envia a falla
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
-		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-		if "Membrain equivocada" in texto_error:
+		write_log("log",texto_error,ShopOrder,BoxType,StandardPack) 
+		if "SHO error" in texto_error or "OF error" in texto_error :			
 			pyautogui.press('enter')
-			return_to_main()
-			time.sleep(1)
-			pyautogui.press('tab')
-			time.sleep(1)
-			pyautogui.press('tab')
-			time.sleep(1)
-			pyautogui.press('space')
-			return_to_main()
+			main_menu()
 			pyautogui.press('backspace')
-		elif "HU no existente" in texto_error:			
-			#send_photo(Jorge_Morales,ruta_foto,token_Tel)
-			pyautogui.press('enter')
-			return_to_main()
-			time.sleep(1)
-			pyautogui.press('backspace')
-			write_log("nok","HU incorrecta",ShopOrder,BoxType,StandardPack)
-			run1.console.configure(text = "HU incorrecta")
+			write_log("nok","SHO incorrecta",ShopOrder,BoxType,StandardPack)
+			run1.console.configure(text = "Shop Order incorrecta")
+			# Paro de Línea TBD aqui
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error 4: {texto_error} Se ejecuta paro de línea"),token_Tel)
+			return_codename = 2
+			return return_codename
 		else:
 			#Something standard
 			pyautogui.press('enter')
-			return_to_main()
-			time.sleep(1)
-		send_message(Jorge_Morales,quote(f" En {Line_ID}: Parece que no pusieron bien la Shop Order. ¿Es {ShopOrder} una Shop Order válida?"),token_Tel)
-		return_codename = 1
-		return return_codename
+			main_menu()
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error 4: {texto_error}"),token_Tel)
+			return_codename = 1
+			return return_codename
+		
+
 	
 	if error5_btn == None:
-		ruta_foto = take_screenshot("full")
-		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
+		#el error5 es cuando no responde el SAP
+		ruta_foto = take_screenshot("error") # cambiado desde full
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: No encontré el embalaje"),token_Tel)
 		write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 		run1.console.configure(text = "No se encontró la secc de embalaje")
@@ -429,11 +464,14 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		return_to_main()
 		return_codename = 1
 		return return_codename
+	
+	
+	
 	#no issue, continue
 	pyautogui.press('tab')
 	pyautogui.press('space')
 	#after this space may errors can arise, including the HU is already in use.
-	time.sleep(1)
+	time.sleep(0.2)
 	#This is where i can save some time by locating the screen.
 	for i in range(0,20):
 		#try locating the screen 10 times
@@ -445,23 +483,25 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			print(f"PI o error encontrado: PI:{error8_btn}, error:{error10_btn}")
 			break
 		time.sleep(3)
-	# Si no aparece la seccion 3 de la etiqueta, haz lo siguiente
-	# puede deberse a internet o a errores en la HU		
-	if error8_btn == None:
+	# Si al terminar el ciclo de deteccion de error8 y erro10 no hay nada, (ambos errores = None)
+	# entonces se ejecuta el error8 donde NO respondió el SAP
+	if error8_btn == None and error10_btn == None :
 		ruta_foto = take_screenshot("full")
-		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: No se pudo abrir el PI."),token_Tel)
 		write_log("nok","No se encontró el PI",ShopOrder,BoxType,StandardPack)
 		run1.console.configure(text = "No se encontró la secc de PI")
 		main_menu()
 		return_codename = 1
 		return return_codename
-	#si el error 10 no está vacio (<>None), entonces encontró un error
+	#si el error 10 no está vacio (<>None), entonces hubo error al desplegar el embalaje.
 	if error10_btn is not None:
 		#encuentra el error y leelo
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
+		# Aqui se puede ejecutar otro paro de linea 
+		send_message(Jorge_Morales,quote(f" En {Line_ID}: error10btn: {texto_error}."),token_Tel)
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
+		pyautogui.press('enter')
 		main_menu()
 		return_codename = 1
 		return return_codename
@@ -469,12 +509,12 @@ def label_print(ShopOrder,BoxType,StandardPack):
 
 	#print(StandardPack)
 	# Integrar el error de Lote
-	pyautogui.click(747, 342)
+	pyautogui.click(747, 360)
 	time.sleep(0.5)
 	pyautogui.write(f"0{ShopOrder}00")
 	time.sleep(0.5)
 	#Click en el PI
-	pyautogui.click(451, 474)
+	pyautogui.click(451, 480)
 	time.sleep(0.5)
 	pyautogui.write(f"{StandardPack}")
 	pyautogui.press('tab')
@@ -492,7 +532,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	time.sleep(0.5)
 ##############---------------THIS ENTER IS TO STORE THE LABEL.
 	pyautogui.press('enter')
-	time.sleep(2)
+	time.sleep(1)
 ###########################################
 	#Look for 2 scenarios: 
 	#After the label input, usually a Yes/no warning appears.
@@ -505,23 +545,28 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
 		#puro ok
 		error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+		print(f"Intento de encontrar el guardar {i}: error: {error2_btn}")
+		print(f"Intento de encontrar el guardar {i}: si/no: {error3_btn}")
+		print(f"Intento de encontrar el guardar {i}: puro_ok: {error6_btn}")
 		if error2_btn is not None or error3_btn is not None or error6_btn is not None:
 			break
 		else:
-			time.sleep(5)
+			time.sleep(3)
 		#YES/NO 
 	#This error3_btn appears when there is a warning that says " x pieces to fulfill the order"
 	#This is not relevant to read, but a necesary step.
 	if error3_btn is not None:
 		pyautogui.press('tab')
-		time.sleep(1)
+		time.sleep(0.5)
 		pyautogui.press('enter')
 		#What if there's an error? 
 		#check for error and for the label correct ending
 		for i in range(0,20):
 			error35_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 			error9_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
-			if error35_btn is not None or error6_btn is not None :
+			print(f"Intento de encontrar el guardar 2da etapa {i}: error: {error35_btn}")
+			print(f"Intento de encontrar el guardar 2da etapa {i}: puro_ok: {error9_btn}")
+			if error35_btn is not None or error9_btn is not None :
 				break
 			else:
 				time.sleep(2)
@@ -534,19 +579,17 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			#####This area is to select what the error text will do. 
 				#What to do if there's an OF error (overfill)
 				#What to do if there's an HU in use error?
-			#send_photo(Jorge_Morales,ruta_foto,token_Tel)
-			if texto_error == "Shop Order con OF":
-				return_codename = 0
-				send_message(Jorge_Morales,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
-			elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
-				return_codename = 1
-				send_message(Jorge_Morales,quote(f" En {Line_ID}: La Hu ya esta siendo utilizada en otro lado"),token_Tel)
+			
+			if texto_error == "OF error" or texto_error == "SHO error":
+				## Códigos de paro de línea ##
+				return_codename = 2
+				send_message(Jorge_Morales,quote(f" En {Line_ID}: error35_btn {texto_error}. Se ejecuta paro de línea."),token_Tel)
 			else:
-				return_codename = 0
+				return_codename = 1
 				send_message(Jorge_Morales,quote(f" En {Line_ID}: Error35 despues de Enter: {texto_error} "),token_Tel)
 
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
-			time.sleep(2)
+			time.sleep(1)
 			pyautogui.press('enter')
 			time.sleep(1)
 			main_menu()
@@ -571,35 +614,24 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
 		print(texto_error)
-		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
-		if texto_error == "Shop Order con OF":
-			return_codename = 0
-			send_message(Jorge_Morales,quote(f" En {Line_ID}: Ya se llenó la Shop Order, por favor cambiar"),token_Tel)
-		elif texto_error == "HU está siendo usada en otro lado" or texto_error == "Bug de misma Shop Order":
-			return_codename = 1
-			send_message(Jorge_Morales,quote(f" En {Line_ID}: La HU ya está siendo utilizada en otro lado"),token_Tel)
+		if texto_error == "OF error" or texto_error == "SHO error" :
+			## Códigos de paro de línea ##
+
+			return_codename = 2
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: error2_btn {texto_error}. Se ejecuta paro de línea."),token_Tel)
 		else:
+
 			return_codename = 1
-			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error2 despues de Enter: {texto_error}"),token_Tel)
-		
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error2_btn despues de Enter: {texto_error} "),token_Tel)
+
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)		
 		write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
 
-		time.sleep(1)
+		time.sleep(0.5)
 		pyautogui.press('enter')
-		time.sleep(1)
+		time.sleep(0.5)
 		main_menu()
 		return return_codename
-		"""
-		This code is very suspicious. Didn't have it.
-		if  texto_error == "no hay embalaje planeado" or texto_error == "Bug de misma Shop Order":
-			main_menu()
-			return_codename = 1
-			return return_codename
-		else:
-			return_codename = 0
-			return return_codename
-		"""
 	if error6_btn is not None:
 		#Good ending 2: take note of the HU
 		ruta_foto = take_screenshot("error")
@@ -636,8 +668,6 @@ class hilo1(threading.Thread):
 			plc.open()		
 			while True:
 				time.sleep(0.5)
-				#print(f"se lee etiqueta {randrange(1,5000)}")
-				# agrega aqui un try except para los timeout.
 				try:
 					data = plc.read_by_name("PB_Stueckzahl.ADS_Label_Printer_Data_STRING", plc_datatype=pyads.PLCTYPE_STRING)
 				except Exception as e:
@@ -658,11 +688,19 @@ class hilo1(threading.Thread):
 							if nuevo_intento == 1:
 								print("se intenta de nuevo la etiqueta")
 								nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+							elif nuevo_intento == 2:
+								send_message(Jorge_Morales,quote(f" En {Line_ID}: Paro de Linea ejecutado "),token_Tel)
+								# aqui va la variable booleana para ejecutar el paro.
+								# 10 segundos despues
+								# se libera la variable booleana.
+								# hay que programar que si se escribe un 107, el plc libere la variable a Falso. Esto como killswitch
 							#waiting time before restarting the process.
 							print("5.Tiempo de Espera para Nueva Etiqueta: 1 mins")
 							run1.console.configure(text = f"Tiempo de Espera para Nueva Etiqueta: 10s")
-							time.sleep(10)
-							print("6.- Limpieza de variables")
+							now = datetime.now()
+							hora_fecha = now.strftime("%d/%m/%Y %H:%M:%S")
+							time.sleep(5)
+							print(f"6.- Limpieza de variables {hora_fecha}")
 							ShopOrder = ""
 							BoxType = ""
 							StandardPack = ""
@@ -694,6 +732,8 @@ class hilo2(threading.Thread):
 	def run(self):
 		#check for thread1 to keep running
 		while True:
+			now = datetime.now()
+			hora_fecha = now.strftime("%d/%m/%Y %H:%M:%S")
 			if [t for t in threading.enumerate() if isinstance(t, hilo1)]:
 				try:
 					run1.console.configure(text = f"Monitor Activo {randrange(10)}")
@@ -701,12 +741,12 @@ class hilo2(threading.Thread):
 				except:
 					self._stop_event.set()
 			else:
-				print(f"A problem occurred... Restarting Thread 1")
+				print(f"A problem occurred... Restarting Thread 1 {hora_fecha}")
 				time.sleep(5)
 				try:
 					thread1 = hilo1(thread_name="Hilo1",opt_arg=run1.ComList.get(),opt_arg2=801)
 					thread1.start()
-					print(f"Thread 1 Started")
+					print(f"Thread 1 Started {hora_fecha}")
 				except:
 					print(f"ya se cerró la app")
 					sys.exit()

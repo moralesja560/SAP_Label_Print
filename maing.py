@@ -27,25 +27,26 @@ import csv
 from random import randrange
 import pyads
 
-###-------------------------------V2.82 Launched-------------------------#
+###-------------------------------V2.9 Launched-------------------------#
 
 """
-	sospecho que las etiquetas no las está intentando de nuevo.
+	loop para la detección del punto de entrada. Eso debería hacerlo mas eficiente.
 
 """
 
 
-###-------------------------------V2.9 Progress-------------------------#
+###-------------------------------V2.95 Progress-------------------------#
 """
 	FINISHED:
 		10.-Timestamp en "Limpieza de variables"
 		15.- Instrucción de click donde no debería de ir.
 		12.- Reparado el sistema de PI, habia un error de programación
+		14.- Convertir en loop el punto de entrada y poner al inicio los mas populares.
+
 	ONGOING:
 		5.-Programar PLC para en caso de un OF, 
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
 		11.- Prevenir multiples instancias de la app
-		14.- Convertir en loop el punto de entrada y poner al inicio los mas populares.
 		15.- Creo que la app se queda sin responder. Algun loop para que esté haciendo algo con el PLC en lo que llega la etiqueta..
 
 
@@ -327,69 +328,87 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	#a protection to avoid printing empty labels
 	##########area to check if app is in position.
 	#check if Membrain is ready to take inputs
+	inicial_btn = None
+	inbox_btn = None
+	error2_btn  = None
+	error3_btn = None
+	error7_btn = None
+	error10_btn = None
 	
-	inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial2.png"),grayscale=False, confidence=.7)
-	#check if Membrain is the main screen
-	inbox_btn = pyautogui.locateOnScreen(resource_path(r"images/boton1.png"),grayscale=False, confidence=.7)
-	#check if ok button was left open
-	error2_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
-	#check if yesno button was left open
-	error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-	#check for GR Cancel
-	error7_btn = pyautogui.locateOnScreen(resource_path(r"images/GR_Cancel2.png"),grayscale=False, confidence=.7)
-	#check for an error screen
-	error10_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
-	ok_flag = False
-	#Test every scenario to look for possible entry points.
+	for i in range(0,6):
+		#main screen.
+		inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial2.png"),grayscale=False, confidence=.7)
+		if inicial_btn !=None:
+			break
+		#check for an error screen
+		error10_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
+		if error10_btn !=None:
+			break
+		#check if Membrain is the main screen
+		inbox_btn = pyautogui.locateOnScreen(resource_path(r"images/boton1.png"),grayscale=False, confidence=.7)
+		if inbox_btn !=None:
+			break
+		#check if ok button was left open
+		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+		if error2_btn !=None:
+			break
+		#check if yesno button was left open
+		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
+		if error3_btn !=None:
+			break
+		#check for GR Cancel
+		error7_btn = pyautogui.locateOnScreen(resource_path(r"images/GR_Cancel2.png"),grayscale=False, confidence=.7)
+		if error7_btn !=None:
+			break
+		print(f"pto entrada {i}: {inicial_btn,inbox_btn,error2_btn,error3_btn,error7_btn,error10_btn}")
+		time.sleep(3)	
 
 	#there was a ok button left
-	if error2_btn != None and ok_flag == False:
+	if error2_btn != None:
 		pyautogui.press('enter')
 		return_to_main()
-		ok_flag = True
 	#no ok button was left, try with yesno
-	if error3_btn != None and ok_flag == False:
+	elif error3_btn != None:
 		#if button left open, click 
 		pyautogui.press('tab')
 		time.sleep(1)
 		pyautogui.press('enter')
 		#if HU was exceeded
-		time.sleep(3)
-		error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
-		if error35_btn != None and ok_flag == False:
+		for i in range(0,10):
+			error35_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)	
+			if error35_btn == None:
+				time.sleep(2)
+			else:
+				break
+		if error35_btn != None:
 		#main screen after all, click on the screen
 			time.sleep(4)
 			pyautogui.press('enter')
 			main_menu()
 			return_to_main()
-		ok_flag = True
 	#Yes/NO button wasn't? try with the main screen
-	if inbox_btn != None and ok_flag == False:
+	elif inbox_btn != None:
 	#if main screen was found:
 		pyautogui.click(500,200)
-		ok_flag = True
 	#¿Still no? Maybe it was ok after all this time
-	if inicial_btn != None and ok_flag == False:
+	elif inicial_btn != None:
 	#initial orange screen detected.
 		return_to_main()
-		ok_flag = True
+
 	#Maybe it was left in GR Cancel
-	if error7_btn != None and ok_flag == False:
+	elif error7_btn != None:
 		#main screen then click on the screen
 		time.sleep(4)
 		pyautogui.press('enter')
 		main_menu()
 		return_to_main()
-		ok_flag = True
-	if error10_btn != None and ok_flag == False:
+	elif error10_btn != None:
 		#somebody left an error message
-		#########################
 		pyautogui.press('enter')
 		main_menu()
 		return_to_main()
-
 	#throw error if ok_flag it's false after this
-	if ok_flag == False:
+	else:
 		ruta_foto = take_screenshot("full")
 		send_message(Jorge_Morales,quote(f" En {Line_ID} falla de detección de punto de entrada"),token_Tel)
 		#send_photo(Jorge_Morales,ruta_foto,token_Tel)

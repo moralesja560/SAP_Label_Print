@@ -45,9 +45,9 @@ import pyads
 		5.-Programar PLC para en caso de un OF, 
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
 		11.- Prevenir multiples instancias de la app
-		
-		13. El lote es muy lento.
 		14.- Convertir en loop el punto de entrada y poner al inicio los mas populares.
+		15.- Creo que la app se queda sin responder. Algun loop para que esté haciendo algo con el PLC en lo que llega la etiqueta..
+
 
 
 		
@@ -325,7 +325,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	global return_codename
 	print("label printing started")
 	#a protection to avoid printing empty labels
-##########area to check if app is in position.
+	##########area to check if app is in position.
 	#check if Membrain is ready to take inputs
 	
 	inicial_btn = pyautogui.locateOnScreen(resource_path(r"images/inicial2.png"),grayscale=False, confidence=.7)

@@ -38,16 +38,16 @@ import pyads
 ###-------------------------------V2.95 Progress-------------------------#
 """
 	FINISHED:
-		10.-Timestamp en "Limpieza de variables"
-		15.- Instrucción de click donde no debería de ir.
-		12.- Reparado el sistema de PI, habia un error de programación
-		14.- Convertir en loop el punto de entrada y poner al inicio los mas populares.
 
 	ONGOING:
 		5.-Programar PLC para en caso de un OF, 
 		7.- Si no hay punto de entrada, ¿qué podemos hacer?
 		11.- Prevenir multiples instancias de la app
 		15.- Creo que la app se queda sin responder. Algun loop para que esté haciendo algo con el PLC en lo que llega la etiqueta..
+			El problema era el sistema de Quick Edit de la consola, si le das click, se pausa.
+		16.- Reduce la cantidad de mensajes que marca 
+		17.- borra una vez al mes la carpeta de fotos.
+		
 
 
 

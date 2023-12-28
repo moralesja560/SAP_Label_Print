@@ -1,3 +1,19 @@
+#------------------Author Info----------------------#
+#			The SAP Automatic Labeling System
+# Designed and developed by: Ing Jorge Alberto Morales, MBA
+# Automation Project Sr Engineer for Mubea Coil Springs Mexico
+# Jorge.Morales@mubea.com
+# 
+# This software has passed three major updates.
+# 
+# 1- The first version used pyserial (RS232) to receive information from PLC
+# 2- The second version dropped pyserial in favor of Twincat ADS for Python (Pyads)
+# 3- The third version dropped Pyautogui object detection in favor of OpenCV's Template_Match.
+#	 3.1 - Also, the label_print function was rewritten to perform better and to take care of disk space.
+#---------------------------------------------------#
+
+
+
 import argparse
 from queue import Queue
 from threading import Thread
@@ -21,6 +37,7 @@ import cv2
 import pytesseract
 import csv
 from random import randrange
+import numpy as np
 
 ######-----------------Sensitive Data Load-----------------####
 load_dotenv()
@@ -125,10 +142,6 @@ def unpack_datos(posdata):
 	BoxType = posdata[x_pos-2:x_pos+1]
 	StandardPack =posdata[x_pos+1:x_pos+4]
 	return ShopOrder,BoxType,StandardPack
-
-
-
-
 
 def PLC_comms(PLC_LT_queue_i,PLC_LT_queue_o,plc,plc_address,plc_netid):
 	print('++++++++++++++++++++++++++++++++++ PLC: Running')
@@ -239,6 +252,8 @@ def take_screenshot(type):
 	mis_docs = My_Documents(5)
 	if type == "error":
 		im = pyautogui.screenshot(region=(490,350,510,190)) #changed to 490 from 500
+	elif type == 'fullscreen':
+		im = pyautogui.screenshot(region=(0,0, 1440, 900)) #changed to 490 from 500
 	else:
 		im = pyautogui.screenshot(region=(0,0, 1200, 700))
 	#check if folder exists
@@ -336,7 +351,111 @@ def read_from_img(img):
 
 	return processed_text
 
+def template_match(base_img,offset_threshold):
 
+
+	ok_found = False
+	sino_found = False
+	error_found = False
+	boton_found = False
+	inicial_found = False
+	embalaje_found = False
+	pi_found = False
+
+	ok_int = 0
+	sino_int = 0
+	error_int = 0
+	boton_int = 0
+	inicial_int = 0
+	embalaje_int = 0
+	pi_int = 0
+
+	if offset_threshold ==1:
+		threshold = 0.95
+	elif offset_threshold ==2:
+		threshold = 0.90
+	elif offset_threshold ==3:
+		threshold = 0.85
+	elif offset_threshold ==4:
+		threshold = 0.80
+	else:
+		threshold = 0.75
+		
+
+
+	#Load base image
+	base_img = cv2.imread(base_img)
+
+	#load templates ok
+	template_ok = cv2.imread(resource_path(r"images/purook.png"))
+	template_sino = cv2.imread(resource_path(r"images/purosino1.png"))
+	template_error = cv2.imread(resource_path(r"images/errorlabel.png"))
+	boton_ini = cv2.imread(resource_path(r"images/boton2.png"))
+	template_inicial = cv2.imread(resource_path(r"images/inicial3.png"))
+	embalaje_ini = cv2.imread(resource_path(r"images/embalaje.png"))
+	pi_ini = cv2.imread(resource_path(r"images/PI.png"))
+	  
+	#w, h = template.shape[1],template.shape[0]
+
+
+	res_ok = cv2.matchTemplate(base_img,template_ok,cv2.TM_CCOEFF_NORMED)
+	res_sino = cv2.matchTemplate(base_img,template_sino,cv2.TM_CCOEFF_NORMED)
+	res_error = cv2.matchTemplate(base_img,template_error,cv2.TM_CCOEFF_NORMED)
+	res_embalaje = cv2.matchTemplate(base_img,embalaje_ini,cv2.TM_CCOEFF_NORMED)
+	res_pi = cv2.matchTemplate(base_img,pi_ini,cv2.TM_CCOEFF_NORMED)
+
+	#botones de proceso
+	boton1_mtc = cv2.matchTemplate(base_img,boton_ini,cv2.TM_CCOEFF_NORMED)
+	inicial_mtc = cv2.matchTemplate(base_img,template_inicial,cv2.TM_CCOEFF_NORMED)
+	
+	#Threshold de 90 para los botones de respuesta.
+	loc_ok = np.where( res_ok >= threshold)
+	loc_sino = np.where( res_sino >= threshold)
+	loc_error = np.where( res_error >= threshold)
+
+	loc_inicial = np.where( inicial_mtc >= threshold)
+	loc_embalaje = np.where( res_embalaje >= threshold)
+	loc_pi = np.where( res_pi >= threshold)
+
+	#Threshold de 75 para los botones de proceso
+	loc_boton = np.where( boton1_mtc >= threshold)
+	
+	
+	
+	for pt in zip(*loc_ok[::-1]):
+		ok_int +=1
+	for pt in zip(*loc_sino[::-1]):
+		sino_int +=1
+	for pt in zip(*loc_error[::-1]):
+		error_int +=1
+	for pt in zip(*loc_boton[::-1]):
+		boton_int +=1
+	for pt in zip(*loc_inicial[::-1]):
+		inicial_int +=1
+	for pt in zip(*loc_embalaje[::-1]):
+		embalaje_int +=1
+	for pt in zip(*loc_pi[::-1]):
+		pi_int +=1
+		
+	#Seccion de retorno de interaccion
+	if error_int >0:
+		error_found = True
+	elif sino_int >0:
+		sino_found = True
+	elif ok_int > 0:
+		ok_found = True
+	# Seccion de retorno de proceso
+	elif boton_int >0:
+		boton_found = True
+	elif inicial_int >0:
+		inicial_found = True
+	elif embalaje_int >0:
+		embalaje_found = True
+	elif pi_int >0:
+		pi_found = True
+	
+
+	return error_found,sino_found,ok_found,boton_found,inicial_found,pi_found,embalaje_found
 
 
 ###################################This is the function that actually prints the labels.
@@ -428,7 +547,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		return_to_main()
 	#throw error if ok_flag it's false after this
 	else:
-		ruta_foto = take_screenshot("full")
+		#ruta_foto = take_screenshot("full")
 		send_message(Jorge_Morales,quote(f" En {Line_ID} falla de detección de punto de entrada"),token_Tel)
 		#send_photo(Jorge_Morales,ruta_foto,token_Tel)
 		write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
@@ -474,6 +593,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#error4 es cuando ingresas una Shop Order mal y te envia a falla
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
+		os.remove(ruta_foto)
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack) 
 		if "SHO error" in texto_error or "OF error" in texto_error :			
 			pyautogui.press('enter')
@@ -496,7 +616,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	
 	if error5_btn == None:
 		#el error5 es cuando no responde el SAP
-		ruta_foto = take_screenshot("error") # cambiado desde full
+		#ruta_foto = take_screenshot("error") # cambiado desde full
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: No encontré el embalaje"),token_Tel)
 		write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
 		main_menu()
@@ -526,8 +646,9 @@ def label_print(ShopOrder,BoxType,StandardPack):
 	# Si al terminar el ciclo de deteccion de error8 y erro10 no hay nada, (ambos errores = None)
 	# entonces se ejecuta el error8 donde NO respondió el SAP
 	if error8_btn == None and error10_btn == None :
-		ruta_foto = take_screenshot("full")
+		#ruta_foto = take_screenshot("full")
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: No se pudo abrir el PI."),token_Tel)
+		#os.remove(ruta_foto)
 		write_log("nok","No se encontró el PI",ShopOrder,BoxType,StandardPack)
 		main_menu()
 		return_codename = 1
@@ -537,6 +658,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#encuentra el error y leelo
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
+		os.remove(ruta_foto)
 		# Aqui se puede ejecutar otro paro de linea 
 		send_message(Jorge_Morales,quote(f" En {Line_ID}: error10btn: {texto_error}."),token_Tel)
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
@@ -580,10 +702,10 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#error
 		error2_btn = pyautogui.locateOnScreen(resource_path(r"images/errorlabel.png"),grayscale=False, confidence=.7)
 		#yes no
-		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.7)
-		
+		error3_btn = pyautogui.locateOnScreen(resource_path(r"images/purosino1.png"),grayscale=False, confidence=.8)
 		#puro ok
-		error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.7)
+		error6_btn = pyautogui.locateOnScreen(resource_path(r"images/purook.png"),grayscale=False, confidence=.8)
+
 		print(f"Intento de encontrar el guardar {i}: error: {error2_btn}")
 		print(f"Intento de encontrar el guardar {i}: si/no: {error3_btn}")
 		print(f"Intento de encontrar el guardar {i}: puro_ok: {error6_btn}")
@@ -614,6 +736,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 			time.sleep(1)
 			ruta_foto = take_screenshot("error")
 			texto_error = read_from_img(ruta_foto)
+			os.remove(ruta_foto)
 			print (texto_error)
 			#####This area is to select what the error text will do. 
 				#What to do if there's an OF error (overfill)
@@ -637,6 +760,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 #################No error after a yes/no message: This is the good ending 1.
 			ruta_foto = take_screenshot("error")
 			texto_error = read_from_img(ruta_foto)
+			os.remove(ruta_foto)
 			print (texto_error)
 			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 			pyautogui.press('enter')
@@ -651,6 +775,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		time.sleep(1)
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
+		os.remove(ruta_foto)
 		print(texto_error)
 		if texto_error == "OF error" or texto_error == "SHO error" :
 			## Códigos de paro de línea ##
@@ -674,6 +799,7 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		#Good ending 2: take note of the HU
 		ruta_foto = take_screenshot("error")
 		texto_error = read_from_img(ruta_foto)
+		os.remove(ruta_foto)
 		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
 		pyautogui.press('enter')
 		return_to_main()
@@ -682,6 +808,342 @@ def label_print(ShopOrder,BoxType,StandardPack):
 		return return_codename
 
 #---------------------------------End of Main Function-------------------------------#
+
+###########  The New Version of Label Printing
+
+def new_label_print(ShopOrder,BoxType,StandardPack):
+	global return_codename
+	print("label printing started")
+	
+	#Encontrar el punto de inicio
+	for i in range(0,6):
+		initial_img = take_screenshot('fullscreen')
+		error_found,sino_found,ok_found,boton_found,inicial_found,PI_found,emba_found = template_match(initial_img,i)
+		print(f"pto entrada {i}: ERR:{error_found} SINO:{sino_found} OK:{ok_found} BTN:{boton_found} INI:{inicial_found}, PI:{PI_found} EMB:{emba_found} ")
+		os.remove(initial_img)
+		if error_found or ok_found:
+			time.sleep(0.2)
+			pyautogui.press('enter')
+			return_to_main()
+			break
+		if sino_found:
+			pyautogui.press('tab')
+			time.sleep(0.5)
+			pyautogui.press('enter')
+			break
+		if boton_found:
+			time.sleep(0.2)
+			pyautogui.click(500,200)
+			break
+		if inicial_found:
+			time.sleep(0.2)
+			return_to_main()
+			break
+		if PI_found:
+			time.sleep(0.2)
+			main_menu()
+			break
+		if emba_found:
+			time.sleep(0.2)
+			main_menu()
+			break
+		time.sleep(3)
+	
+	if error_found or sino_found or ok_found or boton_found or inicial_found or PI_found or emba_found:
+		print("Start has been handled")
+		try:
+			os.remove(initial_img)
+		except:
+			pass
+	else:
+		#ruta_foto = take_screenshot("full")
+		send_message(Jorge_Morales,quote(f" En {Line_ID} falla de detección de punto de entrada"),token_Tel)
+		write_log("nok","No se puede identificar el punto de entrada",ShopOrder,BoxType,StandardPack)
+		#Add a 1 to try to print again
+		return_codename = 1
+		return return_codename
+
+##############This is the procedure start
+
+	return_to_main()
+	#write the shop order but before a healthy backspace
+	pyautogui.press('backspace')
+	pyautogui.write(f"{ShopOrder}")
+	print(f"escribí {ShopOrder} en el campo ShopOrder")
+	pyautogui.press('enter')
+
+	"""
+	Instead of inputting the SHO and waiting 6 seconds to continue, we input the SHO and after that 
+		we start to look for both and SHO error and embalaje. Whichever appears first wins.
+
+	If error4 is <> None, then we execute the script for failed SHO 
+	IF error5 is None and Error4 is None, then we execute the script for failed embalaje opening (mostly due to internet)
+
+	"""
+	for i in range(0,15):
+	# tries before failing
+	#error5 if to detect if script is going well.
+					
+		emba_img = take_screenshot('fullscreen')
+		error_found,sino_found,ok_found,boton_found,inicial_found,PI_found,emba_found = template_match(emba_img,i)
+		print(f"SHO Status {i}: ERR:{error_found} EMB:{emba_found} ")
+		os.remove(emba_img)
+		if emba_found:
+			print("Embalaje Encontrado")
+			error4_btn = None
+			error5_btn = None
+
+			break
+		if error_found:
+			print("Error found")
+			error4_btn = 1
+			error5_btn = None
+			break
+		error4_btn = None
+		error5_btn = None
+		time.sleep(3)
+
+	if error4_btn is not None and error5_btn is None:
+		#error4 es cuando ingresas una Shop Order mal y te envia a falla
+		ruta_foto = take_screenshot("error")
+		texto_error = read_from_img(ruta_foto)
+		write_log("log",texto_error,ShopOrder,BoxType,StandardPack) 
+		if "SHO error" in texto_error or "OF error" in texto_error :			
+			pyautogui.press('enter')
+			main_menu()
+			pyautogui.press('backspace')
+			write_log("nok","SHO incorrecta",ShopOrder,BoxType,StandardPack)
+			# Paro de Línea TBD aqui
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error 4: {texto_error} Se ejecuta paro de línea"),token_Tel)
+			return_codename = 2
+			return return_codename
+		else:
+			#Something standard
+			pyautogui.press('enter')
+			main_menu()
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error 4: {texto_error}"),token_Tel)
+			return_codename = 1
+			return return_codename
+		
+	
+	if not emba_found and not error_found :
+		#el error5 es cuando no responde el SAP
+		#ruta_foto = take_screenshot("error") # cambiado desde full
+		send_message(Jorge_Morales,quote(f" En {Line_ID}: No encontré el embalaje"),token_Tel)
+		write_log("nok","No se encontró el embalaje",ShopOrder,BoxType,StandardPack)
+		main_menu()
+		pyautogui.press('enter')
+		return_to_main()
+		return_codename = 1
+		return return_codename
+	
+	
+	#no issue, continue
+	pyautogui.press('tab')
+	pyautogui.press('space')
+	#after this space may errors can arise, including the HU is already in use.
+	time.sleep(0.2)
+	#This is where i can save some time by locating the screen.
+	for i in range(0,20):
+		#try locating the screen 10 times
+		PI_img = take_screenshot('fullscreen')
+		error_found,sino_found,ok_found,boton_found,inicial_found,PI_found,emba_found = template_match(PI_img,i)
+		print(f"PI Status {i}: ERR:{error_found} PI:{PI_found} ")
+
+		if PI_found:
+			error8_btn = '0'
+			error10_btn = None
+			break
+		if error_found:
+			error8_btn = None
+			error10_btn = '0'
+			break
+		error8_btn = None
+		error10_btn = None
+		os.remove(PI_img)
+		time.sleep(2)
+			
+
+	# Si al terminar el ciclo de deteccion de error8 y erro10 no hay nada, (ambos errores = None)
+	# entonces se ejecuta el error8 donde NO respondió el SAP
+	if error8_btn == None and error10_btn == None :
+		#ruta_foto = take_screenshot("full")
+		send_message(Jorge_Morales,quote(f" En {Line_ID}: No se pudo abrir el PI."),token_Tel)
+		write_log("nok","No se encontró el PI",ShopOrder,BoxType,StandardPack)
+		main_menu()
+		return_codename = 1
+		return return_codename
+	#si el error 10 no está vacio (<>None), entonces hubo error al desplegar el embalaje.
+	if error10_btn is not None:
+		#encuentra el error y leelo
+		ruta_foto = take_screenshot("error")
+		texto_error = read_from_img(ruta_foto)
+		os.remove(ruta_foto)
+		# Aqui se puede ejecutar otro paro de linea 
+		send_message(Jorge_Morales,quote(f" En {Line_ID}: error10btn: {texto_error}."),token_Tel)
+		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
+		pyautogui.press('enter')
+		main_menu()
+		return_codename = 1
+		return return_codename
+
+
+	#Click en el Lote
+	pyautogui.click(747, 360)
+	time.sleep(0.5)
+	pyautogui.write(f"0{ShopOrder}00")
+	time.sleep(0.5)
+	#Click en el PI
+	pyautogui.click(451, 480)
+	time.sleep(0.5)
+	pyautogui.write(f"{StandardPack}")
+	pyautogui.press('tab')
+	#numero de operario
+	pyautogui.write(Operator)
+	time.sleep(0.5)
+	#puesto de trabajo
+	pyautogui.press('tab')
+	time.sleep(0.5)
+	pyautogui.press('tab')
+	#texto libre
+	pyautogui.write("Auto Print")
+	time.sleep(0.5)
+	pyautogui.press('tab')
+	time.sleep(0.5)
+##############---------------THIS ENTER IS TO STORE THE LABEL.
+	pyautogui.press('enter')
+	time.sleep(1)
+###########################################
+	#Look for 2 scenarios: 
+	#After the label input, usually a Yes/no warning appears.
+	#let's look for a yes/no and an error label
+	#error
+	for i in range(0,20):
+		finish_img = take_screenshot('fullscreen')
+		error_found,sino_found,ok_found,boton_found,inicial_found,PI_found,emba_found = template_match(finish_img,i)
+		print(f"PI Status {i}: ERR:{error_found} SINO:{sino_found} OK: {ok_found} ")
+
+		if error_found:
+			error2_btn = 1
+			error3_btn = None
+			error6_btn = None
+			break
+		if sino_found:
+			error2_btn = None
+			error3_btn = 1
+			error6_btn = None
+			break		
+		if ok_found:
+			error2_btn = None
+			error3_btn = None
+			error6_btn = 1
+			break	
+		os.remove(finish_img)
+		time.sleep(2)
+		
+	#YES/NO
+	#This error3_btn appears when there is a warning that says " x pieces to fulfill the order"
+	#This is not relevant to read, but a necesary step.
+	if error3_btn is not None:
+		pyautogui.press('tab')
+		time.sleep(0.5)
+		pyautogui.press('enter')
+		#What if there's an error? 
+		#check for error and for the label correct ending
+		for i in range(0,20):
+			sub_finish = take_screenshot('fullscreen')
+			error_found,sino_found,ok_found,boton_found,inicial_found,PI_found,emba_found = template_match(sub_finish,i)
+			print(f"PI Status {i}: ERR:{error_found} OK: {ok_found} ")
+			os.remove(sub_finish)
+			if error_found:
+				error35_btn = 1
+				error9_btn = None
+				break
+			if ok_found:
+				error35_btn = None
+				error9_btn = 1
+				break
+			error35_btn = None
+			error9_btn = None
+
+		if error35_btn is not None:
+			#write the warning and return to HU input by using boton1.png
+			time.sleep(1)
+			ruta_foto = take_screenshot("error")
+			texto_error = read_from_img(ruta_foto)
+			os.remove(ruta_foto)
+			print (texto_error)
+			#####This area is to select what the error text will do. 
+				#What to do if there's an OF error (overfill)
+				#What to do if there's an HU in use error?
+			
+			if texto_error == "OF error" or texto_error == "SHO error":
+				## Códigos de paro de línea ##
+				return_codename = 2
+				send_message(Jorge_Morales,quote(f" En {Line_ID}: error35_btn {texto_error}. Se ejecuta paro de línea."),token_Tel)
+			else:
+				return_codename = 1
+				send_message(Jorge_Morales,quote(f" En {Line_ID}: Error35 despues de Enter: {texto_error} "),token_Tel)
+
+			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
+			time.sleep(1)
+			pyautogui.press('enter')
+			time.sleep(1)
+			main_menu()
+			return return_codename
+		if error9_btn is not None:
+#################No error after a yes/no message: This is the good ending 1.
+			ruta_foto = take_screenshot("error")
+			texto_error = read_from_img(ruta_foto)
+			os.remove(ruta_foto)
+			print (texto_error)
+			write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
+			pyautogui.press('enter')
+			write_log("ok","No error",ShopOrder,BoxType,StandardPack)
+			return_codename = 0
+			return return_codename
+	
+	#This error differs from error35 because the error triggers immediately after pressing enter.
+	#what if there was an error after the input (e.g. network, Shop Order Overfill)
+	#write the warning and return to HU input by using boton1.png
+	if error2_btn is not None:
+		time.sleep(1)
+		ruta_foto = take_screenshot("error")
+		texto_error = read_from_img(ruta_foto)
+		os.remove(ruta_foto)
+		print(texto_error)
+		if texto_error == "OF error" or texto_error == "SHO error" :
+			## Códigos de paro de línea ##
+
+			return_codename = 2
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: error2_btn {texto_error}. Se ejecuta paro de línea."),token_Tel)
+		else:
+
+			return_codename = 1
+			send_message(Jorge_Morales,quote(f" En {Line_ID}: Error2_btn despues de Enter: {texto_error} "),token_Tel)
+
+		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)		
+		write_log("nok","Error al ingresar la etiqueta",ShopOrder,BoxType,StandardPack)
+
+		time.sleep(0.5)
+		pyautogui.press('enter')
+		time.sleep(0.5)
+		main_menu()
+		return return_codename
+	if error6_btn is not None:
+		#Good ending 2: take note of the HU
+		ruta_foto = take_screenshot("error")
+		texto_error = read_from_img(ruta_foto)
+		os.remove(ruta_foto)
+		write_log("log",texto_error,ShopOrder,BoxType,StandardPack)
+		pyautogui.press('enter')
+		return_to_main()
+		write_log("ok","No error",ShopOrder,BoxType,StandardPack)
+		return_codename = 0
+		return return_codename
+
+#---------------------------------End of Main Function-------------------------------#
+
 
 
 def process_coordinator():
@@ -717,9 +1179,12 @@ def process_coordinator():
 			else:
 				PLC_LT_queue_o.task_done()
 				continue
-			nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
+			nuevo_intento = new_label_print(ShopOrder,BoxType,StandardPack)
 			if nuevo_intento == 1:
 				print("se intenta de nuevo la etiqueta")
+				nuevo_intento = new_label_print(ShopOrder,BoxType,StandardPack)
+			if nuevo_intento ==1:
+				#Emergencia
 				nuevo_intento = label_print(ShopOrder,BoxType,StandardPack)
 			elif nuevo_intento == 2:
 				send_message(Jorge_Morales,quote(f" En {Line_ID}: Paro de Linea ejecutado "),token_Tel)
@@ -741,8 +1206,17 @@ def process_coordinator():
 
 
 
-
-
+"""
+if __name__ == '__main__':
+	#Pandas DataFrame dictionaries
+	pd_dict = {'timestamp' : ['dummy'], 'logtype' : ['dummy'],	'texto' : ['dummy'], 'Shop Order' : ['dummy'], 'BoxType' : ['dummy'], 'SP' : ['dummy']}
+	with open(resource_path(r'images/idline.txt'), 'r') as f:
+		Line_ID = f.readline()
+	with open(resource_path(r'images/Operator.txt'), 'r') as f:
+		Operator = f.readline()
+	time.sleep(3)
+	new_label_print('1401234','BOX','140')
+"""
 
 
 
